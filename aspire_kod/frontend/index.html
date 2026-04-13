@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <!-- PWA: gör att appen fungerar som en app på iPhone -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Aspire">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230A0A0A'/><text x='90' y='122' font-family='Georgia' font-style='italic' font-weight='900' font-size='90' fill='white' text-anchor='middle'>A</text></svg>">
+
+  <title>Aspire — Logga in</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <div class="telefon">
+
+    <!-- ─── LOGIN-SIDAN ─── -->
+    <div class="login-sida">
+
+      <!-- Mörk bakgrundsöverlagring -->
+      <div class="login-bakgrund"></div>
+
+      <!-- Allt innehåll ovanpå bakgrunden -->
+      <div class="login-innehall">
+
+        <!-- Logotyp -->
+        <div class="login-logotyp">Aspire</div>
+
+        <!-- Formulär längst ner -->
+        <div class="login-formular">
+
+          <div class="login-titel">Logga in</div>
+          <div class="login-undertext">Välkommen tillbaka</div>
+
+          <label class="faltetikett">Användarnamn</label>
+          <input class="textfalt" type="text" placeholder="Ditt användarnamn">
+
+          <label class="faltetikett">Lösenord</label>
+          <input class="textfalt" type="password" placeholder="••••••••">
+
+          <div class="glomt-losenord">Glömt lösenord?</div>
+
+          <!-- Knapp navigerar till hem.html -->
+          <a href="hem.html">
+            <button class="logga-in-knapp">Logga in</button>
+          </a>
+
+          <div class="registrera-rad">
+            <p>Har du inget konto?</p>
+            <a href="#">Registrera dig</a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

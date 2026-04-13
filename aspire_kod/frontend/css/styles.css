@@ -1,0 +1,1264 @@
+/* =====================================================
+   ASPIRE APP — DELAD CSS
+   Används av alla HTML-sidor i appen.
+   ===================================================== */
+
+
+/* ─────────────────────────────────────────────────────
+   1. RESET & GRUNDINSTÄLLNINGAR
+───────────────────────────────────────────────────── */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #111111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+
+/* ─────────────────────────────────────────────────────
+   2. TELEFONRAM (visas på dator som en mobil)
+───────────────────────────────────────────────────── */
+
+.telefon {
+  width: 390px;
+  height: 844px;
+  background: white;
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
+
+  /* Flexbox: staplar statusrad, innehåll och navbar */
+  display: flex;
+  flex-direction: column;
+}
+
+/* På riktig iPhone fyller appen hela skärmen */
+@media (max-width: 430px) {
+  body {
+    background: white;
+  }
+  .telefon {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+
+/* ─────────────────────────────────────────────────────
+   3. STATUSRAD (klocka + batteri-ikoner högst upp)
+───────────────────────────────────────────────────── */
+
+.statusrad {
+  height: 44px;
+  padding: 0 24px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statusrad-tid {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0A0A0A;
+}
+
+.statusrad-ikoner {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #0A0A0A;
+}
+
+
+/* ─────────────────────────────────────────────────────
+   4. RULLNINGSBART SIDINNEHÅLL
+───────────────────────────────────────────────────── */
+
+.innehall {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Dölj scrollbar (men behåll funktionen) */
+.innehall::-webkit-scrollbar { display: none; }
+.innehall { scrollbar-width: none; }
+
+
+/* ─────────────────────────────────────────────────────
+   5. NAVIGERINGSRAD (längst ner på varje sida)
+───────────────────────────────────────────────────── */
+
+.navbar {
+  height: 72px;
+  background: white;
+  border-top: 1px solid #E5E5E5;
+  padding: 0 8px 10px 8px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+/* Varje nav-knapp */
+.nav-knapp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ADADAD;
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 10px;
+  position: relative;
+}
+
+.nav-knapp svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-knapp span {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* Aktiv sida = svart färg */
+.nav-knapp.aktiv {
+  color: #0A0A0A;
+}
+
+/* Aktiv med ram (används på Sök och Streaks) */
+.nav-knapp.aktiv-ram {
+  color: #0A0A0A;
+  border: 1.5px solid #0A0A0A;
+}
+
+/* Plus-knapp i mitten */
+.nav-plus {
+  width: 52px;
+  height: 52px;
+  background: #0A0A0A;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  text-decoration: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-plus svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: white;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+/* Röd notis-badge på klockan */
+.badge {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  background: #E8241C;
+  border-radius: 50%;
+  border: 1.5px solid white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 9px;
+  font-weight: 700;
+  color: white;
+}
+
+
+/* ─────────────────────────────────────────────────────
+   6. GEMENSAMMA KOMPONENTER (används på flera sidor)
+───────────────────────────────────────────────────── */
+
+/* Sidans rubrik-rad */
+.sidrubrik {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 20px 12px 20px;
+  flex-shrink: 0;
+}
+
+.sidrubrik-titel {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #0A0A0A;
+}
+
+/* Liten rund knapp (t.ex. kugghjul) */
+.rund-knapp {
+  width: 36px;
+  height: 36px;
+  background: #F0F0F0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rund-knapp svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #2A2A2A;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+/* Sektionsrubrik */
+.sektionsrubrik {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0A0A0A;
+  padding: 4px 20px 12px 20px;
+}
+
+/* Grått kort */
+.kort {
+  background: #F7F7F7;
+  border-radius: 14px;
+  margin: 0 20px 12px 20px;
+  padding: 16px;
+}
+
+/* Mellanrum längst ner (så innehåll inte döljs av navbar) */
+.botten-mellanrum {
+  height: 16px;
+}
+
+
+/* ─────────────────────────────────────────────────────
+   7. LOGIN-SIDAN
+───────────────────────────────────────────────────── */
+
+.login-sida {
+  background: #0D0A09;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.login-bakgrund {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(50, 20, 10, 0.3) 0%,
+    rgba(13, 10, 9, 0.6) 40%,
+    rgba(13, 10, 9, 0.97) 65%
+  );
+}
+
+.login-innehall {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 0 28px;
+}
+
+.login-logotyp {
+  text-align: center;
+  padding-top: 70px;
+  font-size: 48px;
+  font-weight: 900;
+  font-style: italic;
+  color: white;
+  letter-spacing: -2px;
+}
+
+.login-formular {
+  margin-top: auto;
+  padding-bottom: 48px;
+}
+
+.login-titel {
+  font-size: 28px;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.login-undertext {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 28px;
+}
+
+.faltetikett {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.textfalt {
+  width: 100%;
+  height: 52px;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 0 16px;
+  font-size: 15px;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  margin-bottom: 16px;
+}
+
+.textfalt::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.glomt-losenord {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.logga-in-knapp {
+  width: 100%;
+  height: 54px;
+  background: white;
+  color: #0A0A0A;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+
+.registrera-rad {
+  text-align: center;
+  margin-top: 32px;
+}
+
+.registrera-rad p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 4px;
+}
+
+.registrera-rad a {
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+
+/* ─────────────────────────────────────────────────────
+   8. HEM — DAGENS SCHEMA
+───────────────────────────────────────────────────── */
+
+.schema-header {
+  padding: 8px 20px 16px 20px;
+}
+
+.schema-fortitel {
+  font-size: 12px;
+  color: #ADADAD;
+  font-style: italic;
+  margin-bottom: 2px;
+}
+
+.schema-namnrad {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.schema-namn-stor {
+  font-size: 30px;
+  font-weight: 900;
+  color: #0A0A0A;
+  letter-spacing: -1px;
+  line-height: 1.05;
+}
+
+.schema-avatar {
+  width: 50px;
+  height: 50px;
+  background: #0A0A0A;
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.schema-avatar svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: white;
+  stroke-width: 1.8;
+}
+
+.schema-badge {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 20px;
+  height: 20px;
+  background: #E8241C;
+  border-radius: 50%;
+  border: 2px solid white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 9px;
+  font-weight: 700;
+  color: white;
+}
+
+.etikett-pill {
+  display: inline-block;
+  height: 28px;
+  padding: 0 12px;
+  line-height: 28px;
+  background: #F0F0F0;
+  border: 1px solid #E5E5E5;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #2A2A2A;
+  margin-top: 8px;
+}
+
+/* Aktivitetsrad */
+.aktivitet-rad {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #F0F0F0;
+}
+
+.aktivitet-prick {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.aktivitet-prick.rod  { background: #E8241C; }
+.aktivitet-prick.gra  { background: #E5E5E5; }
+
+.aktivitet-ikon {
+  width: 28px;
+  flex-shrink: 0;
+
+  display: flex;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.aktivitet-ikon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #2A2A2A;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.aktivitet-kropp { flex: 1; }
+.aktivitet-tid   { font-size: 11px; color: #ADADAD; margin-bottom: 1px; }
+.aktivitet-namn  { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+.aktivitet-beskrivning { font-size: 12px; color: #ADADAD; margin-top: 2px; }
+
+.starta-knapp {
+  height: 32px;
+  padding: 0 16px;
+  background: #0A0A0A;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  align-self: center;
+}
+
+.kamera-ikon { align-self: center; }
+.kamera-ikon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: #ADADAD;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  display: block;
+}
+
+
+/* ─────────────────────────────────────────────────────
+   9. SÖK ATLETER
+───────────────────────────────────────────────────── */
+
+.sok-omslag {
+  padding: 4px 20px 14px 20px;
+  position: relative;
+}
+
+.sok-ikon {
+  position: absolute;
+  left: 34px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #ADADAD;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.sok-falt {
+  width: 100%;
+  height: 44px;
+  background: #F0F0F0;
+  border: none;
+  border-radius: 22px;
+  padding: 0 16px 0 40px;
+  font-size: 14px;
+  color: #2A2A2A;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+}
+
+.sok-falt::placeholder { color: #ADADAD; }
+
+.filter-rad {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 16px 20px;
+  overflow-x: auto;
+}
+
+.filter-rad::-webkit-scrollbar { display: none; }
+
+.filter-pill {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 17px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  flex-shrink: 0;
+}
+
+.filter-pill.aktiv  { background: #0A0A0A; color: white; }
+.filter-pill.inaktiv { background: #F0F0F0; color: #2A2A2A; }
+
+.atlet-rad {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 20px;
+  border-bottom: 1px solid #F0F0F0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.atlet-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #E5E5E5;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 13px;
+  font-weight: 700;
+  color: #2A2A2A;
+}
+
+.atlet-avatar.lila { background: #7C5CBF; color: white; }
+.atlet-avatar.mork { background: #2A2A2A; color: white; }
+
+.atlet-info { flex: 1; }
+.atlet-namn  { font-size: 15px; font-weight: 600; color: #0A0A0A; }
+.atlet-sport { font-size: 12px; color: #ADADAD; margin-top: 1px; }
+
+.atlet-meta { text-align: right; }
+.atlet-kcal    { font-size: 12px; color: #666666; }
+.atlet-traning { font-size: 12px; color: #ADADAD; margin-top: 2px; }
+
+
+/* ─────────────────────────────────────────────────────
+   10. ATLETPROFIL
+───────────────────────────────────────────────────── */
+
+.tillbaka-knapp {
+  width: 36px;
+  height: 36px;
+  background: #F0F0F0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  margin: 8px 0 0 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tillbaka-knapp svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #0A0A0A;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.atlet-topp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 20px 0 20px;
+}
+
+.atlet-stor-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #F0F0F0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+  font-weight: 800;
+  color: #2A2A2A;
+  margin-bottom: 12px;
+}
+
+.atlet-stort-namn  { font-size: 20px; font-weight: 800; color: #0A0A0A; }
+.atlet-stor-sport  { font-size: 14px; color: #ADADAD; margin-top: 2px; margin-bottom: 10px; }
+
+.bio-rad {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.bio-post {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #666666;
+}
+
+.bio-post svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.bio-post.rod { color: #E8241C; }
+
+.atlet-statistik {
+  display: flex;
+  width: 100%;
+  background: #F7F7F7;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.atlet-stat-post {
+  flex: 1;
+  padding: 12px 8px;
+  border-right: 1px solid #E5E5E5;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.atlet-stat-post:last-child { border-right: none; }
+.atlet-stat-siffra  { font-size: 18px; font-weight: 800; color: #0A0A0A; }
+.atlet-stat-etikett { font-size: 10px; color: #ADADAD; }
+
+.citat-ruta {
+  margin: 0 20px 16px 20px;
+  background: #F7F7F7;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-style: italic;
+  color: #666666;
+  line-height: 1.5;
+}
+
+.flik-rad {
+  display: flex;
+  margin: 0 20px 16px 20px;
+  background: #F0F0F0;
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.flik {
+  flex: 1;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  color: #666666;
+  background: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.flik svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.flik.aktiv {
+  background: white;
+  color: #0A0A0A;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.schema-lista { padding: 0 20px 20px 20px; }
+
+.schema-post {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #F0F0F0;
+}
+
+.schema-post:last-child { border-bottom: none; }
+
+.schema-prick {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.schema-prick.rod { background: #E8241C; }
+.schema-prick.gra { background: #CCCCCC; }
+
+.schema-tid         { font-size: 11px; color: #ADADAD; margin-bottom: 1px; }
+.schema-namn        { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+.schema-beskrivning { font-size: 12px; color: #ADADAD; margin-top: 2px; }
+
+
+/* ─────────────────────────────────────────────────────
+   11. MIN PROFIL
+───────────────────────────────────────────────────── */
+
+.anvandarrad {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px 18px 20px;
+}
+
+.avatar-fyrkant {
+  width: 46px;
+  height: 46px;
+  background: #E5E5E5;
+  border-radius: 10px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 13px;
+  font-weight: 700;
+  color: #2A2A2A;
+}
+
+.anvandarnamn { font-size: 15px; font-weight: 700; color: #0A0A0A; }
+.medsedan     { font-size: 12px; color: #ADADAD; margin-top: 2px; }
+
+.statistik-rad {
+  display: flex;
+  gap: 10px;
+  padding: 0 20px 20px 20px;
+}
+
+.statistik-kort {
+  flex: 1;
+  background: #F7F7F7;
+  border-radius: 14px;
+  padding: 14px 8px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.statistik-ikon    { font-size: 20px; line-height: 1; margin-bottom: 2px; }
+.statistik-siffra  { font-size: 22px; font-weight: 800; color: #0A0A0A; }
+.statistik-etikett { font-size: 11px; color: #ADADAD; text-align: center; }
+
+.progress-rad {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-spar {
+  flex: 1;
+  height: 4px;
+  background: #E5E5E5;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fyll {
+  height: 100%;
+  background: #0A0A0A;
+  border-radius: 2px;
+}
+
+.progress-ring {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2.5px solid #0A0A0A;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 11px;
+  font-weight: 700;
+  color: #0A0A0A;
+}
+
+.vecko-rader { margin: 0 20px; }
+
+.vecko-rad {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  background: #F7F7F7;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.vecko-ikon { width: 28px; display: flex; justify-content: center; flex-shrink: 0; }
+.vecko-ikon svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #666666;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.vecko-text  { flex: 1; font-size: 14px; font-weight: 500; color: #0A0A0A; }
+.vecko-varde { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+.vecko-varde.gron { color: #22AA66; }
+
+.historik-lank {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid #F0F0F0;
+  margin-top: 4px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.historik-lank span { font-size: 15px; color: #666666; }
+.historik-lank svg  { width: 16px; height: 16px; fill: none; stroke: #ADADAD; stroke-width: 2; }
+
+
+/* ─────────────────────────────────────────────────────
+   12. KALORILOGG
+───────────────────────────────────────────────────── */
+
+.kalori-dag-kort {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F7F7F7;
+  border-radius: 14px;
+  margin: 0 20px 12px 20px;
+  padding: 16px;
+}
+
+.kalori-etikett { font-size: 12px; color: #ADADAD; margin-bottom: 4px; }
+.kalori-siffra  { font-size: 32px; font-weight: 800; color: #0A0A0A; letter-spacing: -1px; }
+.kalori-enhet   { font-size: 13px; color: #ADADAD; }
+
+.kalori-ring {
+  width: 56px;
+  height: 56px;
+  position: relative;
+}
+
+.kalori-ring svg {
+  width: 56px;
+  height: 56px;
+  transform: rotate(-90deg);
+}
+
+.kalori-ring-procent {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  font-weight: 700;
+  color: #0A0A0A;
+}
+
+.kalori-formular {
+  background: #F7F7F7;
+  border-radius: 14px;
+  margin: 0 20px 20px 20px;
+  padding: 16px;
+}
+
+.kalori-formular-titel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0A0A0A;
+  margin-bottom: 10px;
+}
+
+.maltids-flikar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.maltids-flik {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.maltids-flik.aktiv  { background: #0A0A0A; color: white; }
+.maltids-flik.inaktiv { background: #E5E5E5; color: #2A2A2A; }
+
+.kalori-falt-etikett { font-size: 13px; color: #666666; margin-bottom: 6px; }
+
+.kalori-inmatning {
+  width: 100%;
+  height: 40px;
+  background: white;
+  border: 1px solid #E5E5E5;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #0A0A0A;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  margin-bottom: 14px;
+}
+
+.kalori-inmatning::placeholder { color: #ADADAD; }
+
+.kalori-knappar {
+  display: flex;
+  gap: 10px;
+}
+
+.avbryt-knapp {
+  flex: 1;
+  height: 40px;
+  background: none;
+  border: 1px solid #E5E5E5;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666666;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+
+.spara-knapp {
+  flex: 1.5;
+  height: 40px;
+  background: #0A0A0A;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.spara-knapp svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: white;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.maltider-lista { padding: 0 20px 20px 20px; }
+
+.maltid-post {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  background: #F7F7F7;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.maltid-bild {
+  width: 32px;
+  height: 32px;
+  background: #E5E5E5;
+  border-radius: 6px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.maltid-bild svg { width: 16px; height: 16px; fill: none; stroke: #ADADAD; stroke-width: 1.6; }
+
+.maltid-info { flex: 1; }
+.maltid-namn { font-size: 14px; font-weight: 600; color: #0A0A0A; }
+.maltid-tid  { font-size: 12px; color: #ADADAD; margin-top: 1px; }
+.maltid-kcal { font-size: 14px; font-weight: 700; color: #0A0A0A; }
+
+
+/* ─────────────────────────────────────────────────────
+   13. STREAKS & MILSTOLPAR
+───────────────────────────────────────────────────── */
+
+.streak-kort-rad {
+  display: flex;
+  gap: 10px;
+  padding: 0 20px 20px 20px;
+}
+
+.streak-kort {
+  flex: 1;
+  background: #F7F7F7;
+  border-radius: 14px;
+  padding: 16px 12px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.streak-ikon    { font-size: 22px; line-height: 1; margin-bottom: 2px; }
+.streak-siffra  { font-size: 28px; font-weight: 900; color: #0A0A0A; letter-spacing: -1px; }
+.streak-etikett { font-size: 12px; color: #ADADAD; }
+
+.vecko-kalender { margin: 0 20px 20px 20px; }
+
+.kalender-dagar {
+  display: flex;
+  gap: 4px;
+}
+
+.kalender-dag {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.dag-namn { font-size: 11px; color: #ADADAD; font-weight: 500; }
+
+.dag-siffra {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dag-siffra.klar     { background: #E8241C; color: white; }
+.dag-siffra.idag     { background: #0A0A0A; color: white; }
+.dag-siffra.kommande { background: none; color: #2A2A2A; }
+
+.dag-check {
+  width: 20px;
+  height: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dag-check svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dag-check.klar svg { stroke: #E8241C; }
+.dag-check.idag svg { stroke: #0A0A0A; }
+.dag-check.tom svg  { stroke: #E5E5E5; }
+
+.milstolpar-lista { padding: 0 20px 20px 20px; }
+
+.milstolpe {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  background: #F7F7F7;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.milstolpe.ej-nadd {
+  background: none;
+  padding-left: 0;
+}
+
+.milstolpe-check {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.milstolpe-check svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.milstolpe-check.nadd    svg { stroke: #E8241C; }
+.milstolpe-check.ej-nadd svg { stroke: #CCCCCC; }
+
+.milstolpe-text        { flex: 1; font-size: 14px; font-weight: 500; }
+.milstolpe-text.aktiv  { color: #0A0A0A; }
+.milstolpe-text.inaktiv { color: #ADADAD; }
+
+.uppnadd-tagg { font-size: 12px; font-weight: 600; color: #E8241C; }
