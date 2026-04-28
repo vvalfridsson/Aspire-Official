@@ -1,89 +1,52 @@
-"""
-=====================================================
-ASPIRE APP — PYTHON WEBBSERVER
-=====================================================
+from flask import Flask, request, jsonify, send_from_directory
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import os
 
-Kör den här filen för att starta Aspire-appen lokalt.
+app = Flask(__name__, static_folder='.')
 
-Instruktioner:
-1. Se till att du är i mappen 'aspire-app'
-2. Kör kommandot:  python server.py
-3. Öppna Safari på din iPhone och gå till:
-   http://DIN_DATORS_IP:8000
+# ─── FYLL I DINA UPPGIFTER FRÅN SKOLAN HÄR ─────────────────
+DB_CONFIG = {
+    "host": "postgres.mau.se",      
+    "database": "",
+    "user": "",
+    "password":"",
+    "port": "55432"                  
+}
 
-Hitta din IP-adress:
-- Mac: Systeminställningar → Nätverk
-- Windows: ipconfig i terminal
+def get_db_connection():
+    return psycopg2.connect(**DB_CONFIG)
 
-iPhone-tips:
-- Tryck på dela-ikonen i Safari
-- Välj "Lägg till på hemskärmen"
-- Nu visas Aspire som en riktig app!
-=====================================================
-"""
+# Serverar HTML-filer
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
 
-import http.server
-import socketserver
-import socket
+@app.route('/<path:path>')
+def serve_file(path):
+    return send_from_directory('.', path)
 
-
-# ─── Inställningar ────────────────────────────────
-
-PORT = 8000           # Porten appen körs på
-HOST = "0.0.0.0"      # Lyssnar på alla nätverksgränssnitt
-
-
-# ─── Hitta datorns IP-adress ──────────────────────
-
-def hitta_ip():
-    """Returnerar datorns lokala IP-adress i nätverket."""
+# API för att spara träning
+@app.route('/api/save-workout', methods=['POST'])
+def save_workout():
+    data = request.json
     try:
-        # Öppna en temporär anslutning för att hitta IP
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except Exception:
-        return "localhost"
-
-
-# ─── Starta servern ───────────────────────────────
-
-class AspreHandler(http.server.SimpleHTTPRequestHandler):
-    """
-    Hanterar HTTP-förfrågningar.
-    SimpleHTTPRequestHandler serverar filer från
-    den mapp där server.py körs.
-    """
-
-    def log_message(self, format, *args):
-        """Skriver ut ett enkelt loggmeddelande för varje besök."""
-        print(f"  → {self.path}")
-
-
-# ─── Kör programmet ───────────────────────────────
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Denna SQL-fråga skickar data till din Postgres-databas
+        cur.execute(
+            "INSERT INTO workout_logs (exercise_name, sets, reps, weight) VALUES (%s, %s, %s, %s)",
+            (data['exercise_name'], data['sets'], data['reps'], data['weight'])
+        )
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"status": "success", "message": "Sparat i Postgres!"}), 201
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == "__main__":
-
-    ip = hitta_ip()
-
-    print("")
-    print("╔══════════════════════════════════════╗")
-    print("║         ASPIRE APP — STARTAD         ║")
-    print("╠══════════════════════════════════════╣")
-    print(f"║  Dator:   http://localhost:{PORT}       ║")
-    print(f"║  iPhone:  http://{ip}:{PORT}   ║")
-    print("╠══════════════════════════════════════╣")
-    print("║  Tryck CTRL+C för att stänga         ║")
-    print("╚══════════════════════════════════════╝")
-    print("")
-
-    # Starta servern
-    with socketserver.TCPServer((HOST, PORT), AspreHandler) as httpd:
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            print("")
-            print("  Servern stängd. Hej då!")
-            print("")
+    print("🚀 ASPIRE SERVER STARTAD PÅ http://localhost:8000")
+    app.run(host='0.0.0.0', port=8000, debug=True)
