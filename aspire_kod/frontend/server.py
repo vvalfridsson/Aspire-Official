@@ -5,7 +5,7 @@ import os
 
 app = Flask(__name__, static_folder='.')
 
-# ─── FYLL I DINA UPPGIFTER FRÅN SKOLAN HÄR ─────────────────
+
 DB_CONFIG = {
     "host": "postgres.mau.se",      
     "database": "",
