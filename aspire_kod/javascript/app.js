@@ -145,3 +145,115 @@ function nuvarandeTid() {
   var minuter = String(nu.getMinutes()).padStart(2, '0');
   return timmar + ':' + minuter;
 }
+
+
+/* Visar ett felmeddelande under ett fält */
+function visaFelmeddelande(elementId, meddelande) {
+  var element = document.getElementById(elementId);
+  if (!element) return;
+  element.textContent = meddelande;
+  element.style.display = 'block';
+}
+
+/* Döljer ett felmeddelande */
+function dolFelmeddelande(elementId) {
+  var element = document.getElementById(elementId);
+  if (element) element.style.display = 'none';
+}
+
+
+/* ─────────────────────────────────────────────────────
+   INLOGGNING (index.html)
+───────────────────────────────────────────────────── */
+
+/* Hanterar klick på Logga in-knappen */
+function hanteraInloggning() {
+  var epost    = document.getElementById('inlogg-epost').value.trim();
+  var losenord = document.getElementById('inlogg-losenord').value;
+
+  dolFelmeddelande('fel-epost');
+  dolFelmeddelande('fel-losenord');
+  dolFelmeddelande('inlogg-fel');
+
+  if (!epost) {
+    visaFelmeddelande('fel-epost', 'E-postfältet är obligatoriskt.');
+    return;
+  }
+
+  if (!losenord) {
+    visaFelmeddelande('fel-losenord', 'Lösenordsfältet är obligatoriskt.');
+    return;
+  }
+
+  fetch('http://127.0.0.1:8001/logga-in', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ epost: epost, losenord: losenord })
+  })
+  .then(function(svar) { return svar.json(); })
+  .then(function(data) {
+    if (data.detail) {
+      visaFelmeddelande('inlogg-fel', data.detail);
+      return;
+    }
+    localStorage.setItem('aspire_inloggad', JSON.stringify(data));
+    window.location.href = 'hem.html';
+  })
+  .catch(function() {
+    visaFelmeddelande('inlogg-fel', 'Kunde inte ansluta till servern.');
+  });
+}
+
+
+/* ─────────────────────────────────────────────────────
+   REGISTRERING (registrera.html)
+───────────────────────────────────────────────────── */
+
+/* Hanterar klick på Skapa konto-knappen */
+function hanteraRegistrering() {
+  var namn     = document.getElementById('reg-namn').value.trim();
+  var epost    = document.getElementById('reg-epost').value.trim();
+  var losenord = document.getElementById('reg-losenord').value;
+  var bekrafta = document.getElementById('reg-bekrafta').value;
+
+  ['fel-reg-namn','fel-reg-epost','fel-reg-losenord','fel-reg-bekrafta','reg-fel']
+    .forEach(dolFelmeddelande);
+
+  if (!namn) {
+    visaFelmeddelande('fel-reg-namn', 'Namn är obligatoriskt.');
+    return;
+  }
+
+  if (!epost) {
+    visaFelmeddelande('fel-reg-epost', 'E-post är obligatoriskt.');
+    return;
+  }
+
+  if (!losenord || losenord.length < 8) {
+    visaFelmeddelande('fel-reg-losenord', 'Lösenordet måste ha minst 8 tecken.');
+    return;
+  }
+
+  if (losenord !== bekrafta) {
+    visaFelmeddelande('fel-reg-bekrafta', 'Lösenorden matchar inte.');
+    return;
+  }
+
+  fetch('http://127.0.0.1:8001/registrera', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ namn: namn, epost: epost, losenord: losenord })
+  })
+  .then(function(svar) { return svar.json(); })
+  .then(function(data) {
+    if (data.detail) {
+      visaFelmeddelande('reg-fel', data.detail);
+      return;
+    }
+    localStorage.setItem('aspire_inloggad', JSON.stringify(data));
+    window.location.href = 'hem.html';
+  })
+  .catch(function() {
+    visaFelmeddelande('reg-fel', 'Kunde inte ansluta till servern.');
+  });
+}
