@@ -1,23 +1,32 @@
 # Aspire — Grupp 4
 
-Träningsapp som låter användaren följa kända atleters dagliga scheman.
+Träningsapp där du kan följa kända atleters dagliga scheman, logga kalorier och hålla koll på dina streaks.
 
-## Hur man kör appen
-1. Ladda ner filerna
-2. Kör: python server.py
-3. Öppna Safari och gå till adressen som visas
-4. Eller öppna index.html direkt i webbläsaren
+## Starta appen
 
-## Teknikstack
-- Python (server.py) — lokal webbserver
-- HTML — sidstruktur (7 sidor)
-- CSS — design med flexbox
-- JavaScript — interaktivitet och localStorage
+**Frontend:** Öppna `aspire_kod/frontend/index.html` i webbläsaren.
+
+**Backend:**
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8001
+```
+
+Skapa en `.env`-fil i `backend/` med din databasadress:
+```
+DATABASE_URL=postgresql://användarnamn:lösenord@localhost:5432/aspire
+```
 
 ## Funktioner
-- Inloggning och registrering med validering
-- Michael Jordans dagliga träningsschema
-- Kalorilogg med ringdiagram
+
+- Inloggning och registrering
+- Sök och bläddra bland atleter
+- Kalorilogg med måltidsflikar
 - Streak-räknare med veckokalender
-- Atletprofil med Schema, Kost och Träning-flikar
-- PWA — kan läggas till på iPhone hemskärm
+- Kan installeras som app på iPhone (PWA)
+
+## Teknik
+
+HTML · CSS · JavaScript · FastAPI · PostgreSQL
+
