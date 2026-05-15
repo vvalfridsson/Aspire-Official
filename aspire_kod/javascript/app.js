@@ -465,3 +465,32 @@ function byttFlik(klickadFlik, flikNamn) {
 }
 
 document.addEventListener("DOMContentLoaded", laddaAtletProfil);
+
+/*funktionen visar klockan istället för en placeholder*/
+
+function uppdateraStatusradKlocka() {
+
+  var tidElement = document.querySelector('.statusrad-tid');
+
+  if (!tidElement) {
+    return;
+  }
+
+  var nu = new Date();
+
+  var timmar = nu.getHours();
+  var minuter = nu.getMinutes();
+
+  /*lägg till ledande nolla på minuter*/
+  if (minuter < 10) {
+    minuter = '0' + minuter;
+  }
+
+  tidElement.textContent = timmar + ':' + minuter;
+}
+
+/*startar om och kör direkt när programmet startas om*/
+uppdateraStatusradKlocka();
+
+/*uppdatera varje sekund*/
+setInterval(uppdateraStatusradKlocka, 1000);
