@@ -30,21 +30,21 @@
       <!-- Atletens topp: avatar, namn, sport -->
       <div class="atlet-topp">
 
-        <div class="atlet-stor-avatar">MJ</div>
-        <div class="atlet-stort-namn">Michael Jordan</div>
-        <div class="atlet-stor-sport">Basketball</div>
+        <div class="atlet-stor-avatar" id="profil-avatar">MJ</div>
+        <div class="atlet-stort-namn" id="profil-namn">Michael Jordan</div>
+        <div class="atlet-stor-sport" id="profil-sport">Basketball</div>
 
         <!-- Biometri: kalorier + träning per dag -->
-        <div class="bio-rad">
-          <div class="bio-post rod">
-            <svg viewBox="0 0 24 24"><path d="M12 2c-4 6-6 10-6 13a6 6 0 0 0 12 0c0-3-2-7-6-13z"/></svg>
-            5 000 kcal
-          </div>
-          <div class="bio-post">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            5h/dag
-          </div>
-        </div>
+<div class="bio-rad">
+  <div class="bio-post rod">
+    <svg viewBox="0 0 24 24"><path d="M12 2c-4 6-6 10-6 13a6 6 0 0 0 12 0c0-3-2-7-6-13z"/></svg>
+    <span id="profil-kalorier">5 000 kcal</span>
+  </div>
+  <div class="bio-post">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span id="profil-traning">5h/dag</span>
+  </div>
+</div>
 
         <!-- Karriärstatistik -->
         <div class="atlet-statistik">
@@ -69,28 +69,28 @@
       </div>
 
       <!-- Inspirationscitat -->
-      <div class="citat-ruta">
+      <div class="citat-ruta" id="profil-citat">
         "I've missed more than 9000 shots in my career. I've lost almost 300 games."
       </div>
 
       <!-- Flikar: Schema / Kost / Träning -->
       <div class="flik-rad">
-        <button class="flik aktiv" onclick="byttFlik(this)">
+        <button class="flik aktiv" onclick="byttFlik(this, 'schema')">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           Schema
         </button>
-        <button class="flik" onclick="byttFlik(this)">
+        <button class="flik" onclick="byttFlik(this, 'kost')">
           <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
           Kost
         </button>
-        <button class="flik" onclick="byttFlik(this)">
+        <button class="flik" onclick="byttFlik(this, 'traning')">
           <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           Träning
         </button>
       </div>
 
       <!-- Schema-lista -->
-      <div class="schema-lista">
+      <div class="schema-lista" id="profil-innehall">
 
         <div class="schema-post">
           <div class="schema-prick rod"></div>

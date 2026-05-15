@@ -63,18 +63,6 @@ function sokAtleter(text) {
    Schema / Kost / Träning
 ───────────────────────────────────────────────────── */
 
-function byttFlik(klickadFlik) {
-
-  /* Ta bort 'aktiv' från alla flikar i samma rad */
-  var allaflikar = klickadFlik.closest('.flik-rad').querySelectorAll('.flik');
-  for (var i = 0; i < allaflikar.length; i++) {
-    allaflikar[i].classList.remove('aktiv');
-  }
-
-  /* Sätt 'aktiv' på den klickade fliken */
-  klickadFlik.classList.add('aktiv');
-}
-
 
 /* ─────────────────────────────────────────────────────
    BYTA MÅLTIDSFLIK (kalorier.html)
@@ -262,6 +250,7 @@ function hanteraRegistrering() {
 }
 
 function loggarUt() {
+  localStorage.removeItem("aspire_inloggad");
   localStorage.removeItem("anvandare");
   localStorage.removeItem("user");
   window.location.href = "index.html";
@@ -272,3 +261,207 @@ function startaVakna(button) {
   button.textContent = "Aktivitet startad";
   button.disabled = true;
 }
+
+const ATLET_PROFILER = {
+  1: {
+    avatar: "MJ",
+    namn: "Michael Jordan",
+    sport: "Basketball",
+    kalorier: "5 000 kcal",
+    traning: "5h/dag",
+    statistik: ["6", "5", "14x", "32,292"],
+    etiketter: ["Championships", "MVPs", "All-Star", "Career Pts"],
+    citat: "\"I've missed more than 9000 shots in my career. I've lost almost 300 games.\""
+  },
+  2: {
+    avatar: "LJ",
+    namn: "LeBron James",
+    sport: "Basketball",
+    kalorier: "4 500 kcal",
+    traning: "5h/dag",
+    statistik: ["4", "4", "20x", "40,000+"],
+    etiketter: ["Championships", "MVPs", "All-Star", "Career Pts"],
+    citat: "\"You have to be able to accept failure to get better.\""
+  },
+  3: {
+    avatar: "CR",
+    namn: "Cristiano Ronaldo",
+    sport: "Fotboll",
+    kalorier: "3 200 kcal",
+    traning: "4h/dag",
+    statistik: ["5", "5", "850+", "200+"],
+    etiketter: ["Champions League", "Ballon d'Or", "Goals", "Caps"],
+    citat: "\"Your love makes me strong. Your hate makes me unstoppable.\""
+  },
+  4: {
+    avatar: "SW",
+    namn: "Serena Williams",
+    sport: "Tennis",
+    kalorier: "3 200 kcal",
+    traning: "4h/dag",
+    statistik: ["23", "4", "319", "73"],
+    etiketter: ["Grand Slams", "Olympics", "Weeks #1", "Titles"],
+    citat: "\"A champion is defined by how they recover.\""
+  },
+  5: {
+    avatar: "UB",
+    namn: "Usain Bolt",
+    sport: "Sprint",
+    kalorier: "5 500 kcal",
+    traning: "4h/dag",
+    statistik: ["8", "100m", "200m", "9.58s"],
+    etiketter: ["Olympic Golds", "Record", "Record", "100m WR"],
+    citat: "\"I trained four years to run nine seconds.\""
+  },
+  6: {
+    avatar: "CM",
+    namn: "Conor McGregor",
+    sport: "MMA",
+    kalorier: "4 000 kcal",
+    traning: "6h/dag",
+    statistik: ["2", "22", "19", "UFC"],
+    etiketter: ["Divisions", "Wins", "KOs", "Champion"],
+    citat: "\"There is no talent here. This is hard work.\""
+  }
+};
+
+function laddaAtletProfil() {
+  if (!window.location.pathname.includes("atletprofil.html")) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id") || "1";
+  const atlet = ATLET_PROFILER[id] || ATLET_PROFILER[1];
+
+  const avatar = document.getElementById("profil-avatar");
+  const namn = document.getElementById("profil-namn");
+  const sport = document.getElementById("profil-sport");
+  const kalorier = document.getElementById("profil-kalorier");
+  const traning = document.getElementById("profil-traning");
+  const citat = document.getElementById("profil-citat");
+
+  if (avatar) avatar.textContent = atlet.avatar;
+  if (namn) namn.textContent = atlet.namn;
+  if (sport) sport.textContent = atlet.sport;
+  if (kalorier) kalorier.textContent = atlet.kalorier;
+  if (traning) traning.textContent = atlet.traning;
+  if (citat) citat.textContent = atlet.citat;
+
+  document.title = "Aspire — " + atlet.namn;
+
+  const siffror = document.querySelectorAll(".atlet-stat-siffra");
+  const etiketter = document.querySelectorAll(".atlet-stat-etikett");
+
+  for (let i = 0; i < siffror.length; i++) {
+    if (atlet.statistik[i]) siffror[i].textContent = atlet.statistik[i];
+  }
+
+  for (let i = 0; i < etiketter.length; i++) {
+    if (atlet.etiketter[i]) etiketter[i].textContent = atlet.etiketter[i];
+  }
+}
+
+function byttFlik(klickadFlik, flikNamn) {
+  var allaflikar = klickadFlik.closest('.flik-rad').querySelectorAll('.flik');
+
+  for (var i = 0; i < allaflikar.length; i++) {
+    allaflikar[i].classList.remove('aktiv');
+  }
+
+  klickadFlik.classList.add('aktiv');
+
+  var innehall = document.getElementById('profil-innehall');
+  if (!innehall) return;
+
+  if (flikNamn === 'schema') {
+    innehall.innerHTML = `
+      <div class="schema-post">
+        <div class="schema-prick rod"></div>
+        <div>
+          <div class="schema-tid">06.00</div>
+          <div class="schema-namn">Vakna!</div>
+        </div>
+      </div>
+
+      <div class="schema-post">
+        <div class="schema-prick rod"></div>
+        <div>
+          <div class="schema-tid">06.30–08.00</div>
+          <div class="schema-namn">Gym</div>
+        </div>
+      </div>
+
+      <div class="schema-post">
+        <div class="schema-prick gra"></div>
+        <div>
+          <div class="schema-tid">08.30–09.00</div>
+          <div class="schema-namn">Power Nap</div>
+          <div class="schema-beskrivning">| Samla energi för dagen!</div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (flikNamn === 'kost') {
+    innehall.innerHTML = `
+      <div class="schema-post">
+        <div class="schema-prick rod"></div>
+        <div>
+          <div class="schema-tid">08.00</div>
+          <div class="schema-namn">Frukost</div>
+          <div class="schema-beskrivning">Havregryn, ägg, frukt och vatten.</div>
+        </div>
+      </div>
+
+      <div class="schema-post">
+        <div class="schema-prick rod"></div>
+        <div>
+          <div class="schema-tid">12.00</div>
+          <div class="schema-namn">Lunch</div>
+          <div class="schema-beskrivning">Kyckling, ris och grönsaker.</div>
+        </div>
+      </div>
+
+      <div class="schema-post">
+        <div class="schema-prick gra"></div>
+        <div>
+          <div class="schema-tid">18.00</div>
+          <div class="schema-namn">Middag</div>
+          <div class="schema-beskrivning">Proteinrik måltid för återhämtning.</div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (flikNamn === 'traning') {
+    innehall.innerHTML = `
+      <div class="schema-post">
+        <div class="schema-prick rod"></div>
+        <div>
+          <div class="schema-tid">06.30</div>
+          <div class="schema-namn">Styrketräning</div>
+          <div class="schema-beskrivning">Explosivitet, ben och core.</div>
+        </div>
+      </div>
+
+      <div class="schema-post">
+        <div class="schema-prick rod"></div>
+        <div>
+          <div class="schema-tid">14.00</div>
+          <div class="schema-namn">Teknikpass</div>
+          <div class="schema-beskrivning">Sport-specifik teknik och rörelsemönster.</div>
+        </div>
+      </div>
+
+      <div class="schema-post">
+        <div class="schema-prick gra"></div>
+        <div>
+          <div class="schema-tid">19.00</div>
+          <div class="schema-namn">Stretching</div>
+          <div class="schema-beskrivning">Rörlighet och återhämtning.</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", laddaAtletProfil);
