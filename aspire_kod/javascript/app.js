@@ -188,7 +188,10 @@ function hanteraInloggning() {
   fetch('http://127.0.0.1:8001/logga-in', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ epost: epost, losenord: losenord })
+    body: JSON.stringify({
+    epost: epost,
+    losenord: losenord
+})
   })
   .then(function(svar) { return svar.json(); })
   .then(function(data) {
@@ -256,4 +259,16 @@ function hanteraRegistrering() {
   .catch(function() {
     visaFelmeddelande('reg-fel', 'Kunde inte ansluta till servern.');
   });
+}
+
+function loggarUt() {
+  localStorage.removeItem("anvandare");
+  localStorage.removeItem("user");
+  window.location.href = "index.html";
+}
+
+function startaVakna(button) {
+  if (!button) return;
+  button.textContent = "Aktivitet startad";
+  button.disabled = true;
 }
