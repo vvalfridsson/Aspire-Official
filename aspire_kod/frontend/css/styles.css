@@ -1320,3 +1320,15 @@ body {
   justify-content: space-around;
   align-items: center;
 }
+.wifi .bar {
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  opacity: 0.2;
+}
+
+#wifi-icon[data-strength="0"] .bar { opacity: 0.2; }
+#wifi-icon[data-strength="1"] .bar1 { opacity: 1; }
+#wifi-icon[data-strength="2"] .bar1,
+#wifi-icon[data-strength="2"] .bar2 { opacity: 1; }
+#wifi-icon[data-strength="3"] .bar { opacity: 1; }
