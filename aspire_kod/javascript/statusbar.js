@@ -79,3 +79,21 @@ async function initBattery() {
 }
 
 document.addEventListener("DOMContentLoaded", initStatusBar);
+
+/*wifi online status*/
+function initWifi() {
+  const wifiPath = document.getElementById("wifi-path");
+  if (!wifiPath) return;
+
+  function updateWifi() {
+    if (navigator.onLine) {
+      wifiPath.style.opacity = "1";
+    } else {
+      wifiPath.style.opacity = "0.25";
+    }
+  }
+
+  updateWifi();
+  window.addEventListener("online", updateWifi);
+  window.addEventListener("offline", updateWifi);
+}
