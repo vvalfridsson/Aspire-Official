@@ -78,8 +78,6 @@ async function initBattery() {
   battery.addEventListener("chargingchange", updateBattery);
 }
 
-document.addEventListener("DOMContentLoaded", initStatusBar);
-
 /*wifi online status*/
 function initWifi() {
   const wifiPath = document.getElementById("wifi-path");
@@ -97,3 +95,5 @@ function initWifi() {
   window.addEventListener("online", updateWifi);
   window.addEventListener("offline", updateWifi);
 }
+/*startar allt när sidan är laddad*/
+document.addEventListener("DOMContentLoaded", initStatusBar);
