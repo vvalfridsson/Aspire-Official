@@ -494,3 +494,23 @@ uppdateraStatusradKlocka();
 
 /*uppdatera varje sekund*/
 setInterval(uppdateraStatusradKlocka, 1000);
+
+async function hamtaNotiser() { /*funktion som hämtar notiser som är kopplade till användarens id genom localstorage*/
+  const anvandareId = localStorage.getItem("anvandare_id");
+  if (!anvandareId) return;
+
+  const res = await fetch(`http://127.0.0.1:8001/notiser/${anvandareId}`); /*koppla upp sig till sidan och fetcha värdet*/
+  const data = await res.json();
+
+  const badge = document.getElementById("notis-badge");
+  if (!badge) return;
+
+  if (data.antal > 0) { /*om värdet är större än 0 ska det visas i navigationsbaren och visa antalet*/
+    badge.textContent = data.antal;
+    badge.style.display = "flex";
+  } else {
+    badge.style.display = "none"; /*annars ska den inte visa något*/
+  }
+}
+
+document.addEventListener("DOMContentLoaded", hamtaNotiser); /*när DOM är fylld ska den visa notiserna*/
