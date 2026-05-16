@@ -136,3 +136,57 @@ def hamta_schema(atlet_id: int):
         return cursor.fetchall()
     finally:
         conn.close()
+
+from datetime import date, timedelta
+
+
+@app.get("/streak/{anvandare_id}")
+def hamta_streak(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+
+        #hämtar alla datum då användaren varit aktiv
+        cursor.execute("""
+            SELECT DISTINCT datum
+            FROM anvandar_aktiviteter
+            WHERE anvandar_id = %s
+            ORDER BY datum DESC
+        """, (anvandare_id,))
+        rows = cursor.fetchall()
+
+        if not rows:
+            return {"aktuell": 0, "langsta": 0}
+
+        dates = [r["datum"] for r in rows]
+
+        #räknar den aktuell streaken
+        today = date.today()
+        streak = 0
+        check_day = today
+
+        while check_day in dates:
+            streak += 1
+            check_day -= timedelta(days=1)
+
+        #räkna den längsta streaken
+        longest = 0
+        current = 1
+
+        for i in range(1, len(dates)):
+            if dates[i-1] - dates[i] == timedelta(days=1):
+                current += 1
+            else:
+                longest = max(longest, current)
+                current = 1
+
+        longest = max(longest, current)
+
+        return {
+            "aktuell": streak,
+            "langsta": longest,
+            "dagar": [str(d) for d in dates]
+        }
+
+    finally:
+        conn.close()
