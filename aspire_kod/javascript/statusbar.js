@@ -30,7 +30,7 @@ function renderIcons() {
 function initStatusBar() {
   initWifi();
   initTime();
-  initBattery();
+ 
 }
 
 /*tiden, hämtas automatiskt och uppdateras kontinuerligt*/
@@ -48,30 +48,6 @@ function initTime() {
   updateTime();
   setInterval(updateTime, 10000);
 }
-
-/*batterinivån som visas i appen syncas upp med enhetens nivå, så vår pwa ser ut och fungerar som en riktig app*/
-async function initBattery() {
-  if (!navigator.getBattery) return;
-
-  const battery = await navigator.getBattery();
-  const batteryFill = document.getElementById("battery-fill");
-  if (!batteryFill) return;
-
-  function updateBattery() {
-    const level = battery.level;
-    const maxWidth = 17;
-    const newWidth = Math.max(2, level * maxWidth);
-
-    batteryFill.setAttribute("width", newWidth);
-
-    if (battery.charging) {
-      batteryFill.style.fill = "#34C759";
-    } else if (level < 0.2) {
-      batteryFill.style.fill = "#FF3B30";
-    } else {
-      batteryFill.style.fill = "currentColor";
-    }
-  }
 
   updateBattery();
   battery.addEventListener("levelchange", updateBattery);
@@ -94,6 +70,32 @@ function initWifi() {
   updateWifi();
   window.addEventListener("online", updateWifi);
   window.addEventListener("offline", updateWifi);
+}
+
+function fakeBattery() {
+  const batteryFill = document.getElementById("battery-fill");
+  if (!batteryFill) return;
+
+  let level = 0.82; // startnivå
+
+  function update() {
+    level -= Math.random() * 0.002;
+
+    if (level < 0.15) level = 1; // "laddad igen"
+
+    const maxWidth = 17;
+    const newWidth = Math.max(2, level * maxWidth);
+    batteryFill.setAttribute("width", newWidth);
+
+    if (level < 0.2) {
+      batteryFill.style.fill = "#FF3B30";
+    } else {
+      batteryFill.style.fill = "currentColor";
+    }
+  }
+
+  update();
+  setInterval(update, 20000);
 }
 /*startar allt när sidan är laddad*/
 document.addEventListener("DOMContentLoaded", initStatusBar);
