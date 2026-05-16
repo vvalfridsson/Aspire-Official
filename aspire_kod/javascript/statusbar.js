@@ -30,6 +30,7 @@ function renderIcons() {
 function initStatusBar() {
   initWifi();
   initTime();
+  fakeWifi();
  
 }
 
@@ -94,7 +95,7 @@ function fakeBattery() {
     }
   }
 
-  function fakeWifi() {
+function fakeWifi() {
   const wifiIcon = document.getElementById("wifi-icon");
   if (!wifiIcon) return;
 
