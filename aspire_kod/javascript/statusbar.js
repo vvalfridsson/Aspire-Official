@@ -94,6 +94,22 @@ function fakeBattery() {
     }
   }
 
+  function fakeWifi() {
+  const wifiIcon = document.getElementById("wifi-icon");
+  if (!wifiIcon) return;
+
+  let strength = 3;
+
+  function updateWifi() {
+    strength = Math.floor(Math.random() * 4); // 0–3 staplar
+
+    wifiIcon.setAttribute("data-strength", strength);
+  }
+
+  updateWifi();
+  setInterval(updateWifi, 15000);
+}
+
   update();
   setInterval(update, 20000);
 }
