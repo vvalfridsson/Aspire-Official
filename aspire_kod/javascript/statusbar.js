@@ -28,7 +28,7 @@ function renderIcons() {
 // filen ser till att alla klockslag och batterinivån följer enheten som används
 
 function initStatusBar() {
-  renderIcons();
+  initWifi();
   initTime();
   initBattery();
 }
