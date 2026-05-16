@@ -1262,3 +1262,15 @@ body {
 .milstolpe-text.inaktiv { color: #ADADAD; }
 
 .uppnadd-tagg { font-size: 12px; font-weight: 600; color: #E8241C; }
+
+.statusrad-ikoner {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.statusrad-ikoner svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+}
