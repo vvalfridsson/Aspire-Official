@@ -36,10 +36,10 @@
 
       <!-- Användarinfo -->
       <div class="anvandarrad">
-        <div class="avatar-fyrkant">DU</div>
+        <img id="profil-bild" class="avatar-fyrkant" src="" alt="Profilbild">
         <div>
-          <div class="anvandarnamn">Aspire Användare</div>
-          <div class="medsedan">Medlem sedan mars 2026</div>
+          <div id="profil-namn" class="anvandarnamn"></div>
+          <div id="profil-medsedan" class="medsedan"></div>
         </div>
       </div>
 
@@ -47,17 +47,17 @@
       <div class="statistik-rad">
         <div class="statistik-kort">
           <div class="statistik-ikon">🔥</div>
-          <div class="statistik-siffra">0</div>
+          <div class="statistik-siffra" id="profil-streak"></div>
           <div class="statistik-etikett">Dagars streak</div>
         </div>
         <div class="statistik-kort">
           <div class="statistik-ikon">🏆</div>
-          <div class="statistik-siffra">3</div>
+          <div class="statistik-siffra" id="profil-utmaningar"></div>
           <div class="statistik-etikett">Utmaningar</div>
         </div>
         <div class="statistik-kort">
           <div class="statistik-ikon">🎯</div>
-          <div class="statistik-siffra">0%</div>
+          <div class="statistik-siffra" id="profil-genomfort"></div>
           <div class="statistik-etikett">Genomfört</div>
         </div>
       </div>
@@ -66,17 +66,14 @@
       <div class="sektionsrubrik">Aktiv utmaning</div>
 
       <div class="kort">
-        <div style="font-size:15px; font-weight:700; color:#0A0A0A; margin-bottom:2px;">
-          Michael Jordan's schema
-        </div>
-        <div style="font-size:13px; color:#ADADAD; margin-bottom:14px;">
-          Dag 0 av 30
-        </div>
+        <div id="aktiv-titel" style="font-size:15px; font-weight:700; margin-bottom:2px;"></div>
+        <div id="aktiv-dag" style="font-size:13px; color:#ADADAD; margin-bottom:14px;"></div>
+        
         <div class="progress-rad">
           <div class="progress-spar">
-            <div class="progress-fyll" style="width: 23%;"></div>
+            <div id="aktiv-progress" class="progress-fyll"></div>
           </div>
-          <div class="progress-ring">23%</div>
+          <div id="aktiv-procent" class="progress-ring"></div>
         </div>
       </div>
 
@@ -90,7 +87,7 @@
             <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
           <div class="vecko-text">Träningspass genomförda</div>
-          <div class="vecko-varde">5/6</div>
+          <div class="vecko-varde" id="vecka-traning"></div>
         </div>
 
         <div class="vecko-rad">
@@ -98,7 +95,7 @@
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
           </div>
           <div class="vecko-text">Kalorimål uppnått</div>
-          <div class="vecko-varde">4/7</div>
+          <div class="vecko-varde" id="vecka-kalorier"></div>
         </div>
 
         <div class="vecko-rad">
@@ -106,13 +103,13 @@
             <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
           </div>
           <div class="vecko-text">Förbättring</div>
-          <div class="vecko-varde gron">+12%</div>
+          <div class="vecko-varde gron" id="vecka-forbattring"></div>
         </div>
 
       </div>
 
       <!-- Historik-länk -->
-      <a href="#" class="historik-lank">
+      <a href="historik.html" class="historik-lank">
         <span>Historik</span>
         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
@@ -146,7 +143,7 @@
 
   </div>
 
-<script src="../javascript/app.js"></script>
+<script src="javascript/app.js"></script>
 <script src="javascript/statusbar.js"></script>
 </body>
 </html>
