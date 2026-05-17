@@ -1,19 +1,30 @@
 """
 Aspire — main.py
-FastAPI-backend med endpoints för inloggning och registrering.
+FastAPI-backend med endpoints för inloggning, registrering, atleter och profiler.
 
-Starta servern: uvicorn main:app --reload --port 8001
+Starta servern:
+py -m uvicorn main:app --reload --port 8001
 """
+
+from datetime import date, timedelta
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
-from typing import Optional
-from database import get_connection, get_cursor, registrera_anvandare, hamta_anvandare, skapa_anvandartabell
+
+from database import (
+    get_connection,
+    get_cursor,
+    registrera_anvandare,
+    hamta_anvandare,
+    skapa_anvandartabell,
+)
+
 
 app = FastAPI(title="Aspire API", version="1.0")
 
-# Tillåter anrop från HTML-filerna
+
+# Tillåter anrop från frontend/Live Server.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,36 +35,49 @@ app.add_middleware(
 
 @app.on_event("startup")
 def startup():
-    """Skapar databastabeller om de inte finns när servern startar."""
+    """
+    Skapar användartabellen om den saknas när backend startar.
+    Resten av tabellerna skapas via SQL-scriptet i pgAdmin.
+    """
     conn = get_connection()
-    skapa_anvandartabell(conn)
-    conn.close()
+    try:
+        skapa_anvandartabell(conn)
+    finally:
+        conn.close()
 
 
-# ── Datamodeller ──────────────────────────────────────────
+# ─────────────────────────────────────────────────────
+# Datamodeller
+# ─────────────────────────────────────────────────────
 
 class RegistreraRequest(BaseModel):
-    """Innehåller uppgifter för att skapa ett nytt konto."""
-    namn:     str
-    epost:    EmailStr
+    namn: str
+    epost: EmailStr
     losenord: str
 
 
 class LoggaInRequest(BaseModel):
-    """Innehåller uppgifter för att logga in."""
-    epost:    EmailStr
+    epost: EmailStr
     losenord: str
 
 
-# ── Endpoints ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────
+# Grund-endpoint
+# ─────────────────────────────────────────────────────
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+# ─────────────────────────────────────────────────────
+# Inloggning och registrering
+# ─────────────────────────────────────────────────────
 
 @app.post("/registrera")
 def registrera(data: RegistreraRequest):
     """
     Skapar ett nytt användarkonto.
-
-    Returnerar användaren om det lyckas,
-    eller felmeddelande om e-posten redan finns.
     """
     if len(data.losenord) < 8:
         raise HTTPException(
@@ -70,9 +94,9 @@ def registrera(data: RegistreraRequest):
         )
 
     return {
-        "id":    anvandare["id"],
-        "namn":  anvandare["namn"],
-        "epost": anvandare["epost"]
+        "id": anvandare["id"],
+        "namn": anvandare["namn"],
+        "epost": anvandare["epost"],
     }
 
 
@@ -80,9 +104,6 @@ def registrera(data: RegistreraRequest):
 def logga_in(data: LoggaInRequest):
     """
     Loggar in en användare med e-post och lösenord.
-
-    Returnerar användaren om uppgifterna stämmer,
-    eller felmeddelande om de är fel.
     """
     anvandare = hamta_anvandare(data.epost)
 
@@ -93,28 +114,56 @@ def logga_in(data: LoggaInRequest):
         )
 
     return {
-        "id":    anvandare["id"],
-        "namn":  anvandare["namn"],
-        "epost": anvandare["epost"]
+        "id": anvandare["id"],
+        "namn": anvandare["namn"],
+        "epost": anvandare["epost"],
     }
 
+
+# ─────────────────────────────────────────────────────
+# Atleter
+# ─────────────────────────────────────────────────────
 
 @app.get("/atleter")
 def hamta_atleter(sport: str = None):
     """
     Hämtar alla atleter, eller filtrerar på sport.
-
-    Parametrar:
-        sport (str): Valfri filtrering, t.ex. Basketball.
     """
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
+
         if sport:
-            cursor.execute("SELECT * FROM atleter WHERE sport = %s", (sport,))
+            cursor.execute(
+                "SELECT * FROM atleter WHERE sport = %s ORDER BY id",
+                (sport,)
+            )
         else:
-            cursor.execute("SELECT * FROM atleter")
+            cursor.execute("SELECT * FROM atleter ORDER BY id")
+
         return cursor.fetchall()
+    finally:
+        conn.close()
+
+
+@app.get("/atleter/{atlet_id}")
+def hamta_atlet(atlet_id: int):
+    """
+    Hämtar en specifik atlet från databasen.
+    """
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute(
+            "SELECT * FROM atleter WHERE id = %s",
+            (atlet_id,)
+        )
+        atlet = cursor.fetchone()
+
+        if atlet is None:
+            raise HTTPException(status_code=404, detail="Atleten finns inte.")
+
+        return atlet
     finally:
         conn.close()
 
@@ -122,45 +171,99 @@ def hamta_atleter(sport: str = None):
 @app.get("/atleter/{atlet_id}/schema")
 def hamta_schema(atlet_id: int):
     """
-    Hämtar schemat för en specifik atlet.
-
-    Parametrar:
-        atlet_id (int): Atletens id i databasen.
+    Hämtar enklare schema från atlet_schema.
     """
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
         cursor.execute(
-            "SELECT * FROM atlet_schema WHERE atlet_id = %s", (atlet_id,)
+            """
+            SELECT *
+            FROM atlet_schema
+            WHERE atlet_id = %s
+            ORDER BY id
+            """,
+            (atlet_id,)
         )
         return cursor.fetchall()
     finally:
         conn.close()
 
-from datetime import date, timedelta
 
+@app.get("/atleter/{atlet_id}/aktiviteter")
+def hamta_atlet_aktiviteter(atlet_id: int):
+    """
+    Hämtar aktiviteter från dagsprogram/aktiviteter för en atlet.
+    """
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute(
+            """
+            SELECT 
+                a.id,
+                a.dagsprogram_id,
+                a.sortering,
+                a.tid_start,
+                a.tid_slut,
+                a.namn,
+                a.beskrivning,
+                a.typ,
+                a.ikon_kod
+            FROM aktiviteter a
+            JOIN dagsprogram d ON d.id = a.dagsprogram_id
+            WHERE d.atlet_id = %s
+            ORDER BY a.sortering
+            """,
+            (atlet_id,)
+        )
+
+        return cursor.fetchall()
+    finally:
+        conn.close()
+
+
+# ─────────────────────────────────────────────────────
+# Streaks
+# ─────────────────────────────────────────────────────
 
 @app.get("/streak/{anvandare_id}")
 def hamta_streak(anvandare_id: int):
+    """
+    Hämtar streak för en användare.
+    Returnerar 0 om tabellen inte finns eller om användaren saknar aktivitet.
+    """
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
 
-        #hämtar alla datum då användaren varit aktiv
-        cursor.execute("""
-            SELECT DISTINCT datum
-            FROM anvandar_aktiviteter
-            WHERE anvandar_id = %s
-            ORDER BY datum DESC
-        """, (anvandare_id,))
-        rows = cursor.fetchall()
+        try:
+            cursor.execute(
+                """
+                SELECT DISTINCT datum
+                FROM anvandar_aktiviteter
+                WHERE anvandar_id = %s
+                ORDER BY datum DESC
+                """,
+                (anvandare_id,)
+            )
+            rows = cursor.fetchall()
+        except Exception:
+            return {
+                "aktuell": 0,
+                "langsta": 0,
+                "dagar": []
+            }
 
         if not rows:
-            return {"aktuell": 0, "langsta": 0}
+            return {
+                "aktuell": 0,
+                "langsta": 0,
+                "dagar": []
+            }
 
         dates = [r["datum"] for r in rows]
 
-        #räknar den aktuell streaken
         today = date.today()
         streak = 0
         check_day = today
@@ -169,12 +272,11 @@ def hamta_streak(anvandare_id: int):
             streak += 1
             check_day -= timedelta(days=1)
 
-        #räkna den längsta streaken
-        longest = 0
+        longest = 1
         current = 1
 
         for i in range(1, len(dates)):
-            if dates[i-1] - dates[i] == timedelta(days=1):
+            if dates[i - 1] - dates[i] == timedelta(days=1):
                 current += 1
             else:
                 longest = max(longest, current)
@@ -191,58 +293,111 @@ def hamta_streak(anvandare_id: int):
     finally:
         conn.close()
 
-#endpoint som frontend anroparför att hämta all profildata
+
+# ─────────────────────────────────────────────────────
+# Profil
+# ─────────────────────────────────────────────────────
+
 @app.get("/profil/{anvandare_id}")
 def hamta_profil(anvandare_id: int):
-    #skapar datbasanslutningen
+    """
+    Hämtar profildata för användaren.
+    Fungerar även om extra statistik-tabeller saknas.
+    """
     conn = get_connection()
     try:
-        #skapar en cursor så man kna köra specifika sql kommandon.
         cursor = get_cursor(conn)
 
-        #hämta användarens information, allt fårn namn till datum för registrering osv som ska synas
         cursor.execute(
-            "SELECT namn, skapad_datum, profilbild FROM anvandare WHERE id = %s",
+            """
+            SELECT 
+                id,
+                namn,
+                epost,
+                skapad
+            FROM anvandare
+            WHERE id = %s
+            """,
             (anvandare_id,)
         )
-        anv = cursor.fetchone() #hämtar en användare som en rad som den ska läsa av
+        anv = cursor.fetchone()
 
-        #hämtar streaken från samma användare
-        cursor.execute("""
-            SELECT COUNT(DISTINCT datum) AS streak
-            FROM anvandar_aktiviteter
-            WHERE anvandar_id = %s
-        """, (anvandare_id,))
-        streak = cursor.fetchone()["streak"]
+        if anv is None:
+            raise HTTPException(status_code=404, detail="Användaren finns inte.")
 
-        #hämtar vckodata 
-        cursor.execute("""
-            SELECT COUNT(*) AS traning
-            FROM anvandar_aktiviteter
-            WHERE anvandar_id = %s
-              AND datum >= CURRENT_DATE - INTERVAL '7 days'
-        """, (anvandare_id,))
-        traning = cursor.fetchone()["traning"]
+        # Standardvärden ifall aktivitets-/statistik-tabeller inte finns.
+        streak = 0
+        traning = 0
 
-        return { #returnerar allt som json till frontend som läser av enligt javascripten
+        try:
+            cursor.execute(
+                """
+                SELECT COUNT(DISTINCT datum) AS streak
+                FROM anvandar_aktiviteter
+                WHERE anvandar_id = %s
+                """,
+                (anvandare_id,)
+            )
+            row = cursor.fetchone()
+            if row and row["streak"] is not None:
+                streak = row["streak"]
+        except Exception:
+            streak = 0
+
+        try:
+            cursor.execute(
+                """
+                SELECT COUNT(*) AS traning
+                FROM anvandar_aktiviteter
+                WHERE anvandar_id = %s
+                  AND datum >= CURRENT_DATE - INTERVAL '7 days'
+                """,
+                (anvandare_id,)
+            )
+            row = cursor.fetchone()
+            if row and row["traning"] is not None:
+                traning = row["traning"]
+        except Exception:
+            traning = 0
+
+        skapad = anv.get("skapad")
+        if skapad:
+            medlem_sedan = skapad.strftime("%Y-%m-%d")
+        else:
+            medlem_sedan = "Okänt datum"
+
+        return {
             "namn": anv["namn"],
-            "medsedan": anv["skapad_datum"].strftime("%Y-%m-%d"),
-            "bild": anv["profilbild"],
+            "medsedan": medlem_sedan,
+            "bild": "",
             "streak": streak,
-            "utmaningar": 12,
-            "genomfort": 78,
-            "aktiv": { #data för aktiv utmaning som visas i profilen
-                "titel": "30 dagar löpning",
-                "dag": 12,
-                "total": 30,
-                "procent": 40
+            "utmaningar": 0,
+            "genomfort": 0,
+            "aktiv": {
+                "titel": "Ingen aktiv utmaning",
+                "dag": 0,
+                "total": 0,
+                "procent": 0
             },
-            "vecka": { #veckans sammanfattnign
+            "vecka": {
                 "traning": traning,
-                "kalorier": "5/7",
-                "forbattring": "+12%"
+                "kalorier": "0/7",
+                "forbattring": "0%"
             }
         }
 
-    finally: #ständer ner databasanslutningen
+    finally:
         conn.close()
+
+
+# ─────────────────────────────────────────────────────
+# Notiser
+# ─────────────────────────────────────────────────────
+
+@app.get("/notiser/{anvandare_id}")
+def hamta_notiser(anvandare_id: int):
+    """
+    Returnerar antal notiser.
+    Just nu standard 0 så frontend inte kraschar.
+    """
+    return {"antal": 0}

@@ -262,209 +262,6 @@ function startaVakna(button) {
   button.disabled = true;
 }
 
-const ATLET_PROFILER = {
-  1: {
-    avatar: "MJ",
-    namn: "Michael Jordan",
-    sport: "Basketball",
-    kalorier: "5 000 kcal",
-    traning: "5h/dag",
-    statistik: ["6", "5", "14x", "32,292"],
-    etiketter: ["Championships", "MVPs", "All-Star", "Career Pts"],
-    citat: "\"I've missed more than 9000 shots in my career. I've lost almost 300 games.\""
-  },
-  2: {
-    avatar: "LJ",
-    namn: "LeBron James",
-    sport: "Basketball",
-    kalorier: "4 500 kcal",
-    traning: "5h/dag",
-    statistik: ["4", "4", "20x", "40,000+"],
-    etiketter: ["Championships", "MVPs", "All-Star", "Career Pts"],
-    citat: "\"You have to be able to accept failure to get better.\""
-  },
-  3: {
-    avatar: "CR",
-    namn: "Cristiano Ronaldo",
-    sport: "Fotboll",
-    kalorier: "3 200 kcal",
-    traning: "4h/dag",
-    statistik: ["5", "5", "850+", "200+"],
-    etiketter: ["Champions League", "Ballon d'Or", "Goals", "Caps"],
-    citat: "\"Your love makes me strong. Your hate makes me unstoppable.\""
-  },
-  4: {
-    avatar: "SW",
-    namn: "Serena Williams",
-    sport: "Tennis",
-    kalorier: "3 200 kcal",
-    traning: "4h/dag",
-    statistik: ["23", "4", "319", "73"],
-    etiketter: ["Grand Slams", "Olympics", "Weeks #1", "Titles"],
-    citat: "\"A champion is defined by how they recover.\""
-  },
-  5: {
-    avatar: "UB",
-    namn: "Usain Bolt",
-    sport: "Sprint",
-    kalorier: "5 500 kcal",
-    traning: "4h/dag",
-    statistik: ["8", "100m", "200m", "9.58s"],
-    etiketter: ["Olympic Golds", "Record", "Record", "100m WR"],
-    citat: "\"I trained four years to run nine seconds.\""
-  },
-  6: {
-    avatar: "CM",
-    namn: "Conor McGregor",
-    sport: "MMA",
-    kalorier: "4 000 kcal",
-    traning: "6h/dag",
-    statistik: ["2", "22", "19", "UFC"],
-    etiketter: ["Divisions", "Wins", "KOs", "Champion"],
-    citat: "\"There is no talent here. This is hard work.\""
-  }
-};
-
-function laddaAtletProfil() {
-  if (!window.location.pathname.includes("atletprofil.html")) return;
-
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id") || "1";
-  const atlet = ATLET_PROFILER[id] || ATLET_PROFILER[1];
-
-  const avatar = document.getElementById("profil-avatar");
-  const namn = document.getElementById("profil-namn");
-  const sport = document.getElementById("profil-sport");
-  const kalorier = document.getElementById("profil-kalorier");
-  const traning = document.getElementById("profil-traning");
-  const citat = document.getElementById("profil-citat");
-
-  if (avatar) avatar.textContent = atlet.avatar;
-  if (namn) namn.textContent = atlet.namn;
-  if (sport) sport.textContent = atlet.sport;
-  if (kalorier) kalorier.textContent = atlet.kalorier;
-  if (traning) traning.textContent = atlet.traning;
-  if (citat) citat.textContent = atlet.citat;
-
-  document.title = "Aspire — " + atlet.namn;
-
-  const siffror = document.querySelectorAll(".atlet-stat-siffra");
-  const etiketter = document.querySelectorAll(".atlet-stat-etikett");
-
-  for (let i = 0; i < siffror.length; i++) {
-    if (atlet.statistik[i]) siffror[i].textContent = atlet.statistik[i];
-  }
-
-  for (let i = 0; i < etiketter.length; i++) {
-    if (atlet.etiketter[i]) etiketter[i].textContent = atlet.etiketter[i];
-  }
-}
-
-function byttFlik(klickadFlik, flikNamn) {
-  var allaflikar = klickadFlik.closest('.flik-rad').querySelectorAll('.flik');
-
-  for (var i = 0; i < allaflikar.length; i++) {
-    allaflikar[i].classList.remove('aktiv');
-  }
-
-  klickadFlik.classList.add('aktiv');
-
-  var innehall = document.getElementById('profil-innehall');
-  if (!innehall) return;
-
-  if (flikNamn === 'schema') {
-    innehall.innerHTML = `
-      <div class="schema-post">
-        <div class="schema-prick rod"></div>
-        <div>
-          <div class="schema-tid">06.00</div>
-          <div class="schema-namn">Vakna!</div>
-        </div>
-      </div>
-
-      <div class="schema-post">
-        <div class="schema-prick rod"></div>
-        <div>
-          <div class="schema-tid">06.30–08.00</div>
-          <div class="schema-namn">Gym</div>
-        </div>
-      </div>
-
-      <div class="schema-post">
-        <div class="schema-prick gra"></div>
-        <div>
-          <div class="schema-tid">08.30–09.00</div>
-          <div class="schema-namn">Power Nap</div>
-          <div class="schema-beskrivning">| Samla energi för dagen!</div>
-        </div>
-      </div>
-    `;
-  }
-
-  if (flikNamn === 'kost') {
-    innehall.innerHTML = `
-      <div class="schema-post">
-        <div class="schema-prick rod"></div>
-        <div>
-          <div class="schema-tid">08.00</div>
-          <div class="schema-namn">Frukost</div>
-          <div class="schema-beskrivning">Havregryn, ägg, frukt och vatten.</div>
-        </div>
-      </div>
-
-      <div class="schema-post">
-        <div class="schema-prick rod"></div>
-        <div>
-          <div class="schema-tid">12.00</div>
-          <div class="schema-namn">Lunch</div>
-          <div class="schema-beskrivning">Kyckling, ris och grönsaker.</div>
-        </div>
-      </div>
-
-      <div class="schema-post">
-        <div class="schema-prick gra"></div>
-        <div>
-          <div class="schema-tid">18.00</div>
-          <div class="schema-namn">Middag</div>
-          <div class="schema-beskrivning">Proteinrik måltid för återhämtning.</div>
-        </div>
-      </div>
-    `;
-  }
-
-  if (flikNamn === 'traning') {
-    innehall.innerHTML = `
-      <div class="schema-post">
-        <div class="schema-prick rod"></div>
-        <div>
-          <div class="schema-tid">06.30</div>
-          <div class="schema-namn">Styrketräning</div>
-          <div class="schema-beskrivning">Explosivitet, ben och core.</div>
-        </div>
-      </div>
-
-      <div class="schema-post">
-        <div class="schema-prick rod"></div>
-        <div>
-          <div class="schema-tid">14.00</div>
-          <div class="schema-namn">Teknikpass</div>
-          <div class="schema-beskrivning">Sport-specifik teknik och rörelsemönster.</div>
-        </div>
-      </div>
-
-      <div class="schema-post">
-        <div class="schema-prick gra"></div>
-        <div>
-          <div class="schema-tid">19.00</div>
-          <div class="schema-namn">Stretching</div>
-          <div class="schema-beskrivning">Rörlighet och återhämtning.</div>
-        </div>
-      </div>
-    `;
-  }
-}
-
-document.addEventListener("DOMContentLoaded", laddaAtletProfil);
 
 /*funktionen visar klockan istället för en placeholder*/
 
@@ -546,3 +343,100 @@ async function hamtaProfil() { // funktionen hämtar all profilinformation från
 }
 //när sidan laddas klart körs funktionen automatiskt
 document.addEventListener("DOMContentLoaded", hamtaProfil);
+
+/* =====================================================
+   HÄMTA ATLETER FRÅN DATABASEN TILL SÖK-SIDAN
+   ===================================================== */
+
+var ASPIRE_API_BASE_URL = "http://127.0.0.1:8001";
+
+function skapaInitialerFranNamn(namn) {
+  if (!namn) return "?";
+
+  var delar = namn.trim().split(" ");
+
+  if (delar.length === 1) {
+    return delar[0].substring(0, 2).toUpperCase();
+  }
+
+  return (delar[0][0] + delar[delar.length - 1][0]).toUpperCase();
+}
+
+function skapaAtletRadFranDatabas(atlet) {
+  var id = atlet.id;
+  var namn = atlet.namn || "Okänd atlet";
+  var sport = atlet.sport || "Okänd sport";
+  var initialer = atlet.initialer || skapaInitialerFranNamn(namn);
+
+  var kalorier = atlet.kcal_per_dag
+    ? atlet.kcal_per_dag + " kcal/dag"
+    : "Kalorier saknas";
+
+  var traning = atlet.traningstid_timmar
+    ? atlet.traningstid_timmar + "h träning"
+    : "Träning saknas";
+
+  return `
+    <a href="atletprofil.html?id=${id}" class="atlet-rad" data-atlet-id="${id}" data-sport="${sport}">
+      <div class="atlet-avatar">${initialer}</div>
+
+      <div class="atlet-info">
+        <div class="atlet-namn">${namn}</div>
+        <div class="atlet-sport">${sport}</div>
+      </div>
+
+      <div class="atlet-meta">
+        <div class="atlet-kcal">${kalorier}</div>
+        <div class="atlet-traning">${traning}</div>
+      </div>
+    </a>
+  `;
+}
+
+async function laddaAtleterFranDatabasTillSok() {
+  var filnamn = window.location.pathname.split("/").pop();
+
+  if (filnamn !== "sok.html") return;
+
+  var lista = document.getElementById("atletlista");
+  if (!lista) return;
+
+  lista.innerHTML = `
+    <div style="padding:20px; color:#777; font-size:14px;">
+      Laddar atleter från databasen...
+    </div>
+  `;
+
+  try {
+    var svar = await fetch(ASPIRE_API_BASE_URL + "/atleter");
+
+    if (!svar.ok) {
+      throw new Error("Backend svarade inte korrekt.");
+    }
+
+    var atleter = await svar.json();
+
+    if (!atleter || atleter.length === 0) {
+      lista.innerHTML = `
+        <div style="padding:20px; color:#777; font-size:14px;">
+          Inga atleter hittades i databasen.
+        </div>
+      `;
+      return;
+    }
+
+    lista.innerHTML = atleter.map(skapaAtletRadFranDatabas).join("");
+
+  } catch (error) {
+    console.error("Kunde inte hämta atleter:", error);
+
+    lista.innerHTML = `
+      <div style="padding:20px; color:red; font-size:14px;">
+        Kunde inte hämta atleter från databasen. Kontrollera att backend körs på port 8001.
+      </div>
+    `;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", laddaAtleterFranDatabasTillSok);
+window.addEventListener("pageshow", laddaAtleterFranDatabasTillSok);
