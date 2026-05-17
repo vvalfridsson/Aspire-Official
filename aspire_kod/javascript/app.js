@@ -173,7 +173,7 @@ function hanteraInloggning() {
     return;
   }
 
-  fetch('http://127.0.0.1:8001/logga-in', {
+  fetch('http://127.0.0.1:8002/logga-in', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -230,7 +230,7 @@ function hanteraRegistrering() {
     return;
   }
 
-  fetch('http://127.0.0.1:8001/registrera', {
+  fetch('http://127.0.0.1:8002/registrera', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ namn: namn, epost: epost, losenord: losenord })
@@ -296,7 +296,7 @@ async function hamtaNotiser() { /*funktion som hämtar notiser som är kopplade 
   const anvandareId = localStorage.getItem("anvandare_id");
   if (!anvandareId) return;
 
-  const res = await fetch(`http://127.0.0.1:8001/notiser/${anvandareId}`); /*koppla upp sig till sidan och fetcha värdet*/
+  const res = await fetch(`http://127.0.0.1:8002/notiser/${anvandareId}`); /*koppla upp sig till sidan och fetcha värdet*/
   const data = await res.json();
 
   const badge = document.getElementById("notis-badge");
@@ -317,7 +317,7 @@ async function hamtaProfil() { // funktionen hämtar all profilinformation från
   const anvandareId = localStorage.getItem("anvandare_id");
   if (!anvandareId) return; //om det inte finns ett id, dvs ingen är inloggad så avbryts funktioenn
 
-  const res = await fetch(`http://127.0.0.1:8001/profil/${anvandareId}`); //förfrågan skickas till API:et för att hämta användarens profildata
+  const res = await fetch(`http://127.0.0.1:8002/profil/${anvandareId}`); //förfrågan skickas till API:et för att hämta användarens profildata
   const data = await res.json(); //gör om json texten till ett javascript objekt
 
   //Profilinfo
@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded", hamtaProfil);
    HÄMTA ATLETER FRÅN DATABASEN TILL SÖK-SIDAN
    ===================================================== */
 
-var ASPIRE_API_BASE_URL = "http://127.0.0.1:8001";
+var ASPIRE_API_BASE_URL = "http://127.0.0.1:8002";
 
 function skapaInitialerFranNamn(namn) {
   if (!namn) return "?";
@@ -432,7 +432,7 @@ async function laddaAtleterFranDatabasTillSok() {
 
     lista.innerHTML = `
       <div style="padding:20px; color:red; font-size:14px;">
-        Kunde inte hämta atleter från databasen. Kontrollera att backend körs på port 8001.
+        Kunde inte hämta atleter från databasen. Kontrollera att backend körs på port 8002.
       </div>
     `;
   }
@@ -440,3 +440,192 @@ async function laddaAtleterFranDatabasTillSok() {
 
 document.addEventListener("DOMContentLoaded", laddaAtleterFranDatabasTillSok);
 window.addEventListener("pageshow", laddaAtleterFranDatabasTillSok);
+
+/* =====================================================
+   HÄMTA ATLETPROFIL FRÅN DATABASEN
+   Gör så att atletprofil.html visar rätt atlet och rätt flikar.
+   ===================================================== */
+
+// Globala variabler för att spara datan vi hämtar
+let aktuellAtlet = null;
+let aktuellAktiviteter = [];
+let aktuelltSchema = [];
+
+// Hämtar atletens ID från webbadressen (t.ex. ?id=2), standard är 1
+const hamtaAtletIdFranUrl = () => new URLSearchParams(window.location.search).get("id") || "1";
+
+// Enkel hjälpfunktion för att hämta JSON-data från API:et
+async function hamtaJsonFranApi(url) {
+  const svar = await fetch(url);
+  if (!svar.ok) throw new Error("Kunde inte hämta data från " + url);
+  return await svar.json();
+}
+
+// Huvudfunktion: Laddar all data för atleten när sidan öppnas
+async function laddaAtletProfilFranDatabas() {
+  // Körs bara om vi är på atlet-sidan
+  if (!window.location.pathname.endsWith("atletprofil.html")) return;
+
+  const atletId = hamtaAtletIdFranUrl();
+
+  try {
+    // 1. Hämta grundinfo om atleten (krävs)
+    aktuellAtlet = await hamtaJsonFranApi(`${ASPIRE_API_BASE_URL}/atleter/${atletId}`);
+
+    // 2. Försök hämta aktiviteter (fånga felet tyst om listan är tom)
+    try {
+      aktuellAktiviteter = await hamtaJsonFranApi(`${ASPIRE_API_BASE_URL}/atleter/${atletId}/aktiviteter`);
+    } catch { aktuellAktiviteter = []; }
+
+    // 3. Försök hämta schemat (fånga felet tyst om listan är tom)
+    try {
+      aktuelltSchema = await hamtaJsonFranApi(`${ASPIRE_API_BASE_URL}/atleter/${atletId}/schema`);
+    } catch { aktuelltSchema = []; }
+
+    // Uppdatera HTML med datan och visa startfliken
+    fyllAtletProfilFranDatabas();
+    visaAtletFlik("schema");
+
+  } catch (error) {
+    console.error("Kunde inte hämta atletprofil:", error);
+  }
+}
+
+// Fyller i atletens uppgifter (namn, sport, statistik) i HTML-koden
+function fyllAtletProfilFranDatabas() {
+  if (!aktuellAtlet) return;
+
+  // Smidig hjälpfunktion för att byta text på ett element (om elementet finns)
+  const sattText = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
+
+  const initialer = aktuellAtlet.initialer || skapaInitialerFranNamn(aktuellAtlet.namn);
+
+  // Fyll i toppen av profilen
+  sattText("profil-avatar", initialer);
+  sattText("profil-namn", aktuellAtlet.namn || "Okänd atlet");
+  sattText("profil-sport", aktuellAtlet.sport || "Okänd sport");
+  sattText("profil-kalorier", aktuellAtlet.kcal_per_dag ? `${aktuellAtlet.kcal_per_dag} kcal` : "Saknas");
+  sattText("profil-traning", aktuellAtlet.traningstid_timmar ? `${aktuellAtlet.traningstid_timmar}h/dag` : "Saknas");
+  sattText("profil-citat", aktuellAtlet.citat || "Ingen motivationstext finns ännu.");
+
+  document.title = "Aspire — " + (aktuellAtlet.namn || "Profil");
+
+  // Fyll i de fyra statistik-rutorna dynamiskt
+  const siffror = document.querySelectorAll(".atlet-stat-siffra");
+  const etiketter = document.querySelectorAll(".atlet-stat-etikett");
+
+  const statVarden = [
+    aktuellAtlet.kcal_per_dag || "-",
+    aktuellAtlet.traningstid_timmar ? `${aktuellAtlet.traningstid_timmar}h` : "-",
+    aktuellAtlet.sport || "-",
+    aktuellAtlet.id || "-"
+  ];
+  
+  const statEtiketter = ["kcal/dag", "träning", "sport", "atlet-id"];
+
+  // Loopa igenom rutorna och sätt in rätt värde och etikett
+  siffror.forEach((el, i) => el.textContent = statVarden[i] || "-");
+  etiketter.forEach((el, i) => el.textContent = statEtiketter[i] || "");
+}
+
+// Skapar HTML-koden för en enda rad i listan (t.ex. en specifik träning eller måltid)
+const skapaProfilRad = (tid, namn, beskrivning, index) => `
+  <div class="schema-post">
+    <div class="schema-prick ${index < 2 ? "rod" : "gra"}"></div>
+    <div>
+      <div class="schema-tid">${tid}</div>
+      <div class="schema-namn">${namn}</div>
+      ${beskrivning ? `<div class="schema-beskrivning">${beskrivning}</div>` : ""}
+    </div>
+  </div>
+`;
+
+// Visar rätt innehåll baserat på vilken flik som är vald (Schema, Kost, Träning)
+function visaAtletFlik(flikNamn) {
+  const innehall = document.getElementById("profil-innehall");
+  if (!innehall) return;
+
+  let rader = [];
+
+  if (flikNamn === "schema") {
+    // Använd aktiviteter i första hand, annars schema-datan
+    if (aktuellAktiviteter.length > 0) {
+      rader = aktuellAktiviteter.map((akt, i) => 
+        skapaProfilRad(`${akt.tid_start}–${akt.tid_slut}`, akt.namn, akt.beskrivning, i)
+      );
+    } else if (aktuelltSchema.length > 0) {
+      rader = aktuelltSchema.map((rad, i) => 
+        skapaProfilRad(rad.tid, rad.aktivitet, rad.veckodag, i)
+      );
+    }
+  } 
+  
+  else if (flikNamn === "kost") {
+    const kost = aktuellAktiviteter.filter(akt => akt.typ === "mat");
+    if (kost.length > 0) {
+      rader = kost.map((akt, i) => skapaProfilRad(`${akt.tid_start}–${akt.tid_slut}`, akt.namn, akt.beskrivning, i));
+    } else {
+      // Hårdkodade standardvärden ifall ingen kostdata finns i databasen
+      rader = [
+        skapaProfilRad("08.00", "Frukost", "Måltidsdata saknas för denna atlet.", 0),
+        skapaProfilRad("12.00", "Lunch", "Lägg in kostschema i databasen för mer detaljer.", 1),
+        skapaProfilRad("18.00", "Middag", "Standardvärde tills databasen har mer data.", 2)
+      ];
+    }
+  } 
+  
+  else if (flikNamn === "traning") {
+    const traning = aktuellAktiviteter.filter(akt => akt.typ === "träning");
+    if (traning.length > 0) {
+      rader = traning.map((akt, i) => skapaProfilRad(`${akt.tid_start}–${akt.tid_slut}`, akt.namn, akt.beskrivning, i));
+    } else {
+      // Hårdkodade standardvärden ifall ingen träningsdata finns i databasen
+      rader = [
+        skapaProfilRad("07.00", "Träning", "Träningsdata saknas för denna atlet.", 0),
+        skapaProfilRad("16.00", "Teknikpass", "Lägg in träningsschema i databasen för mer detaljer.", 1),
+        skapaProfilRad("18.00", "Återhämtning", "Standardvärde tills databasen har mer data.", 2)
+      ];
+    }
+  }
+
+  // Skriv ut HTML-raderna. Visar ett informationsmeddelande om listan är helt tom.
+  innehall.innerHTML = rader.length > 0 
+    ? rader.join("") 
+    : `<div style="padding:20px; color:#777; font-size:14px;">Ingen data hittades för denna flik.</div>`;
+}
+
+// Byt flik när användaren klickar på knapparna i gränssnittet
+function byttFlik(klickadFlik, flikNamn) {
+  const rad = klickadFlik.closest(".flik-rad");
+
+  // Avmarkera alla knappar
+  if (rad) {
+    rad.querySelectorAll(".flik").forEach(flik => flik.classList.remove("aktiv"));
+  }
+
+  // Markera den valda knappen som aktiv och uppdatera innehållet
+  klickadFlik.classList.add("aktiv");
+  visaAtletFlik(flikNamn);
+}
+
+/* =====================================================
+   UPPSTARTS-LYSSNARE
+   Ser till att datan laddas in direkt när sidan visas
+   ===================================================== */
+
+document.addEventListener("DOMContentLoaded", laddaAtletProfilFranDatabas);
+window.addEventListener("pageshow", laddaAtletProfilFranDatabas);
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Ladda ev. gamla funktioner (om de används för kompatibilitet)
+  if (typeof laddaAtletProfil === "function") laddaAtletProfil();
+
+  // Om profil-innehållet är tomt, forcera igång "schema"-fliken direkt
+  const aktivFlik = document.querySelector(".flik.aktiv");
+  if (aktivFlik && document.getElementById("profil-innehall")) {
+    byttFlik(aktivFlik, "schema");
+  }
+});
