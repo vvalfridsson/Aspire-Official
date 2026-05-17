@@ -384,7 +384,8 @@ async function hamtaProfil() { // funktionen hämtar all profilinformation från
   //Profilinfo
   document.getElementById("profil-namn").textContent = data.namn; //användarens namn
   document.getElementById("profil-medsedan").textContent = "Medlem sedan " + data.medsedan; //hämtar datumet som kontot registrerades och kopplar det till det id som sköter den rubriken
-  document.getElementById("profil-bild").src = data.bild; //sätter profilbildens källa som bilden som finns i databasen (om det finns en)
+  const initialer = data.namn.substring(0, 2).toUpperCase(); 
+  document.getElementById("profil-bild").textContent = initialer;
 
   //Statistik
   document.getElementById("profil-streak").textContent = data.streak; //visar den inloggade personens streak
