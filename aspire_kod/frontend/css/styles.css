@@ -1319,9 +1319,6 @@ body {
   font-size: 14px;
   font-weight: 600;
   color: white;
-
-  background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0));
-  backdrop-filter: blur(6px);
 }
 
 .statusrad-tid {
@@ -1343,9 +1340,6 @@ body {
   z-index: 1000;
 
   padding: 10px 20px calc(env(safe-area-inset-bottom) + 10px) 20px;
-
-  background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0));
-  backdrop-filter: blur(10px);
 
   display: flex;
   justify-content: space-around;
