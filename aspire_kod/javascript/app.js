@@ -83,12 +83,10 @@ function byttMaltid(klickad) {
   klickad.classList.remove('inaktiv');
 }
 
-
 /* ─────────────────────────────────────────────────────
    SPARA KALORI-INMATNING (kalorier.html)
    Lägger till en ny rad i "Dagens måltider".
 ───────────────────────────────────────────────────── */
-
 function sparaKalorier() {
 
   /* Hämta värden från formuläret */
@@ -109,6 +107,8 @@ function sparaKalorier() {
 
   var nyRad = document.createElement('div');
   nyRad.className = 'maltid-post';
+  
+  // HÄR LÄGGER VI TILL KRYSSKNAPPEN LÄNGST NER I HTML-STRÄNGEN
   nyRad.innerHTML =
     '<div class="maltid-bild">' +
       '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>' +
@@ -117,14 +117,73 @@ function sparaKalorier() {
       '<div class="maltid-namn">' + maltidstyp + '</div>' +
       '<div class="maltid-tid">' + nuvarandeTid() + '</div>' +
     '</div>' +
-    '<div class="maltid-kcal">' + kcal + ' kcal</div>';
+    '<div class="maltid-kcal">' + kcal + ' kcal</div>' +
+    '<button class="ta-bort-knapp" onclick="taBortMaltid(this)">' +
+      '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+    '</button>';
 
   lista.appendChild(nyRad);
 
   /* Nollställ inmatningsfältet */
   inmatning.value = '';
+
+  /* HÄR: Uppdatera ringen och totalen! */
+  uppdateraKalorier();
 }
 
+/* ─────────────────────────────────────────────────────
+   TA BORT MÅLTID
+   Letar upp måltiden man klickade på och raderar den.
+───────────────────────────────────────────────────── */
+function taBortMaltid(knapp) {
+  // .closest() letar upp den närmaste föräldern med klassen 'maltid-post'
+  var radAttTaBort = knapp.closest('.maltid-post');
+  
+  if (radAttTaBort) {
+    radAttTaBort.remove(); // Raderar HTML-elementet från sidan
+
+    /* HÄR: Uppdatera ringen och totalen när en måltid tagits bort! */
+    uppdateraKalorier();
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   UPPDATERA KALORIER OCH CIRKEL
+   Summerar alla inlagda måltider och uppdaterar UI:t
+───────────────────────────────────────────────────── */
+const DAGLIGT_MAL = 2500; // Ändra dagsmålet för kalorier här
+
+function uppdateraKalorier() {
+  // Inlagda kalorier i listan
+  var allaMaltider = document.querySelectorAll('.maltid-kcal');
+  var totalKcal = 0;
+  
+  // Loopar och adderar alla siffror ihop
+  for (var i = 0; i < allaMaltider.length; i++) {
+    var text = allaMaltider[i].textContent;
+    // Plocka ut bara siffran från strängen (t.ex. "650 kcal" -> 650)
+    var siffra = parseInt(text.replace(/\D/g, '')) || 0;
+    totalKcal += siffra;
+  }
+
+  // Sedan uppdaterar denna stora siffran med "Dagens intag"
+  var totalText = document.getElementById('kalori-total');
+  if (totalText) totalText.textContent = totalKcal;
+
+  // Räkna ut procent (max 100%)
+  var procent = Math.min(100, Math.round((totalKcal / DAGLIGT_MAL) * 100));
+
+  // Uppdatera SVG-cirkeln (138 är omkretsen, 0 är full cirkel, 138 är tom)
+  var cirkel = document.getElementById('kalori-cirkel');
+  if (cirkel) {
+    var offset = 138 - (138 * (procent / 100));
+    cirkel.style.strokeDashoffset = offset;
+  }
+
+  // Uppdatera texten i mitten av cirkeln
+  var procentText = document.getElementById('kalori-procent-text');
+  if (procentText) procentText.textContent = procent + '%';
+}
 
 /* Hjälpfunktion: hämtar aktuell tid som "HH:MM" */
 function nuvarandeTid() {
@@ -314,8 +373,10 @@ document.addEventListener("DOMContentLoaded", hamtaNotiser); /*när DOM är fyll
 
 async function hamtaProfil() { // funktionen hämtar all profilinformation från backend och fyller profilsidans mall
 //hämtar användarens id som sparades vid inloggningen, det används för att veta vilken användare som datan ska hömats från
-  const anvandareId = localStorage.getItem("anvandare_id");
-  if (!anvandareId) return; //om det inte finns ett id, dvs ingen är inloggad så avbryts funktioenn
+  const sparadData = localStorage.getItem("aspire_inloggad");
+  if (!sparadData) return;
+  const inloggadAnvandare = JSON.parse(sparadData);
+  const anvandareId = inloggadAnvandare.id;
 
   const res = await fetch(`http://127.0.0.1:8002/profil/${anvandareId}`); //förfrågan skickas till API:et för att hämta användarens profildata
   const data = await res.json(); //gör om json texten till ett javascript objekt
@@ -627,5 +688,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const aktivFlik = document.querySelector(".flik.aktiv");
   if (aktivFlik && document.getElementById("profil-innehall")) {
     byttFlik(aktivFlik, "schema");
+  }
+});
+
+// Kör uppdateringen direkt när kalorier-sidan har laddats klart
+document.addEventListener("DOMContentLoaded", function() {
+  if (document.getElementById('kalori-total')) {
+    uppdateraKalorier();
   }
 });

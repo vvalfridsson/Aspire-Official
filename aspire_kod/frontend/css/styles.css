@@ -976,6 +976,8 @@ body {
   padding: 16px;
 }
 
+
+
 .kalori-etikett { font-size: 12px; color: #ADADAD; margin-bottom: 4px; }
 .kalori-siffra  { font-size: 32px; font-weight: 800; color: #0A0A0A; letter-spacing: -1px; }
 .kalori-enhet   { font-size: 13px; color: #ADADAD; }
@@ -1101,6 +1103,35 @@ body {
   stroke: white;
   stroke-width: 2.5;
   stroke-linecap: round;
+}
+
+/* ─────────────────────────────────────────────────────
+   KRYSSKNAPP FÖR ATT TA BORT MÅLTIDER
+───────────────────────────────────────────────────── */
+.ta-bort-knapp {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ADADAD; /* Ljusgrå som standard */
+  transition: color 0.2s ease;
+}
+
+.ta-bort-knapp svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.ta-bort-knapp:hover,
+.ta-bort-knapp:active {
+  color: #E8241C; /* Blir röd när man klickar/hovrar */
 }
 
 .maltider-lista { padding: 0 20px 20px 20px; }

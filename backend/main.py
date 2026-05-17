@@ -309,15 +309,7 @@ def hamta_profil(anvandare_id: int):
         cursor = get_cursor(conn)
 
         cursor.execute(
-            """
-            SELECT 
-                id,
-                namn,
-                epost,
-                skapad
-            FROM anvandare
-            WHERE id = %s
-            """,
+            "SELECT namn FROM anvandare WHERE id = %s",
             (anvandare_id,)
         )
         anv = cursor.fetchone()
