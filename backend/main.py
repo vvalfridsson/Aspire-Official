@@ -190,3 +190,59 @@ def hamta_streak(anvandare_id: int):
 
     finally:
         conn.close()
+
+#endpoint som frontend anroparför att hämta all profildata
+@app.get("/profil/{anvandare_id}")
+def hamta_profil(anvandare_id: int):
+    #skapar datbasanslutningen
+    conn = get_connection()
+    try:
+        #skapar en cursor så man kna köra specifika sql kommandon.
+        cursor = get_cursor(conn)
+
+        #hämta användarens information, allt fårn namn till datum för registrering osv som ska synas
+        cursor.execute(
+            "SELECT namn, skapad_datum, profilbild FROM anvandare WHERE id = %s",
+            (anvandare_id,)
+        )
+        anv = cursor.fetchone() #hämtar en användare som en rad som den ska läsa av
+
+        #hämtar streaken från samma användare
+        cursor.execute("""
+            SELECT COUNT(DISTINCT datum) AS streak
+            FROM anvandar_aktiviteter
+            WHERE anvandar_id = %s
+        """, (anvandare_id,))
+        streak = cursor.fetchone()["streak"]
+
+        #hämtar vckodata 
+        cursor.execute("""
+            SELECT COUNT(*) AS traning
+            FROM anvandar_aktiviteter
+            WHERE anvandar_id = %s
+              AND datum >= CURRENT_DATE - INTERVAL '7 days'
+        """, (anvandare_id,))
+        traning = cursor.fetchone()["traning"]
+
+        return { #returnerar allt som json till frontend som läser av enligt javascripten
+            "namn": anv["namn"],
+            "medsedan": anv["skapad_datum"].strftime("%Y-%m-%d"),
+            "bild": anv["profilbild"],
+            "streak": streak,
+            "utmaningar": 12,
+            "genomfort": 78,
+            "aktiv": { #data för aktiv utmaning som visas i profilen
+                "titel": "30 dagar löpning",
+                "dag": 12,
+                "total": 30,
+                "procent": 40
+            },
+            "vecka": { #veckans sammanfattnign
+                "traning": traning,
+                "kalorier": "5/7",
+                "forbattring": "+12%"
+            }
+        }
+
+    finally: #ständer ner databasanslutningen
+        conn.close()
