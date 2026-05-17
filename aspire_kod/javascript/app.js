@@ -514,3 +514,35 @@ async function hamtaNotiser() { /*funktion som hämtar notiser som är kopplade 
 }
 
 document.addEventListener("DOMContentLoaded", hamtaNotiser); /*när DOM är fylld ska den visa notiserna*/
+
+async function hamtaProfil() { // funktionen hämtar all profilinformation från backend och fyller profilsidans mall
+//hämtar användarens id som sparades vid inloggningen, det används för att veta vilken användare som datan ska hömats från
+  const anvandareId = localStorage.getItem("anvandare_id");
+  if (!anvandareId) return; //om det inte finns ett id, dvs ingen är inloggad så avbryts funktioenn
+
+  const res = await fetch(`http://127.0.0.1:8001/profil/${anvandareId}`); //förfrågan skickas till API:et för att hämta användarens profildata
+  const data = await res.json(); //gör om json texten till ett javascript objekt
+
+  //Profilinfo
+  document.getElementById("profil-namn").textContent = data.namn; //användarens namn
+  document.getElementById("profil-medsedan").textContent = "Medlem sedan " + data.medsedan; //hämtar datumet som kontot registrerades och kopplar det till det id som sköter den rubriken
+  document.getElementById("profil-bild").src = data.bild; //sätter profilbildens källa som bilden som finns i databasen (om det finns en)
+
+  //Statistik
+  document.getElementById("profil-streak").textContent = data.streak; //visar den inloggade personens streak
+  document.getElementById("profil-utmaningar").textContent = data.utmaningar; //visar antalet startade utmaningar
+  document.getElementById("profil-genomfort").textContent = data.genomfort + "%"; //visar hur många procent av de totala aktiviteterna som slutförts
+
+  //Aktiv utmaning
+  document.getElementById("aktiv-titel").textContent = data.aktiv.titel; //visar den aktivitet som är igpng just nu
+  document.getElementById("aktiv-dag").textContent = `Dag ${data.aktiv.dag} av ${data.aktiv.total}`; //visar vilken dag i utmaningen användaren är på
+  document.getElementById("aktiv-progress").style.width = data.aktiv.procent + "%"; //fyler progressbaren baserat på procenten
+  document.getElementById("aktiv-procent").textContent = data.aktiv.procent + "%"; //visar procentvärdet som text bredvid baren
+
+  // Veckostatistik
+  document.getElementById("vecka-traning").textContent = data.vecka.traning; //visar hur många träningspass som gjorts denna veckan
+  document.getElementById("vecka-kalorier").textContent = data.vecka.kalorier; //visar antalet brända kalorier 
+  document.getElementById("vecka-forbattring").textContent = data.vecka.forbattring;//jämför förbättringen i procent jämfört med förra veckan.
+}
+//när sidan laddas klart körs funktionen automatiskt
+document.addEventListener("DOMContentLoaded", hamtaProfil);
