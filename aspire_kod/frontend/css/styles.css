@@ -1534,3 +1534,135 @@ body {
   color: #0A0A0A;
   font-weight: 800;
 }
+
+/* Habit score cirkeln */
+.statistik-cirkel-rad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.statistik-cirkel-omslag {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+
+/* Placerar texten exakt i mitten av cirkeln */
+.statistik-ring-text {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 800;
+  color: #0A0A0A;
+}
+
+.statistik-cirkel-etikett {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666666;
+}
+
+/* Stapeldiagrammet */
+.statistik-staplar-rubrik {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0A0A0A;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 16px;
+}
+
+.statistik-staplar {
+  display: flex;
+  align-items: flex-end; /* Sätter staplarna i botten */
+  gap: 8px;
+  height: 120px;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 8px;
+}
+
+.statistik-stapel {
+  flex: 1;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  /* Enkel animation för när stapeln växer */
+  transition: height 0.8s ease;
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.statistik-stapel.nuvarande {
+  background-color: #0A0A0A;
+  color: white;
+}
+
+.statistik-stapel.aldre {
+  background-color: #E5E5E5;
+  color: #666666;
+}
+
+.statistik-staplar-etiketter {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 32px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ADADAD;
+}
+
+/* Lådorna för aktuell streak osv i botten */
+.stat-grid {
+  display: grid;
+  /* Två kolumner som är lika stora */
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.stat-card {
+  background-color: #F7F7F7;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.stat-card-ikon {
+  margin-bottom: 12px;
+  width: 24px;
+  height: 24px;
+}
+
+.stat-card-titel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666666;
+  margin-bottom: 4px;
+}
+
+.stat-card-varde {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0A0A0A;
+}
+
+.stat-card-enhet {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ADADAD;
+}
