@@ -393,3 +393,45 @@ def hamta_notiser(anvandare_id: int):
     Just nu standard 0 så frontend inte kraschar.
     """
     return {"antal": 0}
+
+@app.get("/profil/{anvandare_id}")
+def hamta_profil(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+
+        cursor.execute("""
+            SELECT id, namn, skapad_datum
+            FROM anvandare
+            WHERE id = %s
+        """, (anvandare_id,))
+        user = cursor.fetchone()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="Användare hittades inte")
+
+        return {
+            "namn": user["namn"],
+            "medsedan": user["skapad_datum"].strftime("%Y-%m-%d"),
+            "bild": "/static/default.png",
+            "streak": 0,
+            "utmaningar": 0,
+            "genomfort": 0,
+            "aktiv": {
+                "titel": "Ingen aktiv utmaning",
+                "dag": 0,
+                "total": 0,
+                "procent": 0
+            },
+            "vecka": {
+                "traning": 0,
+                "kalorier": 0,
+                "forbattring": "0%"
+            }
+        }
+    finally:
+        conn.close()
+
+@app.get("/notiser/{anvandare_id}")
+def hamta_notiser(anvandare_id: int):
+    return {"antal": 0}
