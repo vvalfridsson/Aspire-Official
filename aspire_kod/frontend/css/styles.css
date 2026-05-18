@@ -1666,3 +1666,46 @@ body {
   font-weight: 600;
   color: #ADADAD;
 }
+
+/* ========================================== */
+/* KNAPPEN FÖR ATT NOLLSTÄLLA STREAKS         */
+/* ========================================== */
+
+/* Lådan som centrerar knappen under kalendern */
+.reset-omslag {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  margin-bottom: 24px;
+}
+
+/* Själva knappen */
+.reset-knapp {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Mellanrum mellan papperskorgen och texten */
+  background-color: transparent; 
+  color: #E8241C; /* Röd text för att visa att den raderar saker */
+  border: 1px solid #E8241C; /* Röd ram */
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+/* Storlek på papperskorg-ikonen (SVG) inuti knappen */
+.reset-knapp svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* När man drar musen över knappen fylls den i med rött */
+.reset-knapp:hover {
+  background-color: #E8241C;
+  color: #FFFFFF;
+}
