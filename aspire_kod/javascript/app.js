@@ -246,7 +246,7 @@ function hanteraInloggning() {
       visaFelmeddelande('inlogg-fel', data.detail);
       return;
     }
-    localStorage.setItem('anvandare_id', data.id);
+    localStorage.setItem('aspire_inloggad', JSON.stringify(data));
     window.location.href = 'hem.html';
   })
   .catch(function() {
@@ -300,7 +300,7 @@ function hanteraRegistrering() {
       visaFelmeddelande('reg-fel', data.detail);
       return;
     }
-    localStorage.setItem("anvandare_id", data.id);
+    localStorage.setItem('aspire_inloggad', JSON.stringify(data));
     window.location.href = 'hem.html';
   })
   .catch(function() {
@@ -351,32 +351,32 @@ uppdateraStatusradKlocka();
 /*uppdatera varje sekund*/
 setInterval(uppdateraStatusradKlocka, 1000);
 
-async function hamtaNotiser() { /*funktion som hämtar notiser som är kopplade till användarens id genom localstorage*/
-  const anvandareId = localStorage.getItem("anvandare_id");
-  if (!anvandareId) return;
+async function hamtaNotiser() {
+  const user = JSON.parse(localStorage.getItem("aspire_inloggad"));
+  if (!user) return;
 
-  const res = await fetch(`http://127.0.0.1:8002/notiser/${anvandareId}`); /*koppla upp sig till sidan och fetcha värdet*/
+  const anvandareId = user.id;
+
+  const res = await fetch(`http://127.0.0.1:8002/notiser/${anvandareId}`);
   const data = await res.json();
 
   const badge = document.getElementById("notis-badge");
   if (!badge) return;
 
-  if (data.antal > 0) { /*om värdet är större än 0 ska det visas i navigationsbaren och visa antalet*/
+  if (data.antal > 0) {
     badge.textContent = data.antal;
     badge.style.display = "flex";
   } else {
-    badge.style.display = "none"; /*annars ska den inte visa något*/
+    badge.style.display = "none";
   }
 }
-
 document.addEventListener("DOMContentLoaded", hamtaNotiser); /*när DOM är fylld ska den visa notiserna*/
 
 async function hamtaProfil() { // funktionen hämtar all profilinformation från backend och fyller profilsidans mall
 //hämtar användarens id som sparades vid inloggningen, det används för att veta vilken användare som datan ska hömats från
-  const sparadData = localStorage.getItem("aspire_inloggad");
-  if (!sparadData) return;
-  const inloggadAnvandare = JSON.parse(sparadData);
-  const anvandareId = inloggadAnvandare.id;
+  const user = JSON.parse(localStorage.getItem("aspire_inloggad"));
+  if (!user) return;
+  const anvandareId = user.id;
 
   const res = await fetch(`http://127.0.0.1:8002/profil/${anvandareId}`); //förfrågan skickas till API:et för att hämta användarens profildata
   const data = await res.json(); //gör om json texten till ett javascript objekt
@@ -385,7 +385,10 @@ async function hamtaProfil() { // funktionen hämtar all profilinformation från
   document.getElementById("profil-namn").textContent = data.namn; //användarens namn
   document.getElementById("profil-medsedan").textContent = "Medlem sedan " + data.medsedan; //hämtar datumet som kontot registrerades och kopplar det till det id som sköter den rubriken
   const initialer = data.namn.substring(0, 2).toUpperCase(); 
-  document.getElementById("profil-bild").textContent = initialer;
+  document.getElementById("profil-bild").style.display = "none";
+   document.getElementById("profil-bild").insertAdjacentHTML("afterend",
+  `<div class="avatar-fyrkant">${initialer}</div>`
+);
 
   //Statistik
   document.getElementById("profil-streak").textContent = data.streak; //visar den inloggade personens streak

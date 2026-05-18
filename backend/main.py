@@ -1,4 +1,4 @@
-"""
+anv"""
 Aspire — main.py
 FastAPI-backend med endpoints för inloggning, registrering, atleter och profiler.
 
@@ -298,83 +298,110 @@ def hamta_streak(anvandare_id: int):
 # Profil
 # ─────────────────────────────────────────────────────
 
+@app.get("/notiser/{anvandare_id}")
+def hamta_notiser(anvandare_id: int):
+    return {"antal": 0}
+
+@app.get("/atleter/{atlet_id}")
+def hamta_atlet(atlet_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("SELECT * FROM atleter WHERE id = %s", (atlet_id,))
+        atlet = cursor.fetchone()
+        if not atlet:
+            raise HTTPException(status_code=404, detail="Atlet hittades inte")
+        return atlet
+    finally:
+        conn.close()
+
+# ── PROFILENDPOINT ─────────────────────────────────────
+
 @app.get("/profil/{anvandare_id}")
 def hamta_profil(anvandare_id: int):
-    """
-    Hämtar profildata för användaren.
-    Fungerar även om extra statistik-tabeller saknas.
-    """
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
 
-        cursor.execute(
-            "SELECT namn FROM anvandare WHERE id = %s",
-            (anvandare_id,)
-        )
+        # Hämta grundinfo om användaren
+        cursor.execute("""
+            SELECT namn, skapad_datum
+            FROM anvandare
+            WHERE id = %s
+        """, (anvandare_id,))
         anv = cursor.fetchone()
 
-        if anv is None:
-            raise HTTPException(status_code=404, detail="Användaren finns inte.")
+        if not anv:
+            raise HTTPException(status_code=404, detail="Användare hittades inte")
 
-        # Standardvärden ifall aktivitets-/statistik-tabeller inte finns.
-        streak = 0
-        traning = 0
+        # Hämta streak
+        cursor.execute("""
+            SELECT COUNT(*) AS streak
+            FROM anvandar_aktiviteter
+            WHERE anvandar_id = %s
+        """, (anvandare_id,))
+        streak = cursor.fetchone()["streak"]
 
-        try:
-            cursor.execute(
-                """
-                SELECT COUNT(DISTINCT datum) AS streak
-                FROM anvandar_aktiviteter
-                WHERE anvandar_id = %s
-                """,
-                (anvandare_id,)
-            )
-            row = cursor.fetchone()
-            if row and row["streak"] is not None:
-                streak = row["streak"]
-        except Exception:
-            streak = 0
+        # Hämta antal utmaningar
+        cursor.execute("""
+            SELECT COUNT(*) AS utmaningar
+            FROM anvandar_utmaningar
+            WHERE anvandar_id = %s
+        """, (anvandare_id,))
+        utmaningar = cursor.fetchone()["utmaningar"]
 
-        try:
-            cursor.execute(
-                """
-                SELECT COUNT(*) AS traning
-                FROM anvandar_aktiviteter
-                WHERE anvandar_id = %s
-                  AND datum >= CURRENT_DATE - INTERVAL '7 days'
-                """,
-                (anvandare_id,)
-            )
-            row = cursor.fetchone()
-            if row and row["traning"] is not None:
-                traning = row["traning"]
-        except Exception:
-            traning = 0
+        # Hämta genomförandegrad
+        cursor.execute("""
+            SELECT ROUND(AVG(procent_klar)) AS genomfort
+            FROM anvandar_utmaningar
+            WHERE anvandar_id = %s
+        """, (anvandare_id,))
+        genomfort = cursor.fetchone()["genomfort"] or 0
 
-        skapad = anv.get("skapad")
-        if skapad:
-            medlem_sedan = skapad.strftime("%Y-%m-%d")
-        else:
-            medlem_sedan = "Okänt datum"
+        # Hämta aktiv utmaning
+        cursor.execute("""
+            SELECT titel, dag, total_dagar, procent_klar
+            FROM anvandar_utmaningar
+            WHERE anvandar_id = %s AND aktiv = true
+            LIMIT 1
+        """, (anvandare_id,))
+        aktiv = cursor.fetchone()
+
+        # Veckostatistik
+        cursor.execute("""
+            SELECT COUNT(*) AS traning
+            FROM anvandar_aktiviteter
+            WHERE anvandar_id = %s
+              AND datum >= CURRENT_DATE - INTERVAL '7 days'
+        """, (anvandare_id,))
+        traning = cursor.fetchone()["traning"]
+
+        cursor.execute("""
+            SELECT COALESCE(SUM(kalorier),0) AS kalorier
+            FROM anvandar_aktiviteter
+            WHERE anvandar_id = %s
+              AND datum >= CURRENT_DATE - INTERVAL '7 days'
+        """, (anvandare_id,))
+        kalorier = cursor.fetchone()["kalorier"]
 
         return {
             "namn": anv["namn"],
-            "medsedan": medlem_sedan,
-            "bild": "",
+            "medsedan": anv["skapad_datum"].strftime("%Y-%m-%d"),
             "streak": streak,
-            "utmaningar": 0,
-            "genomfort": 0,
+            "utmaningar": utmaningar,
+            "genomfort": genomfort,
+
             "aktiv": {
-                "titel": "Ingen aktiv utmaning",
-                "dag": 0,
-                "total": 0,
-                "procent": 0
+                "titel": aktiv["titel"] if aktiv else "",
+                "dag": aktiv["dag"] if aktiv else 0,
+                "total": aktiv["total_dagar"] if aktiv else 0,
+                "procent": aktiv["procent_klar"] if aktiv else 0
             },
+
             "vecka": {
                 "traning": traning,
-                "kalorier": "0/7",
-                "forbattring": "0%"
+                "kalorier": kalorier,
+                "forbattring": 0
             }
         }
 
@@ -382,56 +409,23 @@ def hamta_profil(anvandare_id: int):
         conn.close()
 
 
-# ─────────────────────────────────────────────────────
-# Notiser
-# ─────────────────────────────────────────────────────
+# ── NOTISER ────────────────────────────────────────────
 
 @app.get("/notiser/{anvandare_id}")
 def hamta_notiser(anvandare_id: int):
-    """
-    Returnerar antal notiser.
-    Just nu standard 0 så frontend inte kraschar.
-    """
-    return {"antal": 0}
-
-@app.get("/profil/{anvandare_id}")
-def hamta_profil(anvandare_id: int):
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
 
         cursor.execute("""
-            SELECT id, namn, skapad_datum
-            FROM anvandare
-            WHERE id = %s
+            SELECT COUNT(*) AS antal
+            FROM notiser
+            WHERE anvandar_id = %s AND last = false
         """, (anvandare_id,))
-        user = cursor.fetchone()
 
-        if not user:
-            raise HTTPException(status_code=404, detail="Användare hittades inte")
+        antal = cursor.fetchone()["antal"]
 
-        return {
-            "namn": user["namn"],
-            "medsedan": user["skapad_datum"].strftime("%Y-%m-%d"),
-            "bild": "/static/default.png",
-            "streak": 0,
-            "utmaningar": 0,
-            "genomfort": 0,
-            "aktiv": {
-                "titel": "Ingen aktiv utmaning",
-                "dag": 0,
-                "total": 0,
-                "procent": 0
-            },
-            "vecka": {
-                "traning": 0,
-                "kalorier": 0,
-                "forbattring": "0%"
-            }
-        }
+        return {"antal": antal}
+
     finally:
         conn.close()
-
-@app.get("/notiser/{anvandare_id}")
-def hamta_notiser(anvandare_id: int):
-    return {"antal": 0}
