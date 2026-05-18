@@ -1357,3 +1357,355 @@ body {
 #wifi-icon[data-strength="2"] .bar1,
 #wifi-icon[data-strength="2"] .bar2 { opacity: 1; }
 #wifi-icon[data-strength="3"] .bar { opacity: 1; }
+
+/* ─────────────────────────────────────────────────────
+   14. UPPDATERAD VERSION AV AKTVITETET
+───────────────────────────────────────────────────── */
+/* Flikarna där man byter mellan Kalender och Statistik */
+.akt-flikar {
+  display: flex;
+  background-color: #F0F0F0;
+  border-radius: 12px;
+  padding: 4px;
+  margin-top: 0px;
+  margin-bottom: 24px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.akt-flik {
+  flex: 1; /* Gör så knapparna tar lika mycket plats */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666666;
+  background-color: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s; /* Enkel animation när man hovrar */
+}
+
+/* Den fliken som är vald just nu */
+.akt-flik.aktiv {
+  background-color: #FFFFFF;
+  color: #0A0A0A;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Gör så att sidorna tonar in snyggt när man byter */
+.akt-vy {
+  display: block;
+  animation: tona-in 0.3s ease;
+}
+
+/* Gömmer den sidan man inte tittar på */
+.akt-vy.dold {
+  display: none;
+}
+
+/* Min egen animation för att visa fliken */
+@keyframes tona-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Navigeringen för månader */
+.kal-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-bottom: 16px;
+}
+
+.kal-pil {
+  background-color: #F7F7F7;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.kal-pil:hover {
+  background-color: #E5E5E5;
+}
+
+.kal-manad {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0A0A0A;
+}
+
+/* Namnen på dagarna (Mån, Tis osv) */
+.kal-dagnamn {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* Mycket snyggare och renare! */
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ADADAD;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 12px;
+}
+
+/* Rutorna för datumen */
+.kal-rutor {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* Samma här! */
+  gap: 8px;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 24px;
+}
+
+.kal-ruta {
+  height: 42px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0A0A0A;
+  background-color: #F7F7F7;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+/* Om rutan är tom ska den inte synas eller gå att klicka på */
+.kal-ruta.tom {
+  background-color: transparent;
+  cursor: default;
+}
+
+.kal-ruta.idag {
+  border: 2px solid #0A0A0A;
+  background-color: #FFFFFF;
+}
+
+.kal-ruta.aktiv {
+  background-color: #E8241C;
+  color: #FFFFFF;
+  border: 1px solid #E8241C;
+}
+
+/* Hover-effekt för vanliga rutor */
+.kal-ruta:hover {
+  transform: scale(1.15);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Tomma rutor ska INTE ha hover-effekt */
+.kal-ruta.tom:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Aktiv ruta får röd skugga när man drar musen över */
+.kal-ruta.aktiv:hover {
+  box-shadow: 0px 4px 12px rgba(232, 36, 28, 0.4);
+}
+
+/* Streaken under kalendern */
+.kal-streak-rad {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666666;
+  margin-bottom: 24px;
+}
+
+.kal-streak-rad strong {
+  color: #0A0A0A;
+  font-weight: 800;
+}
+
+/* Habit score cirkeln */
+.statistik-cirkel-rad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.statistik-cirkel-omslag {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+
+/* Placerar texten exakt i mitten av cirkeln */
+.statistik-ring-text {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 800;
+  color: #0A0A0A;
+}
+
+.statistik-cirkel-etikett {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666666;
+}
+
+/* Stapeldiagrammet */
+.statistik-staplar-rubrik {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0A0A0A;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 16px;
+}
+
+.statistik-staplar {
+  display: flex;
+  align-items: flex-end; /* Sätter staplarna i botten */
+  gap: 8px;
+  height: 120px;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 8px;
+}
+
+.statistik-stapel {
+  flex: 1;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  /* Enkel animation för när stapeln växer */
+  transition: height 0.8s ease;
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.statistik-stapel.nuvarande {
+  background-color: #0A0A0A;
+  color: white;
+}
+
+.statistik-stapel.aldre {
+  background-color: #E5E5E5;
+  color: #666666;
+}
+
+.statistik-staplar-etiketter {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 32px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ADADAD;
+}
+
+/* Lådorna för aktuell streak osv i botten */
+.stat-grid {
+  display: grid;
+  /* Två kolumner som är lika stora */
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.stat-card {
+  background-color: #F7F7F7;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.stat-card-ikon {
+  margin-bottom: 12px;
+  width: 24px;
+  height: 24px;
+}
+
+.stat-card-titel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666666;
+  margin-bottom: 4px;
+}
+
+.stat-card-varde {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0A0A0A;
+}
+
+.stat-card-enhet {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ADADAD;
+}
+
+/* ========================================== */
+/* KNAPPEN FÖR ATT NOLLSTÄLLA STREAKS         */
+/* ========================================== */
+
+/* Lådan som centrerar knappen under kalendern */
+.reset-omslag {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  margin-bottom: 24px;
+}
+
+/* Själva knappen */
+.reset-knapp {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Mellanrum mellan papperskorgen och texten */
+  background-color: transparent; 
+  color: #E8241C; /* Röd text för att visa att den raderar saker */
+  border: 1px solid #E8241C; /* Röd ram */
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+/* Storlek på papperskorg-ikonen (SVG) inuti knappen */
+.reset-knapp svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* När man drar musen över knappen fylls den i med rött */
+.reset-knapp:hover {
+  background-color: #E8241C;
+  color: #FFFFFF;
+}

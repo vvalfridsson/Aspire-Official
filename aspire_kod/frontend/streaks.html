@@ -34,8 +34,7 @@
         <button class="akt-flik aktiv" onclick="bytAktFlik(this, 'kalender')">Kalender</button>
         <button class="akt-flik" onclick="bytAktFlik(this, 'statistik')">Statistik</button>
       </div>
-
-      <div id="vy-kalender" class="akt-vy">
+<div id="vy-kalender" class="akt-vy">
         
         <div class="kal-nav">
           <button id="kal-bakut" class="kal-pil">
@@ -70,6 +69,67 @@
 
       </div>
 
+      <div id="vy-statistik" class="akt-vy dold">
+        
+        <div class="statistik-cirkel-rad">
+          <div class="statistik-cirkel-omslag">
+            <svg class="statistik-ring" viewBox="0 0 140 140">
+              <circle cx="70" cy="70" r="60" fill="none" stroke="#F0F0F0" stroke-width="12"/>
+              <circle id="statistik-ring-fyll" cx="70" cy="70" r="60" fill="none" stroke="#0A0A0A" stroke-width="12" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377" transform="rotate(-90 70 70)"/>
+            </svg>
+            <div class="statistik-ring-text">
+              <span id="statistik-ring-text">0</span><span style="font-size: 18px; color: #ADADAD; margin-left: 2px;">%</span>
+            </div>
+          </div>
+          <div class="statistik-cirkel-etikett">Habit Score</div>
+        </div>
+
+        <div class="statistik-staplar-rubrik">Aktivitet (6 månader)</div>
+        <div id="statistik-staplar" class="statistik-staplar"></div>
+        <div id="statistik-staplar-etiketter" class="statistik-staplar-etiketter"></div>
+
+        <div class="stat-grid">
+          
+          <div class="stat-card">
+            <div class="stat-card-ikon" style="color: #FF7043;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="stat-card-titel">Aktuell Streak</div>
+            <div class="stat-card-varde"><span id="statistik-streak">0</span> <span class="stat-card-enhet">dgr</span></div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-card-ikon" style="color: #22AA66;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="stat-card-titel">Längsta Streak</div>
+            <div class="stat-card-varde"><span id="statistik-langsta">0</span> <span class="stat-card-enhet">dgr</span></div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-ikon" style="color: #3B82F6;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="stat-card-titel">Aktiva Dagar</div>
+            <div class="stat-card-varde"><span id="statistik-aktiva">0</span> <span class="stat-card-enhet">st</span></div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-ikon" style="color: #8B5CF6;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            </div>
+            <div class="stat-card-titel">Total Poäng</div>
+            <div class="stat-card-varde"><span id="statistik-poang">0</span> <span class="stat-card-enhet">p</span></div>
+          </div>
+
+        </div> 
+      </div> 
+      <div class="botten-mellanrum"></div>
+      
+    </div>
+
+      
+
     <!-- ─── NAVBAR — AKTIVITET/STREAKS ÄR AKTIV ─── -->
     <nav class="navbar">
       <a href="hem.html" class="nav-knapp">
@@ -98,5 +158,6 @@
 
 <script src="javascript/app.js"></script>
 <script src="javascript/statusbar.js"></script>
+<script src="javascript/streaks.js"></script>
 </body>
 </html>
