@@ -34,8 +34,7 @@
         <button class="akt-flik aktiv" onclick="bytAktFlik(this, 'kalender')">Kalender</button>
         <button class="akt-flik" onclick="bytAktFlik(this, 'statistik')">Statistik</button>
       </div>
-
-      <div id="vy-kalender" class="akt-vy">
+<div id="vy-kalender" class="akt-vy">
         
         <div class="kal-nav">
           <button id="kal-bakut" class="kal-pil">
@@ -69,6 +68,29 @@
         </div>
 
       </div>
+
+      <div id="vy-statistik" class="akt-vy dold">
+        
+        <div class="statistik-cirkel-rad">
+          <div class="statistik-cirkel-omslag">
+            <svg class="statistik-ring" viewBox="0 0 140 140">
+              <circle cx="70" cy="70" r="60" fill="none" stroke="#F0F0F0" stroke-width="12"/>
+              <circle id="statistik-ring-fyll" cx="70" cy="70" r="60" fill="none" stroke="#0A0A0A" stroke-width="12" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377" transform="rotate(-90 70 70)"/>
+            </svg>
+            <div class="statistik-ring-text">
+              <span id="statistik-ring-text">0</span><span style="font-size: 18px; color: #ADADAD; margin-left: 2px;">%</span>
+            </div>
+          </div>
+          <div class="statistik-cirkel-etikett">Habit Score</div>
+        </div>
+
+        <div class="statistik-staplar-rubrik">Aktivitet (6 månader)</div>
+        <div id="statistik-staplar" class="statistik-staplar"></div>
+        <div id="statistik-staplar-etiketter" class="statistik-staplar-etiketter"></div>
+
+        
+
+      
 
     <!-- ─── NAVBAR — AKTIVITET/STREAKS ÄR AKTIV ─── -->
     <nav class="navbar">
