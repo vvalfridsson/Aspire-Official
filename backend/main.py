@@ -435,3 +435,16 @@ def hamta_profil(anvandare_id: int):
 @app.get("/notiser/{anvandare_id}")
 def hamta_notiser(anvandare_id: int):
     return {"antal": 0}
+
+@app.get("/atleter/{atlet_id}")
+def hamta_atlet(atlet_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("SELECT * FROM atleter WHERE id = %s", (atlet_id,))
+        atlet = cursor.fetchone()
+        if not atlet:
+            raise HTTPException(status_code=404, detail="Atlet hittades inte")
+        return atlet
+    finally:
+        conn.close()
