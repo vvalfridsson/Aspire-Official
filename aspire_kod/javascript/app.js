@@ -246,7 +246,7 @@ function hanteraInloggning() {
       visaFelmeddelande('inlogg-fel', data.detail);
       return;
     }
-    localStorage.setItem('aspire_inloggad', JSON.stringify(data));
+    localStorage.setItem('anvandare_id', data.id);
     window.location.href = 'hem.html';
   })
   .catch(function() {
