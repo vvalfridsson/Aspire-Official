@@ -699,71 +699,43 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-/*denna funktion körs när sidan laddas och hämtar streakens datta från backend baserat på inloggad användare*/
+/* Denna funktion körs när sidan laddas och hämtar streak-data från backend */
 document.addEventListener("DOMContentLoaded", hamtaStreak);
   
 async function hamtaStreak() {
-  /*hämtar id från inloggningen och gör en nyckel som kopplar frontend till databasen*/
   const anvandareId = localStorage.getItem("anvandare_id");
   if (!anvandareId) return;
 
-  /*anropar endpointen från FastAPI genom main.py och räknar streak som är kopplad till användar_aktiviteter tabellen i databasen*/
-  const res = await fetch(`http://127.0.0.1:8001/streak/${anvandareId}`); /*kopplar upp sig till sidan streak och hämtar rätt användare*/
-  const data = await res.json();
+  try {
+    const res = await fetch(`http://127.0.0.1:8001/streak/${anvandareId}`);
+    const data = await res.json();
 
-  //skriver ut den aktuella och längsta streaken i rutorna längst upp på sidan
-  document.getElementById("aktuell-streak").textContent = data.aktuell;
-  document.getElementById("langsta-streak").textContent = data.langsta;
-
-  /*markerar dagarna i veckan i html sidan genom att skicka vidare alla datum till funktionen som markerar veckan visuellt*/
-  markeraVecka(data.dagar); //ritar veckokalendern baserat pp vilka datum som finns i databasen
-  markeraMilstolpar(data.aktuell); //markerar de milstolparna som är uppnådda
-}
-
-/*markerar visuellt med röda cirklar i dem datum som databasen har lagrat som aktiva dagar*/
-function markeraVecka(dagar) {
-  const idag = new Date(); 
-  const veckodag = idag.getDay(); //räknar ut huyr långt ifrån måndag vi är
-  const offset = veckodag === 0 ? 6 : veckodag -1;
-
-  const mandag = new Date(idag); // räknar ut vilket datum måndagens datum är nästa vecka
-  mandag.setDate(idag.getDate() - offset);
-
-  //hämtar alla cirklar och siffror i kalendern
-  const cirklar = document.querySelectorAll(".dag-cirkel"); 
-  const siffror = document.querySelectorAll(".dag-siffra");
-
-  //rensar famla markeringar så inget fastnar vid refresh
-  cirklar.forEach(c => c.classList.remove("klar"));
-
-  // loopar igenom 7 dagar 
-  for (let i = 0; i < 7; i++) {
-    const d = new Date (mandag);
-    d.setDate(mandag.getDate() + i);
-    const datum = d.toISOString().split("T")[0]; // datumet får samma format som databasen skickar
-
-    siffror[i].textContent = d.getDate(); //srkiver ut dagens datum i UI
-
-    if (dagar.includes(datum)) { //om datumet finns i databasen så markeras cirkeln röd
-      cirklar[i].classList.add("klar");
+    // 1. Fyll i Streak-siffrorna i de nya statistikkorten
+    if (document.getElementById("statistik-streak")) {
+      document.getElementById("statistik-streak").textContent = data.aktuell;
     }
+    if (document.getElementById("statistik-langsta")) {
+      document.getElementById("statistik-langsta").textContent = data.langsta;
+    }
+    
+    // 2. Fyll i streaken i kalendervyn
+    if (document.getElementById("kal-streak-siffra")) {
+      document.getElementById("kal-streak-siffra").textContent = data.aktuell + " DAGAR";
+    }
+
+    // 3. Räkna ut och fyll i totala dagar och poäng
+    if (data.dagar && document.getElementById("statistik-aktiva")) {
+      document.getElementById("statistik-aktiva").textContent = data.dagar.length;
+      document.getElementById("statistik-poang").textContent = data.dagar.length * 10;
+    }
+
+    // 4. Skicka in databasens sparade datum till kalendern och rita om sidan
+    if (typeof habitDagar !== 'undefined' && data.dagar) {
+      habitDagar.traning = data.dagar; // Lägger in databasens datum i kalenderns minne
+      uppdateraAllt(); // Ritar om kalendern, veckoremsan och graferna med rätt data!
+    }
+
+  } catch (error) {
+    console.error("Kunde inte hämta data från databasen:", error);
   }
 }
-
-/*markerar milstolpar baserat på den aktuella streaken*/
-function markeraMilstolpar(aktuellStreak) {
-  const milstolpar = document.querySelectorAll(".milstolpe");
-
-  milstolpar.forEach(milstolpe => {
-    milstolpe.classList.remove("klar"); //rensa bort allt gammalt som ligger kvar
-    
-    const krav = parseInt(milstolpe.dataset.dagar); //läs in och avgör hur många dagar som krävs för särskilda milstolpar
-    if (aktuellStreak >= krav) { //om den aktuella streaken som användaren har är större elelr lika med kravet så markeras det
-      milstolpe.classList.add("klar");
-    }
-  });
-}
-
-
-/*när sidan är helt laddad in så startar hela processen (när allt finns i DOM)*/
-document.addEventListener("DOMContentLoaded", hamtaStreak);

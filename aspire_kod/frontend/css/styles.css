@@ -1357,3 +1357,60 @@ body {
 #wifi-icon[data-strength="2"] .bar1,
 #wifi-icon[data-strength="2"] .bar2 { opacity: 1; }
 #wifi-icon[data-strength="3"] .bar { opacity: 1; }
+
+/* ─────────────────────────────────────────────────────
+   14. UPPDATERAD VERSION AV AKTVITETET
+───────────────────────────────────────────────────── */
+/* Flikarna där man byter mellan Kalender och Statistik */
+.akt-flikar {
+  display: flex;
+  background-color: #F0F0F0;
+  border-radius: 12px;
+  padding: 4px;
+  margin-top: 0px;
+  margin-bottom: 24px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.akt-flik {
+  flex: 1; /* Gör så knapparna tar lika mycket plats */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666666;
+  background-color: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s; /* Enkel animation när man hovrar */
+}
+
+/* Den fliken som är vald just nu */
+.akt-flik.aktiv {
+  background-color: #FFFFFF;
+  color: #0A0A0A;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Gör så att sidorna tonar in snyggt när man byter */
+.akt-vy {
+  display: block;
+  animation: tona-in 0.3s ease;
+}
+
+/* Gömmer den sidan man inte tittar på */
+.akt-vy.dold {
+  display: none;
+}
+
+/* Min egen animation för att visa fliken */
+@keyframes tona-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
