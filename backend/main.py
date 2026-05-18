@@ -448,3 +448,118 @@ def hamta_atlet(atlet_id: int):
         return atlet
     finally:
         conn.close()
+
+# ── PROFILENDPOINT ─────────────────────────────────────
+
+@app.get("/profil/{anvandare_id}")
+def hamta_profil(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+
+        # Hämta grundinfo om användaren
+        cursor.execute("""
+            SELECT namn, skapad_datum
+            FROM anvandare
+            WHERE id = %s
+        """, (anvandare_id,))
+        anv = cursor.fetchone()
+
+        if not anv:
+            raise HTTPException(status_code=404, detail="Användare hittades inte")
+
+        # Hämta streak
+        cursor.execute("""
+            SELECT COUNT(*) AS streak
+            FROM anvandar_aktiviteter
+            WHERE anvandar_id = %s
+        """, (anvandare_id,))
+        streak = cursor.fetchone()["streak"]
+
+        # Hämta antal utmaningar
+        cursor.execute("""
+            SELECT COUNT(*) AS utmaningar
+            FROM anvandar_utmaningar
+            WHERE anvandar_id = %s
+        """, (anvandare_id,))
+        utmaningar = cursor.fetchone()["utmaningar"]
+
+        # Hämta genomförandegrad
+        cursor.execute("""
+            SELECT ROUND(AVG(procent_klar)) AS genomfort
+            FROM anvandar_utmaningar
+            WHERE anvandar_id = %s
+        """, (anvandare_id,))
+        genomfort = cursor.fetchone()["genomfort"] or 0
+
+        # Hämta aktiv utmaning
+        cursor.execute("""
+            SELECT titel, dag, total_dagar, procent_klar
+            FROM anvandar_utmaningar
+            WHERE anvandar_id = %s AND aktiv = true
+            LIMIT 1
+        """, (anvandare_id,))
+        aktiv = cursor.fetchone()
+
+        # Veckostatistik
+        cursor.execute("""
+            SELECT COUNT(*) AS traning
+            FROM anvandar_aktiviteter
+            WHERE anvandar_id = %s
+              AND datum >= CURRENT_DATE - INTERVAL '7 days'
+        """, (anvandare_id,))
+        traning = cursor.fetchone()["traning"]
+
+        cursor.execute("""
+            SELECT COALESCE(SUM(kalorier),0) AS kalorier
+            FROM anvandar_aktiviteter
+            WHERE anvandar_id = %s
+              AND datum >= CURRENT_DATE - INTERVAL '7 days'
+        """, (anvandare_id,))
+        kalorier = cursor.fetchone()["kalorier"]
+
+        return {
+            "namn": anv["namn"],
+            "medsedan": anv["skapad_datum"].strftime("%Y-%m-%d"),
+            "streak": streak,
+            "utmaningar": utmaningar,
+            "genomfort": genomfort,
+
+            "aktiv": {
+                "titel": aktiv["titel"] if aktiv else "",
+                "dag": aktiv["dag"] if aktiv else 0,
+                "total": aktiv["total_dagar"] if aktiv else 0,
+                "procent": aktiv["procent_klar"] if aktiv else 0
+            },
+
+            "vecka": {
+                "traning": traning,
+                "kalorier": kalorier,
+                "forbattring": 0
+            }
+        }
+
+    finally:
+        conn.close()
+
+
+# ── NOTISER ────────────────────────────────────────────
+
+@app.get("/notiser/{anvandare_id}")
+def hamta_notiser(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+
+        cursor.execute("""
+            SELECT COUNT(*) AS antal
+            FROM notiser
+            WHERE anvandar_id = %s AND last = false
+        """, (anvandare_id,))
+
+        antal = cursor.fetchone()["antal"]
+
+        return {"antal": antal}
+
+    finally:
+        conn.close()
