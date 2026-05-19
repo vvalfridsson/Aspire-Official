@@ -739,3 +739,4 @@ document.addEventListener("DOMContentLoaded", function() {
     laddaKalorierFranDatabas();
   }
 });
+
