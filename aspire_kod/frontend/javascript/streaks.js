@@ -240,7 +240,7 @@ async function aterstallData() {
   if (!anvandareId) return;
 
   try {
-      await fetch(`http://127.0.0.1:8001/streak/${anvandareId}/reset`, { method: 'POST' });
+      await fetch(`http://127.0.0.1:8002/streak/${anvandareId}/reset`, { method: 'POST' });
   } catch(fel) {
       console.log("Databasen kunde inte nås för reset:", fel);
   }
