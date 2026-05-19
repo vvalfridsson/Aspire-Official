@@ -10,7 +10,7 @@ Träningsapp där du kan följa kända atleters dagliga scheman, logga kalorier 
 ```bash
 cd backend
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8001
+uvicorn main:app --reload --port 8002
 ```
 
 Skapa en `.env`-fil i `backend/` med din databasadress:
