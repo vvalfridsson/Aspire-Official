@@ -1,4 +1,4 @@
-anv"""
+"""
 Aspire — main.py
 FastAPI-backend med endpoints för inloggning, registrering, atleter och profiler.
 
