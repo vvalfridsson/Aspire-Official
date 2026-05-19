@@ -3,7 +3,7 @@ Aspire — main.py
 FastAPI-backend med endpoints för inloggning, registrering, atleter och profiler.
 
 Starta servern:
-py -m uvicorn main:app --reload --port 8001
+py -m uvicorn main:app --reload --port 8002
 """
 
 from datetime import date, timedelta
@@ -59,6 +59,10 @@ class RegistreraRequest(BaseModel):
 class LoggaInRequest(BaseModel):
     epost: EmailStr
     losenord: str
+
+class KaloriRequest(BaseModel):
+    maltid: str
+    kalorier: int
 
 
 # ─────────────────────────────────────────────────────
@@ -200,7 +204,7 @@ def hamta_atlet_aktiviteter(atlet_id: int):
         cursor = get_cursor(conn)
         cursor.execute(
             """
-            SELECT 
+            SELECT
                 a.id,
                 a.dagsprogram_id,
                 a.sortering,
@@ -295,27 +299,65 @@ def hamta_streak(anvandare_id: int):
 
 
 # ─────────────────────────────────────────────────────
-# Profil
+# Notiser
 # ─────────────────────────────────────────────────────
 
 @app.get("/notiser/{anvandare_id}")
 def hamta_notiser(anvandare_id: int):
     return {"antal": 0}
 
-@app.get("/atleter/{atlet_id}")
-def hamta_atlet(atlet_id: int):
+
+# ─────────────────────────────────────────────────────
+# Kalorilogg
+# ─────────────────────────────────────────────────────
+
+@app.post("/kalorier/{anvandare_id}")
+def spara_kalori(anvandare_id: int, data: KaloriRequest):
+    if data.kalorier <= 0:
+        raise HTTPException(status_code=400, detail="Kalorier måste vara större än 0.")
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
-        cursor.execute("SELECT * FROM atleter WHERE id = %s", (atlet_id,))
-        atlet = cursor.fetchone()
-        if not atlet:
-            raise HTTPException(status_code=404, detail="Atlet hittades inte")
-        return atlet
+        cursor.execute(
+            "INSERT INTO kaloriloggar (anvandar_id, maltid, kalorier) VALUES (%s, %s, %s) RETURNING id, maltid, kalorier, skapad",
+            (anvandare_id, data.maltid, data.kalorier)
+        )
+        rad = cursor.fetchone()
+        conn.commit()
+        return rad
     finally:
         conn.close()
 
-# ── PROFILENDPOINT ─────────────────────────────────────
+
+@app.get("/kalorier/{anvandare_id}")
+def hamta_kalorier(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute(
+            "SELECT id, maltid, kalorier, skapad FROM kaloriloggar WHERE anvandar_id = %s AND skapad::date = CURRENT_DATE ORDER BY skapad",
+            (anvandare_id,)
+        )
+        return cursor.fetchall()
+    finally:
+        conn.close()
+
+
+@app.delete("/kalorier/{kalori_id}/ta-bort")
+def ta_bort_kalori(kalori_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("DELETE FROM kaloriloggar WHERE id = %s", (kalori_id,))
+        conn.commit()
+        return {"status": "borttagen"}
+    finally:
+        conn.close()
+
+
+# ─────────────────────────────────────────────────────
+# Profil
+# ─────────────────────────────────────────────────────
 
 @app.get("/profil/{anvandare_id}")
 def hamta_profil(anvandare_id: int):
@@ -404,28 +446,6 @@ def hamta_profil(anvandare_id: int):
                 "forbattring": 0
             }
         }
-
-    finally:
-        conn.close()
-
-
-# ── NOTISER ────────────────────────────────────────────
-
-@app.get("/notiser/{anvandare_id}")
-def hamta_notiser(anvandare_id: int):
-    conn = get_connection()
-    try:
-        cursor = get_cursor(conn)
-
-        cursor.execute("""
-            SELECT COUNT(*) AS antal
-            FROM notiser
-            WHERE anvandar_id = %s AND last = false
-        """, (anvandare_id,))
-
-        antal = cursor.fetchone()["antal"]
-
-        return {"antal": antal}
 
     finally:
         conn.close()

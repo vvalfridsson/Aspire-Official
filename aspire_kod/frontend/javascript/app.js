@@ -88,34 +88,73 @@ function byttMaltid(klickad) {
    Lägger till en ny rad i "Dagens måltider".
 ───────────────────────────────────────────────────── */
 function sparaKalorier() {
-
-  /* Hämta värden från formuläret */
   var inmatning = document.getElementById('kalori-input');
   var kcal = inmatning.value;
 
   var aktivFlik = document.querySelector('.maltids-flik.aktiv');
-  var maltidstyp = aktivFlik ? aktivFlik.textContent : 'Okänd';
+  var maltidstyp = aktivFlik ? aktivFlik.textContent.trim() : 'Okänd';
 
-  /* Validera att något är inmatat */
   if (!kcal || kcal <= 0) {
     alert('Ange ett giltigt kalorival!');
     return;
   }
 
-  /* Skapa ny rad i listan */
+  var user = JSON.parse(localStorage.getItem('aspire_inloggad'));
+  if (!user) { alert('Du måste vara inloggad.'); return; }
+
+  fetch(ASPIRE_API_BASE_URL + '/kalorier/' + user.id, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ maltid: maltidstyp, kalorier: parseInt(kcal) })
+  })
+  .then(function(svar) { return svar.json(); })
+  .then(function(data) {
+    laggTillMaltidRad(data.id, maltidstyp, kcal, nuvarandeTid());
+    inmatning.value = '';
+    uppdateraKalorier();
+  })
+  .catch(function() {
+    alert('Kunde inte spara till databasen.');
+  });
+}
+/* ─────────────────────────────────────────────────────
+   TA BORT MÅLTID
+   Letar upp måltiden man klickade på och raderar den.
+───────────────────────────────────────────────────── */
+function taBortMaltid(knapp) {
+  var radAttTaBort = knapp.closest('.maltid-post');
+  if (!radAttTaBort) return;
+
+  var kaloriId = radAttTaBort.dataset.id;
+
+  if (kaloriId) {
+    fetch(ASPIRE_API_BASE_URL + '/kalorier/' + kaloriId + '/ta-bort', {
+      method: 'DELETE'
+    });
+  }
+
+  radAttTaBort.remove();
+  uppdateraKalorier();
+}
+
+/* ─────────────────────────────────────────────────────
+   LÄGG TILL EN MÅLTIDSRAD I LISTAN
+───────────────────────────────────────────────────── */
+function laggTillMaltidRad(id, maltidstyp, kcal, tid) {
   var lista = document.getElementById('maltider-lista');
+  if (!lista) return;
 
   var nyRad = document.createElement('div');
   nyRad.className = 'maltid-post';
-  
-  // HÄR LÄGGER VI TILL KRYSSKNAPPEN LÄNGST NER I HTML-STRÄNGEN
+  nyRad.dataset.id = id;
+
   nyRad.innerHTML =
     '<div class="maltid-bild">' +
       '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>' +
     '</div>' +
     '<div class="maltid-info">' +
       '<div class="maltid-namn">' + maltidstyp + '</div>' +
-      '<div class="maltid-tid">' + nuvarandeTid() + '</div>' +
+      '<div class="maltid-tid">' + tid + '</div>' +
     '</div>' +
     '<div class="maltid-kcal">' + kcal + ' kcal</div>' +
     '<button class="ta-bort-knapp" onclick="taBortMaltid(this)">' +
@@ -123,28 +162,27 @@ function sparaKalorier() {
     '</button>';
 
   lista.appendChild(nyRad);
-
-  /* Nollställ inmatningsfältet */
-  inmatning.value = '';
-
-  /* HÄR: Uppdatera ringen och totalen! */
-  uppdateraKalorier();
 }
 
 /* ─────────────────────────────────────────────────────
-   TA BORT MÅLTID
-   Letar upp måltiden man klickade på och raderar den.
+   LADDA SPARADE KALORIER FRÅN DATABASEN
 ───────────────────────────────────────────────────── */
-function taBortMaltid(knapp) {
-  // .closest() letar upp den närmaste föräldern med klassen 'maltid-post'
-  var radAttTaBort = knapp.closest('.maltid-post');
-  
-  if (radAttTaBort) {
-    radAttTaBort.remove(); // Raderar HTML-elementet från sidan
+function laddaKalorierFranDatabas() {
+  var filnamn = window.location.pathname.split("/").pop();
+  if (filnamn !== "kalorier.html") return;
 
-    /* HÄR: Uppdatera ringen och totalen när en måltid tagits bort! */
-    uppdateraKalorier();
-  }
+  var user = JSON.parse(localStorage.getItem('aspire_inloggad'));
+  if (!user) return;
+
+  fetch(ASPIRE_API_BASE_URL + '/kalorier/' + user.id)
+    .then(function(svar) { return svar.json(); })
+    .then(function(data) {
+      for (var i = 0; i < data.length; i++) {
+        var tid = new Date(data[i].skapad).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+        laggTillMaltidRad(data[i].id, data[i].maltid, data[i].kalorier, tid);
+      }
+      uppdateraKalorier();
+    });
 }
 
 /* ─────────────────────────────────────────────────────
@@ -698,6 +736,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // Kör uppdateringen direkt när kalorier-sidan har laddats klart
 document.addEventListener("DOMContentLoaded", function() {
   if (document.getElementById('kalori-total')) {
-    uppdateraKalorier();
+    laddaKalorierFranDatabas();
   }
 });
