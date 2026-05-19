@@ -13,11 +13,6 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8002
 ```
 
-Skapa en `.env`-fil i `backend/` med din databasadress:
-```
-DATABASE_URL=postgresql://användarnamn:lösenord@localhost:5432/aspire
-```
-
 ## Funktioner
 
 - Inloggning och registrering
