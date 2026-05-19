@@ -158,7 +158,6 @@ body {
 /* Aktiv med ram (används på Sök och Streaks) */
 .nav-knapp.aktiv-ram {
   color: #0A0A0A;
-  border: 1.5px solid #0A0A0A;
 }
 
 /* Plus-knapp i mitten */
@@ -1503,7 +1502,7 @@ body {
 
 /* Hover-effekt för vanliga rutor */
 .kal-ruta:hover {
-  transform: scale(1.15);
+  transform: scale(1.02);
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -1513,10 +1512,6 @@ body {
   box-shadow: none;
 }
 
-/* Aktiv ruta får röd skugga när man drar musen över */
-.kal-ruta.aktiv:hover {
-  box-shadow: 0px 4px 12px rgba(232, 36, 28, 0.4);
-}
 
 /* Streaken under kalendern */
 .kal-streak-rad {
