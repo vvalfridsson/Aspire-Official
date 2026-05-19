@@ -3,132 +3,114 @@
    Används av alla HTML-sidor i appen.
    ===================================================== */
 
+const ASPIRE_API_BASE_URL = "http://127.0.0.1:8002";
+
+// Globala variabler för atletprofiler
+let aktuellAtlet = null;
+let aktuellAktiviteter = [];
+let aktuelltSchema = [];
+const DAGLIGT_MAL = 2500;
 
 /* ─────────────────────────────────────────────────────
    FILTRERA ATLETER PÅ SPORT (sok.html)
-   Klick på en sport-pill visar bara den sportens atleter.
 ───────────────────────────────────────────────────── */
-
 function filterSport(klickadPill, sport) {
-
-  /* Steg 1: Markera rätt pill som aktiv */
-  var allaPills = document.querySelectorAll('.filter-pill');
-  for (var i = 0; i < allaPills.length; i++) {
-    allaPills[i].classList.remove('aktiv');
-    allaPills[i].classList.add('inaktiv');
-  }
+  const allaPills = document.querySelectorAll('.filter-pill');
+  allaPills.forEach(pill => {
+    pill.classList.remove('aktiv');
+    pill.classList.add('inaktiv');
+  });
   klickadPill.classList.add('aktiv');
   klickadPill.classList.remove('inaktiv');
 
-  /* Steg 2: Visa/dölj atletrader baserat på sport */
-  var alleRader = document.querySelectorAll('.atlet-rad');
-  for (var j = 0; j < alleRader.length; j++) {
-    if (sport === 'alla' || alleRader[j].dataset.sport === sport) {
-      alleRader[j].style.display = 'flex';
+  const alleRader = document.querySelectorAll('.atlet-rad');
+  alleRader.forEach(rad => {
+    if (sport === 'alla' || rad.dataset.sport === sport) {
+      rad.style.display = 'flex';
     } else {
-      alleRader[j].style.display = 'none';
+      rad.style.display = 'none';
     }
-  }
+  });
 }
-
 
 /* ─────────────────────────────────────────────────────
    SÖK ATLETER I REALTID (sok.html)
-   Filtrerar listan medan användaren skriver.
 ───────────────────────────────────────────────────── */
-
 function sokAtleter(text) {
+  const soktext = text.toLowerCase();
+  const rader = document.querySelectorAll('.atlet-rad');
 
-  /* Gör söktexten till gemener för enklare jämförelse */
-  var soktext = text.toLowerCase();
+  rader.forEach(rad => {
+    const namn = rad.querySelector('.atlet-namn').textContent.toLowerCase();
+    const sport = rad.querySelector('.atlet-sport').textContent.toLowerCase();
 
-  var rader = document.querySelectorAll('.atlet-rad');
-  for (var i = 0; i < rader.length; i++) {
-
-    var namn  = rader[i].querySelector('.atlet-namn').textContent.toLowerCase();
-    var sport = rader[i].querySelector('.atlet-sport').textContent.toLowerCase();
-
-    /* Visa raden om namn eller sport matchar söktexten */
     if (namn.includes(soktext) || sport.includes(soktext)) {
-      rader[i].style.display = 'flex';
+      rad.style.display = 'flex';
     } else {
-      rader[i].style.display = 'none';
+      rad.style.display = 'none';
     }
-  }
+  });
 }
-
-
-/* ─────────────────────────────────────────────────────
-   BYTA FLIK (atletprofil.html)
-   Schema / Kost / Träning
-───────────────────────────────────────────────────── */
-
 
 /* ─────────────────────────────────────────────────────
    BYTA MÅLTIDSFLIK (kalorier.html)
-   Frukost / Lunch / Middag / Mellanmål
 ───────────────────────────────────────────────────── */
-
 function byttMaltid(klickad) {
+  const alla = klickad.closest('.maltids-flikar').querySelectorAll('.maltids-flik');
+  alla.forEach(flik => {
+    flik.classList.remove('aktiv');
+    flik.classList.add('inaktiv');
+  });
 
-  /* Ta bort 'aktiv' från alla måltidsflikar */
-  var alla = klickad.closest('.maltids-flikar').querySelectorAll('.maltids-flik');
-  for (var i = 0; i < alla.length; i++) {
-    alla[i].classList.remove('aktiv');
-    alla[i].classList.add('inaktiv');
-  }
-
-  /* Sätt 'aktiv' på den klickade */
   klickad.classList.add('aktiv');
   klickad.classList.remove('inaktiv');
 }
 
 /* ─────────────────────────────────────────────────────
    SPARA KALORI-INMATNING (kalorier.html)
-   Lägger till en ny rad i "Dagens måltider".
 ───────────────────────────────────────────────────── */
 function sparaKalorier() {
-  var inmatning = document.getElementById('kalori-input');
-  var kcal = inmatning.value;
+  const inmatning = document.getElementById('kalori-input');
+  const kcal = inmatning.value;
 
-  var aktivFlik = document.querySelector('.maltids-flik.aktiv');
-  var maltidstyp = aktivFlik ? aktivFlik.textContent.trim() : 'Okänd';
+  const aktivFlik = document.querySelector('.maltids-flik.aktiv');
+  const maltidstyp = aktivFlik ? aktivFlik.textContent.trim() : 'Okänd';
 
   if (!kcal || kcal <= 0) {
     alert('Ange ett giltigt kalorival!');
     return;
   }
 
-  var user = JSON.parse(localStorage.getItem('aspire_inloggad'));
+  const user = JSON.parse(localStorage.getItem('aspire_inloggad'));
   if (!user) { alert('Du måste vara inloggad.'); return; }
 
-  fetch(ASPIRE_API_BASE_URL + '/kalorier/' + user.id, {
+  fetch(`${ASPIRE_API_BASE_URL}/kalorier/${user.id}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ maltid: maltidstyp, kalorier: parseInt(kcal) })
   })
-  .then(function(svar) { return svar.json(); })
-  .then(function(data) {
+  .then(svar => svar.json())
+  .then(data => {
     laggTillMaltidRad(data.id, maltidstyp, kcal, nuvarandeTid());
     inmatning.value = '';
     uppdateraKalorier();
   })
-  .catch(function() {
+  .catch(() => {
     alert('Kunde inte spara till databasen.');
   });
 }
+
 /* ─────────────────────────────────────────────────────
    TA BORT MÅLTID
-   Letar upp måltiden man klickade på och raderar den.
 ───────────────────────────────────────────────────── */
 function taBortMaltid(knapp) {
-  var radAttTaBort = knapp.closest('.maltid-post');
+  const radAttTaBort = knapp.closest('.maltid-post');
   if (!radAttTaBort) return;
 
-  var kaloriId = radAttTaBort.dataset.id;
+  const kaloriId = radAttTaBort.dataset.id;
 
   if (kaloriId) {
-    fetch(ASPIRE_API_BASE_URL + '/kalorier/' + kaloriId + '/ta-bort', {
+    fetch(`${ASPIRE_API_BASE_URL}/kalorier/${kaloriId}/ta-bort`, {
       method: 'DELETE'
     });
   }
@@ -141,25 +123,26 @@ function taBortMaltid(knapp) {
    LÄGG TILL EN MÅLTIDSRAD I LISTAN
 ───────────────────────────────────────────────────── */
 function laggTillMaltidRad(id, maltidstyp, kcal, tid) {
-  var lista = document.getElementById('maltider-lista');
+  const lista = document.getElementById('maltider-lista');
   if (!lista) return;
 
-  var nyRad = document.createElement('div');
+  const nyRad = document.createElement('div');
   nyRad.className = 'maltid-post';
   nyRad.dataset.id = id;
 
-  nyRad.innerHTML =
-    '<div class="maltid-bild">' +
-      '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>' +
-    '</div>' +
-    '<div class="maltid-info">' +
-      '<div class="maltid-namn">' + maltidstyp + '</div>' +
-      '<div class="maltid-tid">' + tid + '</div>' +
-    '</div>' +
-    '<div class="maltid-kcal">' + kcal + ' kcal</div>' +
-    '<button class="ta-bort-knapp" onclick="taBortMaltid(this)">' +
-      '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-    '</button>';
+  nyRad.innerHTML = `
+    <div class="maltid-bild">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    </div>
+    <div class="maltid-info">
+      <div class="maltid-namn">${maltidstyp}</div>
+      <div class="maltid-tid">${tid}</div>
+    </div>
+    <div class="maltid-kcal">${kcal} kcal</div>
+    <button class="ta-bort-knapp" onclick="taBortMaltid(this)">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  `;
 
   lista.appendChild(nyRad);
 }
@@ -168,18 +151,15 @@ function laggTillMaltidRad(id, maltidstyp, kcal, tid) {
    LADDA SPARADE KALORIER FRÅN DATABASEN
 ───────────────────────────────────────────────────── */
 function laddaKalorierFranDatabas() {
-  var filnamn = window.location.pathname.split("/").pop();
-  if (filnamn !== "kalorier.html") return;
-
-  var user = JSON.parse(localStorage.getItem('aspire_inloggad'));
+  const user = JSON.parse(localStorage.getItem('aspire_inloggad'));
   if (!user) return;
 
-  fetch(ASPIRE_API_BASE_URL + '/kalorier/' + user.id)
-    .then(function(svar) { return svar.json(); })
-    .then(function(data) {
-      for (var i = 0; i < data.length; i++) {
-        var tid = new Date(data[i].skapad).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
-        laggTillMaltidRad(data[i].id, data[i].maltid, data[i].kalorier, tid);
+  fetch(`${ASPIRE_API_BASE_URL}/kalorier/${user.id}`)
+    .then(svar => svar.json())
+    .then(data => {
+      for (const post of data) {
+        const tid = new Date(post.skapad).toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' });
+        laggTillMaltidRad(post.id, post.maltid, post.kalorier, tid);
       }
       uppdateraKalorier();
     });
@@ -187,169 +167,101 @@ function laddaKalorierFranDatabas() {
 
 /* ─────────────────────────────────────────────────────
    UPPDATERA KALORIER OCH CIRKEL
-   Summerar alla inlagda måltider och uppdaterar UI:t
 ───────────────────────────────────────────────────── */
-const DAGLIGT_MAL = 2500; // Ändra dagsmålet för kalorier här
-
 function uppdateraKalorier() {
-  // Inlagda kalorier i listan
-  var allaMaltider = document.querySelectorAll('.maltid-kcal');
-  var totalKcal = 0;
+  const allaMaltider = document.querySelectorAll('.maltid-kcal');
+  let totalKcal = 0;
   
-  // Loopar och adderar alla siffror ihop
-  for (var i = 0; i < allaMaltider.length; i++) {
-    var text = allaMaltider[i].textContent;
-    // Plocka ut bara siffran från strängen (t.ex. "650 kcal" -> 650)
-    var siffra = parseInt(text.replace(/\D/g, '')) || 0;
+  allaMaltider.forEach(maltid => {
+    const siffra = parseInt(maltid.textContent.replace(/\D/g, '')) || 0;
     totalKcal += siffra;
-  }
+  });
 
-  // Sedan uppdaterar denna stora siffran med "Dagens intag"
-  var totalText = document.getElementById('kalori-total');
+  const totalText = document.getElementById('kalori-total');
   if (totalText) totalText.textContent = totalKcal;
 
-  // Räkna ut procent (max 100%)
-  var procent = Math.min(100, Math.round((totalKcal / DAGLIGT_MAL) * 100));
-
-  // Uppdatera SVG-cirkeln (138 är omkretsen, 0 är full cirkel, 138 är tom)
-  var cirkel = document.getElementById('kalori-cirkel');
+  const procent = Math.min(100, Math.round((totalKcal / DAGLIGT_MAL) * 100));
+  const cirkel = document.getElementById('kalori-cirkel');
   if (cirkel) {
-    var offset = 138 - (138 * (procent / 100));
-    cirkel.style.strokeDashoffset = offset;
+    cirkel.style.strokeDashoffset = 138 - (138 * (procent / 100));
   }
 
-  // Uppdatera texten i mitten av cirkeln
-  var procentText = document.getElementById('kalori-procent-text');
-  if (procentText) procentText.textContent = procent + '%';
+  const procentText = document.getElementById('kalori-procent-text');
+  if (procentText) procentText.textContent = `${procent}%`;
 }
 
-/* Hjälpfunktion: hämtar aktuell tid som "HH:MM" */
 function nuvarandeTid() {
-  var nu = new Date();
-  var timmar  = String(nu.getHours()).padStart(2, '0');
-  var minuter = String(nu.getMinutes()).padStart(2, '0');
-  return timmar + ':' + minuter;
+  const nu = new Date();
+  return `${String(nu.getHours()).padStart(2, '0')}:${String(nu.getMinutes()).padStart(2, '0')}`;
 }
 
-
-/* Visar ett felmeddelande under ett fält */
 function visaFelmeddelande(elementId, meddelande) {
-  var element = document.getElementById(elementId);
+  const element = document.getElementById(elementId);
   if (!element) return;
   element.textContent = meddelande;
   element.style.display = 'block';
 }
 
-/* Döljer ett felmeddelande */
 function dolFelmeddelande(elementId) {
-  var element = document.getElementById(elementId);
+  const element = document.getElementById(elementId);
   if (element) element.style.display = 'none';
 }
 
-
 /* ─────────────────────────────────────────────────────
-   INLOGGNING (index.html)
+   INLOGGNING & REGISTRERING
 ───────────────────────────────────────────────────── */
-
-/* Hanterar klick på Logga in-knappen */
 function hanteraInloggning() {
-  var epost    = document.getElementById('inlogg-epost').value.trim();
-  var losenord = document.getElementById('inlogg-losenord').value;
+  const epost = document.getElementById('inlogg-epost').value.trim();
+  const losenord = document.getElementById('inlogg-losenord').value;
 
-  dolFelmeddelande('fel-epost');
-  dolFelmeddelande('fel-losenord');
-  dolFelmeddelande('inlogg-fel');
+  ['fel-epost', 'fel-losenord', 'inlogg-fel'].forEach(dolFelmeddelande);
 
-  if (!epost) {
-    visaFelmeddelande('fel-epost', 'E-postfältet är obligatoriskt.');
-    return;
-  }
+  if (!epost) return visaFelmeddelande('fel-epost', 'E-postfältet är obligatoriskt.');
+  if (!losenord) return visaFelmeddelande('fel-losenord', 'Lösenordsfältet är obligatoriskt.');
 
-  if (!losenord) {
-    visaFelmeddelande('fel-losenord', 'Lösenordsfältet är obligatoriskt.');
-    return;
-  }
-
-  fetch('http://127.0.0.1:8002/logga-in', {
+  fetch(`${ASPIRE_API_BASE_URL}/logga-in`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-    epost: epost,
-    losenord: losenord
-})
+    body: JSON.stringify({ epost, losenord })
   })
-  .then(function(svar) { return svar.json(); })
-  .then(function(data) {
-    if (data.detail) {
-      visaFelmeddelande('inlogg-fel', data.detail);
-      return;
-    }
+  .then(svar => svar.json())
+  .then(data => {
+    if (data.detail) return visaFelmeddelande('inlogg-fel', data.detail);
     localStorage.setItem('aspire_inloggad', JSON.stringify(data));
     window.location.href = 'hem.html';
   })
-  .catch(function() {
-    visaFelmeddelande('inlogg-fel', 'Kunde inte ansluta till servern.');
-  });
+  .catch(() => visaFelmeddelande('inlogg-fel', 'Kunde inte ansluta till servern.'));
 }
 
-
-/* ─────────────────────────────────────────────────────
-   REGISTRERING (registrera.html)
-───────────────────────────────────────────────────── */
-
-/* Hanterar klick på Skapa konto-knappen */
 function hanteraRegistrering() {
-  var namn     = document.getElementById('reg-namn').value.trim();
-  var epost    = document.getElementById('reg-epost').value.trim();
-  var losenord = document.getElementById('reg-losenord').value;
-  var bekrafta = document.getElementById('reg-bekrafta').value;
+  const namn = document.getElementById('reg-namn').value.trim();
+  const epost = document.getElementById('reg-epost').value.trim();
+  const losenord = document.getElementById('reg-losenord').value;
+  const bekrafta = document.getElementById('reg-bekrafta').value;
 
-  ['fel-reg-namn','fel-reg-epost','fel-reg-losenord','fel-reg-bekrafta','reg-fel']
-    .forEach(dolFelmeddelande);
+  ['fel-reg-namn','fel-reg-epost','fel-reg-losenord','fel-reg-bekrafta','reg-fel'].forEach(dolFelmeddelande);
 
-  if (!namn) {
-    visaFelmeddelande('fel-reg-namn', 'Namn är obligatoriskt.');
-    return;
-  }
+  if (!namn) return visaFelmeddelande('fel-reg-namn', 'Namn är obligatoriskt.');
+  if (!epost) return visaFelmeddelande('fel-reg-epost', 'E-post är obligatoriskt.');
+  if (!losenord || losenord.length < 8) return visaFelmeddelande('fel-reg-losenord', 'Lösenordet måste ha minst 8 tecken.');
+  if (losenord !== bekrafta) return visaFelmeddelande('fel-reg-bekrafta', 'Lösenorden matchar inte.');
 
-  if (!epost) {
-    visaFelmeddelande('fel-reg-epost', 'E-post är obligatoriskt.');
-    return;
-  }
-
-  if (!losenord || losenord.length < 8) {
-    visaFelmeddelande('fel-reg-losenord', 'Lösenordet måste ha minst 8 tecken.');
-    return;
-  }
-
-  if (losenord !== bekrafta) {
-    visaFelmeddelande('fel-reg-bekrafta', 'Lösenorden matchar inte.');
-    return;
-  }
-
-  fetch('http://127.0.0.1:8002/registrera', {
+  fetch(`${ASPIRE_API_BASE_URL}/registrera`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ namn: namn, epost: epost, losenord: losenord })
+    body: JSON.stringify({ namn, epost, losenord })
   })
-  .then(function(svar) { return svar.json(); })
-  .then(function(data) {
-    if (data.detail) {
-      visaFelmeddelande('reg-fel', data.detail);
-      return;
-    }
+  .then(svar => svar.json())
+  .then(data => {
+    if (data.detail) return visaFelmeddelande('reg-fel', data.detail);
     localStorage.setItem('aspire_inloggad', JSON.stringify(data));
     window.location.href = 'hem.html';
   })
-  .catch(function() {
-    visaFelmeddelande('reg-fel', 'Kunde inte ansluta till servern.');
-  });
+  .catch(() => visaFelmeddelande('reg-fel', 'Kunde inte ansluta till servern.'));
 }
 
 function loggarUt() {
-  localStorage.removeItem("aspire_inloggad");
-  localStorage.removeItem("anvandare");
-  localStorage.removeItem("user");
+  ['aspire_inloggad', 'anvandare', 'user'].forEach(k => localStorage.removeItem(k));
   window.location.href = "index.html";
 }
 
@@ -359,45 +271,26 @@ function startaVakna(button) {
   button.disabled = true;
 }
 
-
-/*funktionen visar klockan istället för en placeholder*/
-
 function uppdateraStatusradKlocka() {
+  const tidElement = document.querySelector('.statusrad-tid');
+  if (!tidElement) return;
 
-  var tidElement = document.querySelector('.statusrad-tid');
-
-  if (!tidElement) {
-    return;
-  }
-
-  var nu = new Date();
-
-  var timmar = nu.getHours();
-  var minuter = nu.getMinutes();
-
-  /*lägg till ledande nolla på minuter*/
-  if (minuter < 10) {
-    minuter = '0' + minuter;
-  }
-
-  tidElement.textContent = timmar + ':' + minuter;
+  const nu = new Date();
+  tidElement.textContent = `${nu.getHours()}:${String(nu.getMinutes()).padStart(2, '0')}`;
 }
 
-/*startar om och kör direkt när programmet startas om*/
 uppdateraStatusradKlocka();
-
-/*uppdatera varje sekund*/
 setInterval(uppdateraStatusradKlocka, 1000);
 
+/* ─────────────────────────────────────────────────────
+   NOTISER & PROFIL
+───────────────────────────────────────────────────── */
 async function hamtaNotiser() {
   const user = JSON.parse(localStorage.getItem("aspire_inloggad"));
   if (!user) return;
 
-  const anvandareId = user.id;
-
-  const res = await fetch(`http://127.0.0.1:8002/notiser/${anvandareId}`);
+  const res = await fetch(`${ASPIRE_API_BASE_URL}/notiser/${user.id}`);
   const data = await res.json();
-
   const badge = document.getElementById("notis-badge");
   if (!badge) return;
 
@@ -408,86 +301,59 @@ async function hamtaNotiser() {
     badge.style.display = "none";
   }
 }
-document.addEventListener("DOMContentLoaded", hamtaNotiser); /*när DOM är fylld ska den visa notiserna*/
 
-async function hamtaProfil() { // funktionen hämtar all profilinformation från backend och fyller profilsidans mall
-//hämtar användarens id som sparades vid inloggningen, det används för att veta vilken användare som datan ska hömats från
+async function hamtaProfil() {
   const user = JSON.parse(localStorage.getItem("aspire_inloggad"));
   if (!user) return;
-  const anvandareId = user.id;
 
-  const res = await fetch(`http://127.0.0.1:8002/profil/${anvandareId}`); //förfrågan skickas till API:et för att hämta användarens profildata
-  const data = await res.json(); //gör om json texten till ett javascript objekt
+  const res = await fetch(`${ASPIRE_API_BASE_URL}/profil/${user.id}`);
+  const data = await res.json();
 
-  //Profilinfo
-  document.getElementById("profil-namn").textContent = data.namn; //användarens namn
-  document.getElementById("profil-medsedan").textContent = "Medlem sedan " + data.medsedan; //hämtar datumet som kontot registrerades och kopplar det till det id som sköter den rubriken
+  document.getElementById("profil-namn").textContent = data.namn;
+  document.getElementById("profil-medsedan").textContent = `Medlem sedan ${data.medsedan}`;
+  
   const initialer = data.namn.substring(0, 2).toUpperCase(); 
   document.getElementById("profil-bild").style.display = "none";
-   document.getElementById("profil-bild").insertAdjacentHTML("afterend",
-  `<div class="avatar-fyrkant">${initialer}</div>`
-);
+  document.getElementById("profil-bild").insertAdjacentHTML("afterend", `<div class="avatar-fyrkant">${initialer}</div>`);
 
-  //Statistik
-  document.getElementById("profil-streak").textContent = data.streak; //visar den inloggade personens streak
-  document.getElementById("profil-utmaningar").textContent = data.utmaningar; //visar antalet startade utmaningar
-  document.getElementById("profil-genomfort").textContent = data.genomfort + "%"; //visar hur många procent av de totala aktiviteterna som slutförts
+  document.getElementById("profil-streak").textContent = data.streak;
+  document.getElementById("profil-utmaningar").textContent = data.utmaningar;
+  document.getElementById("profil-genomfort").textContent = `${data.genomfort}%`;
 
-  //Aktiv utmaning
-  document.getElementById("aktiv-titel").textContent = data.aktiv.titel; //visar den aktivitet som är igpng just nu
-  document.getElementById("aktiv-dag").textContent = `Dag ${data.aktiv.dag} av ${data.aktiv.total}`; //visar vilken dag i utmaningen användaren är på
-  document.getElementById("aktiv-progress").style.width = data.aktiv.procent + "%"; //fyler progressbaren baserat på procenten
-  document.getElementById("aktiv-procent").textContent = data.aktiv.procent + "%"; //visar procentvärdet som text bredvid baren
+  document.getElementById("aktiv-titel").textContent = data.aktiv.titel;
+  document.getElementById("aktiv-dag").textContent = `Dag ${data.aktiv.dag} av ${data.aktiv.total}`;
+  document.getElementById("aktiv-progress").style.width = `${data.aktiv.procent}%`;
+  document.getElementById("aktiv-procent").textContent = `${data.aktiv.procent}%`;
 
-  // Veckostatistik
-  document.getElementById("vecka-traning").textContent = data.vecka.traning; //visar hur många träningspass som gjorts denna veckan
-  document.getElementById("vecka-kalorier").textContent = data.vecka.kalorier; //visar antalet brända kalorier 
-  document.getElementById("vecka-forbattring").textContent = data.vecka.forbattring;//jämför förbättringen i procent jämfört med förra veckan.
+  document.getElementById("vecko-traning").textContent = data.vecka.traning;
+  document.getElementById("vecko-kalorier").textContent = data.vecka.kalorier;
+  document.getElementById("vecka-forbattring").textContent = data.vecka.forbattring;
 }
-//när sidan laddas klart körs funktionen automatiskt
-document.addEventListener("DOMContentLoaded", hamtaProfil);
 
-/* =====================================================
-   HÄMTA ATLETER FRÅN DATABASEN TILL SÖK-SIDAN
-   ===================================================== */
-
-var ASPIRE_API_BASE_URL = "http://127.0.0.1:8002";
-
+/* ─────────────────────────────────────────────────────
+   HÄMTA ATLETER & ATLETPROFIL
+───────────────────────────────────────────────────── */
 function skapaInitialerFranNamn(namn) {
   if (!namn) return "?";
-
-  var delar = namn.trim().split(" ");
-
-  if (delar.length === 1) {
-    return delar[0].substring(0, 2).toUpperCase();
-  }
-
-  return (delar[0][0] + delar[delar.length - 1][0]).toUpperCase();
+  const delar = namn.trim().split(" ");
+  return delar.length === 1 ? delar[0].substring(0, 2).toUpperCase() : (delar[0][0] + delar[delar.length - 1][0]).toUpperCase();
 }
 
 function skapaAtletRadFranDatabas(atlet) {
-  var id = atlet.id;
-  var namn = atlet.namn || "Okänd atlet";
-  var sport = atlet.sport || "Okänd sport";
-  var initialer = atlet.initialer || skapaInitialerFranNamn(namn);
-
-  var kalorier = atlet.kcal_per_dag
-    ? atlet.kcal_per_dag + " kcal/dag"
-    : "Kalorier saknas";
-
-  var traning = atlet.traningstid_timmar
-    ? atlet.traningstid_timmar + "h träning"
-    : "Träning saknas";
+  const id = atlet.id;
+  const namn = atlet.namn || "Okänd atlet";
+  const sport = atlet.sport || "Okänd sport";
+  const initialer = atlet.initialer || skapaInitialerFranNamn(namn);
+  const kalorier = atlet.kcal_per_dag ? `${atlet.kcal_per_dag} kcal/dag` : "Kalorier saknas";
+  const traning = atlet.traningstid_timmar ? `${atlet.traningstid_timmar}h träning` : "Träning saknas";
 
   return `
     <a href="atletprofil.html?id=${id}" class="atlet-rad" data-atlet-id="${id}" data-sport="${sport}">
       <div class="atlet-avatar">${initialer}</div>
-
       <div class="atlet-info">
         <div class="atlet-namn">${namn}</div>
         <div class="atlet-sport">${sport}</div>
       </div>
-
       <div class="atlet-meta">
         <div class="atlet-kcal">${kalorier}</div>
         <div class="atlet-traning">${traning}</div>
@@ -497,116 +363,88 @@ function skapaAtletRadFranDatabas(atlet) {
 }
 
 async function laddaAtleterFranDatabasTillSok() {
-  var filnamn = window.location.pathname.split("/").pop();
-
-  if (filnamn !== "sok.html") return;
-
-  var lista = document.getElementById("atletlista");
+  const lista = document.getElementById("atletlista");
   if (!lista) return;
 
-  lista.innerHTML = `
-    <div style="padding:20px; color:#777; font-size:14px;">
-      Laddar atleter från databasen...
-    </div>
-  `;
+  // Om vi har sparad data sen innan, visa den blixtsnabbt först
+  const sparadeAtleter = JSON.parse(localStorage.getItem('aspire_alla_atleter'));
+  if (sparadeAtleter && sparadeAtleter.length > 0) {
+    lista.innerHTML = sparadeAtleter.map(skapaAtletRadFranDatabas).join("");
+  } else {
+    lista.innerHTML = `<div style="padding:20px; color:#777; font-size:14px;">Laddar atleter...</div>`;
+  }
 
   try {
-    var svar = await fetch(ASPIRE_API_BASE_URL + "/atleter");
-
-    if (!svar.ok) {
-      throw new Error("Backend svarade inte korrekt.");
-    }
-
-    var atleter = await svar.json();
+    const svar = await fetch(`${ASPIRE_API_BASE_URL}/atleter`);
+    if (!svar.ok) throw new Error("Backend-fel");
+    const atleter = await svar.json();
 
     if (!atleter || atleter.length === 0) {
-      lista.innerHTML = `
-        <div style="padding:20px; color:#777; font-size:14px;">
-          Inga atleter hittades i databasen.
-        </div>
-      `;
+      lista.innerHTML = `<div style="padding:20px; color:#777; font-size:14px;">Inga atleter hittades.</div>`;
       return;
     }
-
+    
+    // SPARA TILL MINNET FÖR BLIXTSNABB LADDNING SENARE
+    localStorage.setItem('aspire_alla_atleter', JSON.stringify(atleter));
+    
+    // Uppdatera listan
     lista.innerHTML = atleter.map(skapaAtletRadFranDatabas).join("");
-
-  } catch (error) {
-    console.error("Kunde inte hämta atleter:", error);
-
-    lista.innerHTML = `
-      <div style="padding:20px; color:red; font-size:14px;">
-        Kunde inte hämta atleter från databasen. Kontrollera att backend körs på port 8002.
-      </div>
-    `;
+  } catch {
+    if (!sparadeAtleter) {
+      lista.innerHTML = `<div style="padding:20px; color:red; font-size:14px;">Kunde inte hämta atleter. Kontrollera servern.</div>`;
+    }
   }
 }
 
-document.addEventListener("DOMContentLoaded", laddaAtleterFranDatabasTillSok);
-window.addEventListener("pageshow", laddaAtleterFranDatabasTillSok);
-
-/* =====================================================
-   HÄMTA ATLETPROFIL FRÅN DATABASEN
-   Gör så att atletprofil.html visar rätt atlet och rätt flikar.
-   ===================================================== */
-
-// Globala variabler för att spara datan vi hämtar
-let aktuellAtlet = null;
-let aktuellAktiviteter = [];
-let aktuelltSchema = [];
-
-// Hämtar atletens ID från webbadressen (t.ex. ?id=2), standard är 1
 const hamtaAtletIdFranUrl = () => new URLSearchParams(window.location.search).get("id") || "1";
 
-// Enkel hjälpfunktion för att hämta JSON-data från API:et
 async function hamtaJsonFranApi(url) {
   const svar = await fetch(url);
-  if (!svar.ok) throw new Error("Kunde inte hämta data från " + url);
+  if (!svar.ok) throw new Error(`Fel vid hämtning av ${url}`);
   return await svar.json();
 }
 
-// Huvudfunktion: Laddar all data för atleten när sidan öppnas
 async function laddaAtletProfilFranDatabas() {
-  // Körs bara om vi är på atlet-sidan
-  if (!window.location.pathname.endsWith("atletprofil.html")) return;
-
   const atletId = hamtaAtletIdFranUrl();
+  
+  // 1. OMEDELBAR LADDNING (0 millisekunder väntetid)
+  // Vi kollar i minnet om atleten redan finns från sök-sidan.
+  const sparadeAtleter = JSON.parse(localStorage.getItem('aspire_alla_atleter')) || [];
+  const cacheAtlet = sparadeAtleter.find(a => a.id == atletId);
+  
+  if (cacheAtlet) {
+    aktuellAtlet = cacheAtlet;
+    fyllAtletProfilFranDatabas(); // Fyll i namn, bild och biometri direkt!
+  }
 
+  // 2. HÄMTA RESTEN I BAKGRUNDEN PARALLELLT (Mycket snabbare än en i taget)
   try {
-    // 1. Hämta grundinfo om atleten (krävs)
-    aktuellAtlet = await hamtaJsonFranApi(`${ASPIRE_API_BASE_URL}/atleter/${atletId}`);
+    // Promise.allSettled skickar iväg alla tre förfrågningar på samma gång
+    const [atletSvar, aktSvar, schemaSvar] = await Promise.allSettled([
+      hamtaJsonFranApi(`${ASPIRE_API_BASE_URL}/atleter/${atletId}`),
+      hamtaJsonFranApi(`${ASPIRE_API_BASE_URL}/atleter/${atletId}/aktiviteter`),
+      hamtaJsonFranApi(`${ASPIRE_API_BASE_URL}/atleter/${atletId}/schema`)
+    ]);
 
-    // 2. Försök hämta aktiviteter (fånga felet tyst om listan är tom)
-    try {
-      aktuellAktiviteter = await hamtaJsonFranApi(`${ASPIRE_API_BASE_URL}/atleter/${atletId}/aktiviteter`);
-    } catch { aktuellAktiviteter = []; }
+    // Uppdatera med den helt färska datan från servern
+    if (atletSvar.status === "fulfilled") aktuellAtlet = atletSvar.value;
+    aktuellAktiviteter = aktSvar.status === "fulfilled" ? aktSvar.value : [];
+    aktuelltSchema = schemaSvar.status === "fulfilled" ? schemaSvar.value : [];
 
-    // 3. Försök hämta schemat (fånga felet tyst om listan är tom)
-    try {
-      aktuelltSchema = await hamtaJsonFranApi(`${ASPIRE_API_BASE_URL}/atleter/${atletId}/schema`);
-    } catch { aktuelltSchema = []; }
-
-    // Uppdatera HTML med datan och visa startfliken
+    // Fyll i allt på nytt och visa rätt schema-flik
     fyllAtletProfilFranDatabas();
     visaAtletFlik("schema");
-
+    
   } catch (error) {
-    console.error("Kunde inte hämta atletprofil:", error);
+    console.error("Kunde inte hämta all atletdata:", error);
   }
 }
 
-// Fyller i atletens uppgifter (namn, sport, statistik) i HTML-koden
 function fyllAtletProfilFranDatabas() {
   if (!aktuellAtlet) return;
-
-  // Smidig hjälpfunktion för att byta text på ett element (om elementet finns)
-  const sattText = (id, text) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
-  };
-
+  const sattText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   const initialer = aktuellAtlet.initialer || skapaInitialerFranNamn(aktuellAtlet.namn);
 
-  // Fyll i toppen av profilen
   sattText("profil-avatar", initialer);
   sattText("profil-namn", aktuellAtlet.namn || "Okänd atlet");
   sattText("profil-sport", aktuellAtlet.sport || "Okänd sport");
@@ -614,11 +452,7 @@ function fyllAtletProfilFranDatabas() {
   sattText("profil-traning", aktuellAtlet.traningstid_timmar ? `${aktuellAtlet.traningstid_timmar}h/dag` : "Saknas");
   sattText("profil-citat", aktuellAtlet.citat || "Ingen motivationstext finns ännu.");
 
-  document.title = "Aspire — " + (aktuellAtlet.namn || "Profil");
-
-  // Fyll i de fyra statistik-rutorna dynamiskt
-  const siffror = document.querySelectorAll(".atlet-stat-siffra");
-  const etiketter = document.querySelectorAll(".atlet-stat-etikett");
+  document.title = `Aspire — ${aktuellAtlet.namn || "Profil"}`;
 
   const statVarden = [
     aktuellAtlet.kcal_per_dag || "-",
@@ -626,15 +460,12 @@ function fyllAtletProfilFranDatabas() {
     aktuellAtlet.sport || "-",
     aktuellAtlet.id || "-"
   ];
-  
   const statEtiketter = ["kcal/dag", "träning", "sport", "atlet-id"];
 
-  // Loopa igenom rutorna och sätt in rätt värde och etikett
-  siffror.forEach((el, i) => el.textContent = statVarden[i] || "-");
-  etiketter.forEach((el, i) => el.textContent = statEtiketter[i] || "");
+  document.querySelectorAll(".atlet-stat-siffra").forEach((el, i) => el.textContent = statVarden[i]);
+  document.querySelectorAll(".atlet-stat-etikett").forEach((el, i) => el.textContent = statEtiketter[i]);
 }
 
-// Skapar HTML-koden för en enda rad i listan (t.ex. en specifik träning eller måltid)
 const skapaProfilRad = (tid, namn, beskrivning, index) => `
   <div class="schema-post">
     <div class="schema-prick ${index < 2 ? "rod" : "gra"}"></div>
@@ -646,7 +477,6 @@ const skapaProfilRad = (tid, namn, beskrivning, index) => `
   </div>
 `;
 
-// Visar rätt innehåll baserat på vilken flik som är vald (Schema, Kost, Träning)
 function visaAtletFlik(flikNamn) {
   const innehall = document.getElementById("profil-innehall");
   if (!innehall) return;
@@ -654,89 +484,62 @@ function visaAtletFlik(flikNamn) {
   let rader = [];
 
   if (flikNamn === "schema") {
-    // Använd aktiviteter i första hand, annars schema-datan
     if (aktuellAktiviteter.length > 0) {
-      rader = aktuellAktiviteter.map((akt, i) => 
-        skapaProfilRad(`${akt.tid_start}–${akt.tid_slut}`, akt.namn, akt.beskrivning, i)
-      );
+      rader = aktuellAktiviteter.map((akt, i) => skapaProfilRad(`${akt.tid_start}–${akt.tid_slut}`, akt.namn, akt.beskrivning, i));
     } else if (aktuelltSchema.length > 0) {
-      rader = aktuelltSchema.map((rad, i) => 
-        skapaProfilRad(rad.tid, rad.aktivitet, rad.veckodag, i)
-      );
+      rader = aktuelltSchema.map((rad, i) => skapaProfilRad(rad.tid, rad.aktivitet, rad.veckodag, i));
     }
-  } 
-  
-  else if (flikNamn === "kost") {
+  } else if (flikNamn === "kost") {
     const kost = aktuellAktiviteter.filter(akt => akt.typ === "mat");
-    if (kost.length > 0) {
-      rader = kost.map((akt, i) => skapaProfilRad(`${akt.tid_start}–${akt.tid_slut}`, akt.namn, akt.beskrivning, i));
-    } else {
-      // Hårdkodade standardvärden ifall ingen kostdata finns i databasen
-      rader = [
-        skapaProfilRad("08.00", "Frukost", "Måltidsdata saknas för denna atlet.", 0),
-        skapaProfilRad("12.00", "Lunch", "Lägg in kostschema i databasen för mer detaljer.", 1),
-        skapaProfilRad("18.00", "Middag", "Standardvärde tills databasen har mer data.", 2)
-      ];
-    }
-  } 
-  
-  else if (flikNamn === "traning") {
+    rader = kost.length > 0 ? kost.map((akt, i) => skapaProfilRad(`${akt.tid_start}–${akt.tid_slut}`, akt.namn, akt.beskrivning, i)) : [
+      skapaProfilRad("08.00", "Frukost", "Måltidsdata saknas för denna atlet.", 0),
+      skapaProfilRad("12.00", "Lunch", "Lägg in kostschema i databasen.", 1),
+      skapaProfilRad("18.00", "Middag", "Standardvärde tills databasen har mer data.", 2)
+    ];
+  } else if (flikNamn === "traning") {
     const traning = aktuellAktiviteter.filter(akt => akt.typ === "träning");
-    if (traning.length > 0) {
-      rader = traning.map((akt, i) => skapaProfilRad(`${akt.tid_start}–${akt.tid_slut}`, akt.namn, akt.beskrivning, i));
-    } else {
-      // Hårdkodade standardvärden ifall ingen träningsdata finns i databasen
-      rader = [
-        skapaProfilRad("07.00", "Träning", "Träningsdata saknas för denna atlet.", 0),
-        skapaProfilRad("16.00", "Teknikpass", "Lägg in träningsschema i databasen för mer detaljer.", 1),
-        skapaProfilRad("18.00", "Återhämtning", "Standardvärde tills databasen har mer data.", 2)
-      ];
-    }
+    rader = traning.length > 0 ? traning.map((akt, i) => skapaProfilRad(`${akt.tid_start}–${akt.tid_slut}`, akt.namn, akt.beskrivning, i)) : [
+      skapaProfilRad("07.00", "Träning", "Träningsdata saknas för denna atlet.", 0),
+      skapaProfilRad("16.00", "Teknikpass", "Lägg in träningsschema i databasen.", 1),
+      skapaProfilRad("18.00", "Återhämtning", "Standardvärde tills databasen har mer data.", 2)
+    ];
   }
 
-  // Skriv ut HTML-raderna. Visar ett informationsmeddelande om listan är helt tom.
-  innehall.innerHTML = rader.length > 0 
-    ? rader.join("") 
-    : `<div style="padding:20px; color:#777; font-size:14px;">Ingen data hittades för denna flik.</div>`;
+  innehall.innerHTML = rader.length > 0 ? rader.join("") : `<div style="padding:20px; color:#777; font-size:14px;">Ingen data hittades för denna flik.</div>`;
 }
 
-// Byt flik när användaren klickar på knapparna i gränssnittet
 function byttFlik(klickadFlik, flikNamn) {
   const rad = klickadFlik.closest(".flik-rad");
-
-  // Avmarkera alla knappar
-  if (rad) {
-    rad.querySelectorAll(".flik").forEach(flik => flik.classList.remove("aktiv"));
-  }
-
-  // Markera den valda knappen som aktiv och uppdatera innehållet
+  if (rad) rad.querySelectorAll(".flik").forEach(flik => flik.classList.remove("aktiv"));
   klickadFlik.classList.add("aktiv");
   visaAtletFlik(flikNamn);
 }
 
-/* =====================================================
-   UPPSTARTS-LYSSNARE
-   Ser till att datan laddas in direkt när sidan visas
-   ===================================================== */
+/* ─────────────────────────────────────────────────────
+   UPPSTARTS-KONTROLLER (Exekverar OMEDELBART för snabbhet)
+───────────────────────────────────────────────────── */
+const filnamn = window.location.pathname.split("/").pop();
 
-document.addEventListener("DOMContentLoaded", laddaAtletProfilFranDatabas);
-window.addEventListener("pageshow", laddaAtletProfilFranDatabas);
+if (filnamn === "sok.html") {
+  laddaAtleterFranDatabasTillSok();
+} 
+else if (filnamn === "atletprofil.html") {
+  laddaAtletProfilFranDatabas();
+} 
+else if (filnamn === "profil.html") {
+  hamtaProfil();
+} 
+else if (filnamn === "kalorier.html") {
+  laddaKalorierFranDatabas();
+}
 
+// Körs i bakgrunden utan att blockera databasen
 document.addEventListener("DOMContentLoaded", () => {
-  // Ladda ev. gamla funktioner (om de används för kompatibilitet)
-  if (typeof laddaAtletProfil === "function") laddaAtletProfil();
-
-  // Om profil-innehållet är tomt, forcera igång "schema"-fliken direkt
-  const aktivFlik = document.querySelector(".flik.aktiv");
-  if (aktivFlik && document.getElementById("profil-innehall")) {
-    byttFlik(aktivFlik, "schema");
+  hamtaNotiser();
+  if (filnamn === "atletprofil.html") {
+    const aktivFlik = document.querySelector(".flik.aktiv");
+    if (aktivFlik && document.getElementById("profil-innehall")) {
+      byttFlik(aktivFlik, "schema");
+    }
   }
 });
-
-// Kör uppdateringen direkt när kalorier-sidan har laddats klart
-document.addEventListener("DOMContentLoaded", function() {
-  if (document.getElementById('kalori-total')) {
-    laddaKalorierFranDatabas();
-  }
-});
-
