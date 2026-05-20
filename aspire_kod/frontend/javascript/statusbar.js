@@ -50,11 +50,6 @@ function initTime() {
   setInterval(updateTime, 10000);
 }
 
-  updateBattery();
-  battery.addEventListener("levelchange", updateBattery);
-  battery.addEventListener("chargingchange", updateBattery);
-}
-
 /*wifi online status*/
 function initWifi() {
   const wifiPath = document.getElementById("wifi-path");
@@ -77,23 +72,24 @@ function fakeBattery() {
   const batteryFill = document.getElementById("battery-fill");
   if (!batteryFill) return;
 
-  let level = 0.82; // startnivå
+  let level = 0.82;
 
   function update() {
     level -= Math.random() * 0.002;
-
-    if (level < 0.15) level = 1; // "laddad igen"
-
+    if (level < 0.15) level = 1;
     const maxWidth = 17;
     const newWidth = Math.max(2, level * maxWidth);
     batteryFill.setAttribute("width", newWidth);
-
     if (level < 0.2) {
       batteryFill.style.fill = "#FF3B30";
     } else {
       batteryFill.style.fill = "currentColor";
     }
   }
+
+  update();
+  setInterval(update, 20000);
+}
 
 function fakeWifi() {
   const wifiIcon = document.getElementById("wifi-icon");
@@ -111,8 +107,5 @@ function fakeWifi() {
   setInterval(updateWifi, 15000);
 }
 
-  update();
-  setInterval(update, 20000);
-}
 /*startar allt när sidan är laddad*/
 document.addEventListener("DOMContentLoaded", initStatusBar);

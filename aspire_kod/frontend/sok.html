@@ -9,6 +9,25 @@
   <title>Aspire — Sök atleter</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+  .valj-knapp {
+    flex-shrink: 0;
+    height: 32px;
+    padding: 0 14px;
+    background: #0A0A0A;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .valj-knapp.vald { background: #22AA66; pointer-events: none; }
+  .valj-knapp.laddning { background: #ADADAD; pointer-events: none; }
+  .atlet-rad-lank { display: flex; align-items: center; gap: 12px; flex: 1; text-decoration: none; min-width: 0; }
+</style>
 </head>
 <body>
 
@@ -53,81 +72,7 @@
       </div>
 
       <!-- Atletlista — klick öppnar atletprofil.html -->
-      <div id="atletlista">
-
-        <a href="atletprofil.html?id=1" class="atlet-rad" data-sport="Basketball">
-          <div class="atlet-avatar">MJ</div>
-          <div class="atlet-info">
-            <div class="atlet-namn">Michael Jordan</div>
-            <div class="atlet-sport">Basketball</div>
-          </div>
-          <div class="atlet-meta">
-            <div class="atlet-kcal">5 000 kcal/dag</div>
-            <div class="atlet-traning">5h träning</div>
-          </div>
-        </a>
-
-        <a href="atletprofil.html?id=2" class="atlet-rad" data-sport="Basketball">
-          <div class="atlet-avatar">LJ</div>
-          <div class="atlet-info">
-            <div class="atlet-namn">LeBron James</div>
-            <div class="atlet-sport">Basketball</div>
-          </div>
-          <div class="atlet-meta">
-            <div class="atlet-kcal">4 500 kcal/dag</div>
-            <div class="atlet-traning">5h träning</div>
-          </div>
-        </a>
-
-        <a href="atletprofil.html?id=3" class="atlet-rad" data-sport="Fotboll">
-          <div class="atlet-avatar">CR</div>
-          <div class="atlet-info">
-            <div class="atlet-namn">Cristiano Ronaldo</div>
-            <div class="atlet-sport">Fotboll</div>
-          </div>
-          <div class="atlet-meta">
-            <div class="atlet-kcal">3 200 kcal/dag</div>
-            <div class="atlet-traning">4h träning</div>
-          </div>
-        </a>
-
-        <a href="atletprofil.html?id=4" class="atlet-rad" data-sport="Tennis">
-          <div class="atlet-avatar lila">SW</div>
-          <div class="atlet-info">
-            <div class="atlet-namn">Serena Williams</div>
-            <div class="atlet-sport">Tennis</div>
-          </div>
-          <div class="atlet-meta">
-            <div class="atlet-kcal">3 200 kcal/dag</div>
-            <div class="atlet-traning">4h träning</div>
-          </div>
-        </a>
-
-        <a href="atletprofil.html?id=5" class="atlet-rad" data-sport="Sprint">
-          <div class="atlet-avatar">UB</div>
-          <div class="atlet-info">
-            <div class="atlet-namn">Usain Bolt</div>
-            <div class="atlet-sport">Sprint</div>
-          </div>
-          <div class="atlet-meta">
-            <div class="atlet-kcal">5 500 kcal/dag</div>
-            <div class="atlet-traning">4h träning</div>
-          </div>
-        </a>
-
-        <a href="atletprofil.html?id=6" class="atlet-rad" data-sport="MMA">
-          <div class="atlet-avatar mork">CM</div>
-          <div class="atlet-info">
-            <div class="atlet-namn">Conor McGregor</div>
-            <div class="atlet-sport">MMA</div>
-          </div>
-          <div class="atlet-meta">
-            <div class="atlet-kcal">4 000 kcal/dag</div>
-            <div class="atlet-traning">6h träning</div>
-          </div>
-        </a>
-
-      </div>
+      <div id="atletlista"></div>
 
       <div class="botten-mellanrum"></div>
     </div>
@@ -158,7 +103,30 @@
 
   </div>
 
-<script src="../javascript/app.js"></script>
+<script src="javascript/app.js"></script>
 <script src="javascript/statusbar.js"></script>
+<script>
+  async function valjAtlet(atletId, knapp) {
+    const user = JSON.parse(localStorage.getItem("aspire_inloggad"));
+    if (!user) return;
+    knapp.textContent = "Väljer...";
+    knapp.classList.add("laddning");
+    try {
+      await fetch(`http://127.0.0.1:8002/anvandare/${user.id}/valj-atlet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ atlet_id: atletId })
+      });
+      knapp.textContent = "Vald ✓";
+      knapp.classList.remove("laddning");
+      knapp.classList.add("vald");
+      setTimeout(() => { window.location.href = "hem.html"; }, 600);
+    } catch (e) {
+      knapp.textContent = "Välj";
+      knapp.classList.remove("laddning");
+    }
+  }
+</script>
+
 </body>
 </html>

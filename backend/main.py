@@ -449,3 +449,157 @@ def hamta_profil(anvandare_id: int):
 
     finally:
         conn.close()
+
+# ─────────────────────────────────────────────────────
+# VÄLJ ATLET & SCHEMA FÖR HEM.HTML
+# ─────────────────────────────────────────────────────
+ 
+class ValjAtletBody(BaseModel):
+    atlet_id: int
+ 
+class BockaAvBody(BaseModel):
+    avbockad: bool
+ 
+ 
+@app.post("/anvandare/{anvandare_id}/valj-atlet")
+def valj_atlet(anvandare_id: int, body: ValjAtletBody):
+    """Sparar vilken atlet användaren valt och kopierar atletens aktiviteter till användarens schema för idag."""
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+ 
+        # Spara vald atlet på användaren
+        cursor.execute("""
+            UPDATE anvandare SET vald_atlet_id = %s WHERE id = %s
+        """, (body.atlet_id, anvandare_id))
+ 
+        # Hämta atletens aktiviteter
+        cursor.execute("""
+            SELECT namn, tid_start, tid_slut, beskrivning
+            FROM atlet_aktiviteter
+            WHERE atlet_id = %s
+            ORDER BY tid_start
+        """, (body.atlet_id,))
+        aktiviteter = cursor.fetchall()
+ 
+        # Ta bort eventuellt gammalt schema för idag
+        cursor.execute("""
+            DELETE FROM anvandare_schema
+            WHERE anvandar_id = %s AND datum = CURRENT_DATE
+        """, (anvandare_id,))
+ 
+        # Kopiera in atletens aktiviteter som dagens schema
+        for akt in aktiviteter:
+            cursor.execute("""
+                INSERT INTO anvandare_schema (anvandar_id, atlet_id, namn, tid_start, tid_slut, beskrivning, datum, avbockad)
+                VALUES (%s, %s, %s, %s, %s, %s, CURRENT_DATE, FALSE)
+            """, (anvandare_id, body.atlet_id, akt["namn"], akt.get("tid_start"), akt.get("tid_slut"), akt.get("beskrivning")))
+ 
+        conn.commit()
+        return {"status": "ok"}
+    finally:
+        conn.close()
+ 
+ 
+@app.get("/anvandare/{anvandare_id}/vald-atlet")
+def hamta_vald_atlet(anvandare_id: int):
+    """Returnerar den atlet användaren valt, eller 404 om ingen är vald."""
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+ 
+        cursor.execute("""
+            SELECT vald_atlet_id FROM anvandare WHERE id = %s
+        """, (anvandare_id,))
+        anv = cursor.fetchone()
+ 
+        if not anv or not anv["vald_atlet_id"]:
+            raise HTTPException(status_code=404, detail="Ingen atlet vald")
+ 
+        cursor.execute("""
+            SELECT id, namn, sport FROM atleter WHERE id = %s
+        """, (anv["vald_atlet_id"],))
+        atlet = cursor.fetchone()
+ 
+        if not atlet:
+            raise HTTPException(status_code=404, detail="Atleten hittades inte")
+ 
+        return {"id": atlet["id"], "namn": atlet["namn"], "sport": atlet["sport"]}
+    finally:
+        conn.close()
+ 
+ 
+@app.get("/anvandare/{anvandare_id}/schema/idag")
+def hamta_schema_idag(anvandare_id: int):
+    """Returnerar användarens schema för dagens datum."""
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+ 
+        cursor.execute("""
+            SELECT id, namn, tid_start, tid_slut, beskrivning, avbockad
+            FROM anvandare_schema
+            WHERE anvandar_id = %s AND datum = CURRENT_DATE
+            ORDER BY tid_start
+        """, (anvandare_id,))
+        rader = cursor.fetchall()
+ 
+        return [
+            {
+                "id": r["id"],
+                "namn": r["namn"],
+                "tid_start": r["tid_start"],
+                "tid_slut": r["tid_slut"],
+                "beskrivning": r["beskrivning"],
+                "avbockad": r["avbockad"]
+            }
+            for r in rader
+        ]
+    finally:
+        conn.close()
+ 
+ 
+@app.post("/anvandare/{anvandare_id}/schema/{rad_id}/bocka-av")
+def bocka_av_aktivitet(anvandare_id: int, rad_id: int, body: BockaAvBody):
+    """Bockar av eller avmarkerar en aktivitet och uppdaterar streak om hela dagen är klar."""
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+ 
+        # Uppdatera avbockad-status
+        cursor.execute("""
+            UPDATE anvandare_schema
+            SET avbockad = %s
+            WHERE id = %s AND anvandar_id = %s
+        """, (body.avbockad, rad_id, anvandare_id))
+ 
+        # Kolla om alla aktiviteter för idag är avbockade
+        cursor.execute("""
+            SELECT COUNT(*) AS totalt,
+                   SUM(CASE WHEN avbockad THEN 1 ELSE 0 END) AS avbockade
+            FROM anvandare_schema
+            WHERE anvandar_id = %s AND datum = CURRENT_DATE
+        """, (anvandare_id,))
+        rad = cursor.fetchone()
+        totalt = rad["totalt"]
+        avbockade = rad["avbockade"]
+ 
+        # Om alla är klara — lägg till dagens datum i anvandar_aktiviteter (om det inte redan finns)
+        if totalt > 0 and totalt == avbockade:
+            cursor.execute("""
+                INSERT INTO anvandar_aktiviteter (anvandar_id, datum)
+                VALUES (%s, CURRENT_DATE)
+                ON CONFLICT (anvandar_id, datum) DO NOTHING
+            """, (anvandare_id,))
+        else:
+            # Om användaren avmarkerar en aktivitet och dagen inte längre är hel — ta bort dagens streak
+            cursor.execute("""
+                DELETE FROM anvandar_aktiviteter
+                WHERE anvandar_id = %s AND datum = CURRENT_DATE
+            """, (anvandare_id,))
+ 
+        conn.commit()
+        return {"status": "ok", "avbockade": avbockade, "totalt": totalt}
+    finally:
+        conn.close()
+ 

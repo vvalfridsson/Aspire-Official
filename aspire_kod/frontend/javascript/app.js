@@ -348,7 +348,8 @@ function skapaAtletRadFranDatabas(atlet) {
   const traning = atlet.traningstid_timmar ? `${atlet.traningstid_timmar}h träning` : "Träning saknas";
 
   return `
-    <a href="atletprofil.html?id=${id}" class="atlet-rad" data-atlet-id="${id}" data-sport="${sport}">
+  <div class="atlet-rad" data-atlet-id="${id}" data-sport="${sport}">
+    <a href="atletprofil.html?id=${id}" class="atlet-rad-lank">
       <div class="atlet-avatar">${initialer}</div>
       <div class="atlet-info">
         <div class="atlet-namn">${namn}</div>
@@ -359,7 +360,9 @@ function skapaAtletRadFranDatabas(atlet) {
         <div class="atlet-traning">${traning}</div>
       </div>
     </a>
-  `;
+    <button class="valj-knapp" onclick="valjAtlet(${id}, this)">Välj</button>
+  </div>
+`;
 }
 
 async function laddaAtleterFranDatabasTillSok() {

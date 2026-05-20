@@ -481,20 +481,21 @@ function skapaAtletRadFranDatabas(atlet) {
     : "Träning saknas";
 
   return `
-    <a href="atletprofil.html?id=${id}" class="atlet-rad" data-atlet-id="${id}" data-sport="${sport}">
+  <div class="atlet-rad" data-atlet-id="${id}" data-sport="${sport}">
+    <a href="atletprofil.html?id=${id}" class="atlet-rad-lank">
       <div class="atlet-avatar">${initialer}</div>
-
       <div class="atlet-info">
         <div class="atlet-namn">${namn}</div>
         <div class="atlet-sport">${sport}</div>
       </div>
-
       <div class="atlet-meta">
         <div class="atlet-kcal">${kalorier}</div>
         <div class="atlet-traning">${traning}</div>
       </div>
     </a>
-  `;
+    <button class="valj-knapp" onclick="valjAtlet(${id}, this)">Välj</button>
+  </div>
+`;
 }
 
 async function laddaAtleterFranDatabasTillSok() {
