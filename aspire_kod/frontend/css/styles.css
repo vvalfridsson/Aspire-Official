@@ -1321,6 +1321,8 @@ body {
 
 .statusrad-tid {
   letter-spacing: 0.5px;
+  padding-left: 15px;
+  padding-top: 15px;
 }
 
 .statusrad-ikoner {
