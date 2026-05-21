@@ -548,4 +548,5 @@ def bocka_av_aktivitet(anvandare_id: int, rad_id: int, body: BockaAvBody):
         conn.commit()
         return {"status": "ok", "avbockade": avbockade, "totalt": totalt}
     finally:
-        release_connection(conn)
+        conn.close()
+ 
