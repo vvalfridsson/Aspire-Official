@@ -15,6 +15,7 @@ from pydantic import BaseModel, EmailStr
 from database import (
     get_connection,
     get_cursor,
+    release_connection,
     registrera_anvandare,
     hamta_anvandare,
     skapa_anvandartabell,
@@ -24,7 +25,6 @@ from database import (
 app = FastAPI(title="Aspire API", version="1.0")
 
 
-# Tillåter anrop från frontend/Live Server.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,15 +35,11 @@ app.add_middleware(
 
 @app.on_event("startup")
 def startup():
-    """
-    Skapar användartabellen om den saknas när backend startar.
-    Resten av tabellerna skapas via SQL-scriptet i pgAdmin.
-    """
     conn = get_connection()
     try:
         skapa_anvandartabell(conn)
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 # ─────────────────────────────────────────────────────
@@ -80,9 +76,6 @@ def health():
 
 @app.post("/registrera")
 def registrera(data: RegistreraRequest):
-    """
-    Skapar ett nytt användarkonto.
-    """
     if len(data.losenord) < 8:
         raise HTTPException(
             status_code=400,
@@ -106,9 +99,6 @@ def registrera(data: RegistreraRequest):
 
 @app.post("/logga-in")
 def logga_in(data: LoggaInRequest):
-    """
-    Loggar in en användare med e-post och lösenord.
-    """
     anvandare = hamta_anvandare(data.epost)
 
     if anvandare is None or anvandare["losenord"] != data.losenord:
@@ -130,9 +120,6 @@ def logga_in(data: LoggaInRequest):
 
 @app.get("/atleter")
 def hamta_atleter(sport: str = None):
-    """
-    Hämtar alla atleter, eller filtrerar på sport.
-    """
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
@@ -147,14 +134,11 @@ def hamta_atleter(sport: str = None):
 
         return cursor.fetchall()
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 @app.get("/atleter/{atlet_id}")
 def hamta_atlet(atlet_id: int):
-    """
-    Hämtar en specifik atlet från databasen.
-    """
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
@@ -169,14 +153,11 @@ def hamta_atlet(atlet_id: int):
 
         return atlet
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 @app.get("/atleter/{atlet_id}/schema")
 def hamta_schema(atlet_id: int):
-    """
-    Hämtar enklare schema från atlet_schema.
-    """
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
@@ -191,14 +172,11 @@ def hamta_schema(atlet_id: int):
         )
         return cursor.fetchall()
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 @app.get("/atleter/{atlet_id}/aktiviteter")
 def hamta_atlet_aktiviteter(atlet_id: int):
-    """
-    Hämtar aktiviteter från dagsprogram/aktiviteter för en atlet.
-    """
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
@@ -221,10 +199,9 @@ def hamta_atlet_aktiviteter(atlet_id: int):
             """,
             (atlet_id,)
         )
-
         return cursor.fetchall()
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 # ─────────────────────────────────────────────────────
@@ -233,10 +210,6 @@ def hamta_atlet_aktiviteter(atlet_id: int):
 
 @app.get("/streak/{anvandare_id}")
 def hamta_streak(anvandare_id: int):
-    """
-    Hämtar streak för en användare.
-    Returnerar 0 om tabellen inte finns eller om användaren saknar aktivitet.
-    """
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
@@ -253,18 +226,10 @@ def hamta_streak(anvandare_id: int):
             )
             rows = cursor.fetchall()
         except Exception:
-            return {
-                "aktuell": 0,
-                "langsta": 0,
-                "dagar": []
-            }
+            return {"aktuell": 0, "langsta": 0, "dagar": []}
 
         if not rows:
-            return {
-                "aktuell": 0,
-                "langsta": 0,
-                "dagar": []
-            }
+            return {"aktuell": 0, "langsta": 0, "dagar": []}
 
         dates = [r["datum"] for r in rows]
 
@@ -295,7 +260,7 @@ def hamta_streak(anvandare_id: int):
         }
 
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 # ─────────────────────────────────────────────────────
@@ -326,7 +291,7 @@ def spara_kalori(anvandare_id: int, data: KaloriRequest):
         conn.commit()
         return rad
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 @app.get("/kalorier/{anvandare_id}")
@@ -340,7 +305,7 @@ def hamta_kalorier(anvandare_id: int):
         )
         return cursor.fetchall()
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 @app.delete("/kalorier/{kalori_id}/ta-bort")
@@ -352,7 +317,7 @@ def ta_bort_kalori(kalori_id: int):
         conn.commit()
         return {"status": "borttagen"}
     finally:
-        conn.close()
+        release_connection(conn)
 
 
 # ─────────────────────────────────────────────────────
@@ -365,7 +330,6 @@ def hamta_profil(anvandare_id: int):
     try:
         cursor = get_cursor(conn)
 
-        # Hämta grundinfo om användaren
         cursor.execute("""
             SELECT namn, skapad_datum
             FROM anvandare
@@ -376,7 +340,6 @@ def hamta_profil(anvandare_id: int):
         if not anv:
             raise HTTPException(status_code=404, detail="Användare hittades inte")
 
-        # Hämta streak
         cursor.execute("""
             SELECT COUNT(*) AS streak
             FROM anvandar_aktiviteter
@@ -384,7 +347,6 @@ def hamta_profil(anvandare_id: int):
         """, (anvandare_id,))
         streak = cursor.fetchone()["streak"]
 
-        # Hämta antal utmaningar
         cursor.execute("""
             SELECT COUNT(*) AS utmaningar
             FROM anvandar_utmaningar
@@ -392,7 +354,6 @@ def hamta_profil(anvandare_id: int):
         """, (anvandare_id,))
         utmaningar = cursor.fetchone()["utmaningar"]
 
-        # Hämta genomförandegrad
         cursor.execute("""
             SELECT ROUND(AVG(procent_klar)) AS genomfort
             FROM anvandar_utmaningar
@@ -400,7 +361,6 @@ def hamta_profil(anvandare_id: int):
         """, (anvandare_id,))
         genomfort = cursor.fetchone()["genomfort"] or 0
 
-        # Hämta aktiv utmaning
         cursor.execute("""
             SELECT titel, dag, total_dagar, procent_klar
             FROM anvandar_utmaningar
@@ -409,7 +369,6 @@ def hamta_profil(anvandare_id: int):
         """, (anvandare_id,))
         aktiv = cursor.fetchone()
 
-        # Veckostatistik
         cursor.execute("""
             SELECT COUNT(*) AS traning
             FROM anvandar_aktiviteter
@@ -432,14 +391,12 @@ def hamta_profil(anvandare_id: int):
             "streak": streak,
             "utmaningar": utmaningar,
             "genomfort": genomfort,
-
             "aktiv": {
                 "titel": aktiv["titel"] if aktiv else "",
                 "dag": aktiv["dag"] if aktiv else 0,
                 "total": aktiv["total_dagar"] if aktiv else 0,
                 "procent": aktiv["procent_klar"] if aktiv else 0
             },
-
             "vecka": {
                 "traning": traning,
                 "kalorier": kalorier,
@@ -448,32 +405,30 @@ def hamta_profil(anvandare_id: int):
         }
 
     finally:
-        conn.close()
+        release_connection(conn)
+
 
 # ─────────────────────────────────────────────────────
 # VÄLJ ATLET & SCHEMA FÖR HEM.HTML
 # ─────────────────────────────────────────────────────
- 
+
 class ValjAtletBody(BaseModel):
     atlet_id: int
- 
+
 class BockaAvBody(BaseModel):
     avbockad: bool
- 
- 
+
+
 @app.post("/anvandare/{anvandare_id}/valj-atlet")
 def valj_atlet(anvandare_id: int, body: ValjAtletBody):
-    """Sparar vilken atlet användaren valt och kopierar atletens aktiviteter till användarens schema för idag."""
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
- 
-        # Spara vald atlet på användaren
+
         cursor.execute("""
             UPDATE anvandare SET vald_atlet_id = %s WHERE id = %s
         """, (body.atlet_id, anvandare_id))
- 
-        # Hämta atletens aktiviteter
+
         cursor.execute("""
             SELECT namn, tid_start, tid_slut, beskrivning, typ
             FROM atlet_aktiviteter
@@ -481,68 +436,65 @@ def valj_atlet(anvandare_id: int, body: ValjAtletBody):
             ORDER BY tid_start
         """, (body.atlet_id,))
         aktiviteter = cursor.fetchall()
- 
-        # Ta bort eventuellt gammalt schema för idag
+
         cursor.execute("""
             DELETE FROM anvandare_schema
             WHERE anvandar_id = %s AND datum = CURRENT_DATE
         """, (anvandare_id,))
- 
-        # Kopiera in atletens aktiviteter som dagens schema
+
         for akt in aktiviteter:
             cursor.execute("""
                 INSERT INTO anvandare_schema (anvandar_id, atlet_id, namn, tid_start, tid_slut, beskrivning, typ, datum, avbockad)
-VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_DATE, FALSE)
-""", (anvandare_id, body.atlet_id, akt["namn"], akt.get("tid_start"), akt.get("tid_slut"), akt.get("beskrivning"), akt.get("typ"))) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_DATE, FALSE)
+            """, (anvandare_id, body.atlet_id, akt["namn"], akt.get("tid_start"), akt.get("tid_slut"), akt.get("beskrivning"), akt.get("typ")))
+
         conn.commit()
         return {"status": "ok"}
     finally:
-        conn.close()
- 
- 
+        release_connection(conn)
+
+
 @app.get("/anvandare/{anvandare_id}/vald-atlet")
 def hamta_vald_atlet(anvandare_id: int):
-    """Returnerar den atlet användaren valt, eller 404 om ingen är vald."""
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
- 
+
         cursor.execute("""
             SELECT vald_atlet_id FROM anvandare WHERE id = %s
         """, (anvandare_id,))
         anv = cursor.fetchone()
- 
+
         if not anv or not anv["vald_atlet_id"]:
             raise HTTPException(status_code=404, detail="Ingen atlet vald")
- 
+
         cursor.execute("""
             SELECT id, namn, sport FROM atleter WHERE id = %s
         """, (anv["vald_atlet_id"],))
         atlet = cursor.fetchone()
- 
+
         if not atlet:
             raise HTTPException(status_code=404, detail="Atleten hittades inte")
- 
+
         return {"id": atlet["id"], "namn": atlet["namn"], "sport": atlet["sport"]}
     finally:
-        conn.close()
- 
- 
+        release_connection(conn)
+
+
 @app.get("/anvandare/{anvandare_id}/schema/idag")
 def hamta_schema_idag(anvandare_id: int):
-    """Returnerar användarens schema för dagens datum."""
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
- 
+
         cursor.execute("""
             SELECT id, namn, tid_start, tid_slut, beskrivning, avbockad, typ
-                FROM anvandare_schema
+            FROM anvandare_schema
             WHERE anvandar_id = %s AND datum = CURRENT_DATE
             ORDER BY tid_start
         """, (anvandare_id,))
         rader = cursor.fetchall()
- 
+
         return [
             {
                 "id": r["id"],
@@ -556,23 +508,21 @@ def hamta_schema_idag(anvandare_id: int):
             for r in rader
         ]
     finally:
-            conn.close()  
+        release_connection(conn)
+
 
 @app.post("/anvandare/{anvandare_id}/schema/{rad_id}/bocka-av")
 def bocka_av_aktivitet(anvandare_id: int, rad_id: int, body: BockaAvBody):
-    """Bockar av eller avmarkerar en aktivitet och uppdaterar streak om hela dagen är klar."""
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
- 
-        # Uppdatera avbockad-status
+
         cursor.execute("""
             UPDATE anvandare_schema
             SET avbockad = %s
             WHERE id = %s AND anvandar_id = %s
         """, (body.avbockad, rad_id, anvandare_id))
- 
-        # Kolla om alla aktiviteter för idag är avbockade
+
         cursor.execute("""
             SELECT COUNT(*) AS totalt,
                    SUM(CASE WHEN avbockad THEN 1 ELSE 0 END) AS avbockade
@@ -582,8 +532,7 @@ def bocka_av_aktivitet(anvandare_id: int, rad_id: int, body: BockaAvBody):
         rad = cursor.fetchone()
         totalt = rad["totalt"]
         avbockade = rad["avbockade"]
- 
-        # Om alla är klara — lägg till dagens datum i anvandar_aktiviteter (om det inte redan finns)
+
         if totalt > 0 and totalt == avbockade:
             cursor.execute("""
                 INSERT INTO anvandar_aktiviteter (anvandar_id, datum)
@@ -591,14 +540,12 @@ def bocka_av_aktivitet(anvandare_id: int, rad_id: int, body: BockaAvBody):
                 ON CONFLICT (anvandar_id, datum) DO NOTHING
             """, (anvandare_id,))
         else:
-            # Om användaren avmarkerar en aktivitet och dagen inte längre är hel — ta bort dagens streak
             cursor.execute("""
                 DELETE FROM anvandar_aktiviteter
                 WHERE anvandar_id = %s AND datum = CURRENT_DATE
             """, (anvandare_id,))
- 
+
         conn.commit()
         return {"status": "ok", "avbockade": avbockade, "totalt": totalt}
     finally:
-        conn.close()
- 
+        release_connection(conn)
