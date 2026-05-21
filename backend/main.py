@@ -358,33 +358,34 @@ def ta_bort_kalori(kalori_id: int):
 # ─────────────────────────────────────────────────────
 # Profil
 # ─────────────────────────────────────────────────────
-
 @app.get("/profil/{anvandare_id}")
 def hamta_profil(anvandare_id: int):
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
 
-        # Hämta grundinfo om användaren
         cursor.execute("""
             SELECT namn, skapad_datum
             FROM anvandare
             WHERE id = %s
         """, (anvandare_id,))
         anv = cursor.fetchone()
-
         if not anv:
             raise HTTPException(status_code=404, detail="Användare hittades inte")
 
-        # Hämta streak
         cursor.execute("""
-            SELECT COUNT(*) AS streak
+            SELECT DISTINCT datum
             FROM anvandar_aktiviteter
             WHERE anvandar_id = %s
+            ORDER BY datum DESC
         """, (anvandare_id,))
-        streak = cursor.fetchone()["streak"]
+        datumrader = [r["datum"] for r in cursor.fetchall()]
+        streak = 0
+        kolla_dag = date.today()
+        while kolla_dag in datumrader:
+            streak += 1
+            kolla_dag -= timedelta(days=1)
 
-        # Hämta antal utmaningar
         cursor.execute("""
             SELECT COUNT(*) AS utmaningar
             FROM anvandar_utmaningar
@@ -392,7 +393,6 @@ def hamta_profil(anvandare_id: int):
         """, (anvandare_id,))
         utmaningar = cursor.fetchone()["utmaningar"]
 
-        # Hämta genomförandegrad
         cursor.execute("""
             SELECT ROUND(AVG(procent_klar)) AS genomfort
             FROM anvandar_utmaningar
@@ -400,7 +400,6 @@ def hamta_profil(anvandare_id: int):
         """, (anvandare_id,))
         genomfort = cursor.fetchone()["genomfort"] or 0
 
-        # Hämta aktiv utmaning
         cursor.execute("""
             SELECT titel, dag, total_dagar, procent_klar
             FROM anvandar_utmaningar
@@ -409,7 +408,6 @@ def hamta_profil(anvandare_id: int):
         """, (anvandare_id,))
         aktiv = cursor.fetchone()
 
-        # Veckostatistik
         cursor.execute("""
             SELECT COUNT(*) AS traning
             FROM anvandar_aktiviteter
@@ -419,12 +417,46 @@ def hamta_profil(anvandare_id: int):
         traning = cursor.fetchone()["traning"]
 
         cursor.execute("""
-            SELECT COALESCE(SUM(kalorier),0) AS kalorier
+            SELECT COUNT(*) AS traning_forra
             FROM anvandar_aktiviteter
             WHERE anvandar_id = %s
-              AND datum >= CURRENT_DATE - INTERVAL '7 days'
+              AND datum >= CURRENT_DATE - INTERVAL '14 days'
+              AND datum <  CURRENT_DATE - INTERVAL '7 days'
         """, (anvandare_id,))
-        kalorier = cursor.fetchone()["kalorier"]
+        traning_forra = cursor.fetchone()["traning_forra"]
+
+        if traning_forra > 0:
+            forbattring = round(((traning - traning_forra) / traning_forra) * 100)
+        elif traning > 0:
+            forbattring = 100
+        else:
+            forbattring = 0
+
+        cursor.execute("""
+            SELECT COUNT(*) AS dagar
+            FROM (
+                SELECT skapad::date, SUM(kalorier) AS totalt
+                FROM kaloriloggar
+                WHERE anvandar_id = %s
+                  AND skapad::date >= CURRENT_DATE - INTERVAL '7 days'
+                GROUP BY skapad::date
+                HAVING SUM(kalorier) >= 2500
+            ) AS uppnadda
+        """, (anvandare_id,))
+        kalorier_dagar = cursor.fetchone()["dagar"]
+
+        cursor.execute("""
+            SELECT DATE_TRUNC('week', datum)::date AS vecka_start, COUNT(*) AS pass
+            FROM anvandar_aktiviteter
+            WHERE anvandar_id = %s
+              AND datum >= CURRENT_DATE - INTERVAL '56 days'
+            GROUP BY vecka_start
+            ORDER BY vecka_start DESC
+        """, (anvandare_id,))
+        historik = [
+            {"vecka": r["vecka_start"].strftime("%d %b"), "pass": r["pass"]}
+            for r in cursor.fetchall()
+        ]
 
         return {
             "namn": anv["namn"],
@@ -432,24 +464,22 @@ def hamta_profil(anvandare_id: int):
             "streak": streak,
             "utmaningar": utmaningar,
             "genomfort": genomfort,
-
             "aktiv": {
                 "titel": aktiv["titel"] if aktiv else "",
                 "dag": aktiv["dag"] if aktiv else 0,
                 "total": aktiv["total_dagar"] if aktiv else 0,
                 "procent": aktiv["procent_klar"] if aktiv else 0
             },
-
             "vecka": {
                 "traning": traning,
-                "kalorier": kalorier,
-                "forbattring": 0
-            }
+                "kalorier_dagar": kalorier_dagar,
+                "forbattring": forbattring
+            },
+            "historik": historik
         }
 
     finally:
         conn.close()
-
 # ─────────────────────────────────────────────────────
 # VÄLJ ATLET & SCHEMA FÖR HEM.HTML
 # ─────────────────────────────────────────────────────

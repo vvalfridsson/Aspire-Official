@@ -319,6 +319,36 @@ async function hamtaProfil() {
   document.getElementById("profil-utmaningar").textContent = data.utmaningar;
   document.getElementById("profil-genomfort").textContent = `${data.genomfort}%`;
 
+  renderaHistorik(data.historik);
+
+  function renderaHistorik(historik) {
+    const lista = document.getElementById("historik-lista");
+    if (!lista) return;
+
+    if (!historik || historik.length === 0) {
+      lista.innerHTML = `<div style="padding:16px; color:#ADADAD; font-size:14px;">Ingen historik ännu – slutför ditt första träningspass!</div>`;
+      return;
+    }
+
+    lista.innerHTML = historik.map((rad, i) => `
+      <div style="
+        display:flex; align-items:center; justify-content:space-between;
+        padding:14px 16px;
+        ${i > 0 ? 'border-top:1px solid #F0F0F0;' : ''}
+      ">
+        <div style="font-size:14px; font-weight:600; color:#0A0A0A;">Vecka fr. ${rad.vecka}</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="
+            height:8px; border-radius:4px; background:#0A0A0A;
+            width:${Math.min(rad.pass * 14, 98)}px;
+            min-width:4px;
+            transition:width 0.4s ease;
+          "></div>
+          <div style="font-size:14px; font-weight:700; color:#0A0A0A; min-width:24px; text-align:right;">${rad.pass}</div>
+        </div>
+      </div>
+    `).join("");
+  }
   // Aktiv utmaning
   if (data.aktiv.titel) {
     document.getElementById("aktiv-titel").textContent = data.aktiv.titel;
@@ -334,7 +364,7 @@ async function hamtaProfil() {
 
   // Veckans sammanfattning — rätt ID:n och formatering
   document.getElementById("vecka-traning").textContent = `${data.vecka.traning} pass`;
-  document.getElementById("vecka-kalorier").textContent = `${data.vecka.kalorier_dagar}/7 dagar`;
+  document.getElementById("vecka-kalorier").textContent = `${data.vecka.kalorier}/7 dagar`;
 
   const forb = data.vecka.forbattring;
   const forbEl = document.getElementById("vecka-forbattring");
