@@ -301,7 +301,6 @@ async function hamtaNotiser() {
     badge.style.display = "none";
   }
 }
-
 async function hamtaProfil() {
   const user = JSON.parse(localStorage.getItem("aspire_inloggad"));
   if (!user) return;
@@ -311,8 +310,8 @@ async function hamtaProfil() {
 
   document.getElementById("profil-namn").textContent = data.namn;
   document.getElementById("profil-medsedan").textContent = `Medlem sedan ${data.medsedan}`;
-  
-  const initialer = data.namn.substring(0, 2).toUpperCase(); 
+
+  const initialer = data.namn.substring(0, 2).toUpperCase();
   document.getElementById("profil-bild").style.display = "none";
   document.getElementById("profil-bild").insertAdjacentHTML("afterend", `<div class="avatar-fyrkant">${initialer}</div>`);
 
@@ -320,15 +319,37 @@ async function hamtaProfil() {
   document.getElementById("profil-utmaningar").textContent = data.utmaningar;
   document.getElementById("profil-genomfort").textContent = `${data.genomfort}%`;
 
-  document.getElementById("aktiv-titel").textContent = data.aktiv.titel;
-  document.getElementById("aktiv-dag").textContent = `Dag ${data.aktiv.dag} av ${data.aktiv.total}`;
-  document.getElementById("aktiv-progress").style.width = `${data.aktiv.procent}%`;
-  document.getElementById("aktiv-procent").textContent = `${data.aktiv.procent}%`;
+  // Aktiv utmaning
+  if (data.aktiv.titel) {
+    document.getElementById("aktiv-titel").textContent = data.aktiv.titel;
+    document.getElementById("aktiv-dag").textContent = `Dag ${data.aktiv.dag} av ${data.aktiv.total}`;
+    document.getElementById("aktiv-progress").style.width = `${data.aktiv.procent}%`;
+    document.getElementById("aktiv-procent").textContent = `${data.aktiv.procent}%`;
+  } else {
+    document.getElementById("aktiv-titel").textContent = "Ingen aktiv utmaning";
+    document.getElementById("aktiv-dag").textContent = "Välj en utmaning för att komma igång";
+    document.getElementById("aktiv-progress").style.width = "0%";
+    document.getElementById("aktiv-procent").textContent = "0%";
+  }
 
-  document.getElementById("vecko-traning").textContent = data.vecka.traning;
-  document.getElementById("vecko-kalorier").textContent = data.vecka.kalorier;
-  document.getElementById("vecka-forbattring").textContent = data.vecka.forbattring;
+  // Veckans sammanfattning — rätt ID:n och formatering
+  document.getElementById("vecka-traning").textContent = `${data.vecka.traning} pass`;
+  document.getElementById("vecka-kalorier").textContent = `${data.vecka.kalorier_dagar}/7 dagar`;
+
+  const forb = data.vecka.forbattring;
+  const forbEl = document.getElementById("vecka-forbattring");
+  if (forb > 0) {
+    forbEl.textContent = `+${forb}%`;
+    forbEl.style.color = "#22C55E";
+  } else if (forb < 0) {
+    forbEl.textContent = `${forb}%`;
+    forbEl.style.color = "#EF4444";
+  } else {
+    forbEl.textContent = "—";
+    forbEl.style.color = "#ADADAD";
+  }
 }
+
 
 /* ─────────────────────────────────────────────────────
    HÄMTA ATLETER & ATLETPROFIL
