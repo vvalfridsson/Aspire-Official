@@ -601,4 +601,112 @@ def bocka_av_aktivitet(anvandare_id: int, rad_id: int, body: BockaAvBody):
         return {"status": "ok", "avbockade": avbockade, "totalt": totalt}
     finally:
         conn.close()
+    
+# ─────────────────────────────────────────────────────
+# HÄMTA & UPPDATERA ANVÄNDARINFO (inställningssidan)
+# ─────────────────────────────────────────────────────
+
+class UppdateraAnvandareRequest(BaseModel):
+    namn: str | None = None
+    epost: EmailStr | None = None
+    nuvarande_losenord: str | None = None
+    nytt_losenord: str | None = None
+
+
+class KroppsdataRequest(BaseModel):
+    langd: float   # cm
+    vikt: float    # kg
+
+
+@app.get("/anvandare/{anvandare_id}")
+def hamta_anvandare_info(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("SELECT id, namn, epost FROM anvandare WHERE id = %s", (anvandare_id,))
+        anv = cursor.fetchone()
+        if not anv:
+            raise HTTPException(status_code=404, detail="Användaren hittades inte.")
+        return {"id": anv["id"], "namn": anv["namn"], "epost": anv["epost"]}
+    finally:
+        conn.close()
+
+
+@app.put("/anvandare/{anvandare_id}")
+def uppdatera_anvandare(anvandare_id: int, data: UppdateraAnvandareRequest):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("SELECT namn, epost, losenord FROM anvandare WHERE id = %s", (anvandare_id,))
+        anv = cursor.fetchone()
+        if not anv:
+            raise HTTPException(status_code=404, detail="Användaren hittades inte.")
+
+        nytt_namn     = data.namn   if data.namn   else anv["namn"]
+        nytt_epost    = data.epost  if data.epost  else anv["epost"]
+        nytt_losenord = anv["losenord"]
+
+        if data.nytt_losenord:
+            if not data.nuvarande_losenord:
+                raise HTTPException(status_code=400, detail="Nuvarande lösenord krävs.")
+            if anv["losenord"] != data.nuvarande_losenord:
+                raise HTTPException(status_code=401, detail="Felaktigt nuvarande lösenord.")
+            if len(data.nytt_losenord) < 8:
+                raise HTTPException(status_code=400, detail="Nytt lösenord måste ha minst 8 tecken.")
+            nytt_losenord = data.nytt_losenord
+
+        if nytt_epost != anv["epost"]:
+            cursor.execute("SELECT id FROM anvandare WHERE epost = %s AND id != %s", (nytt_epost, anvandare_id))
+            if cursor.fetchone():
+                raise HTTPException(status_code=409, detail="E-postadressen används redan av ett annat konto.")
+
+        cursor.execute(
+            "UPDATE anvandare SET namn = %s, epost = %s, losenord = %s WHERE id = %s",
+            (nytt_namn, nytt_epost, nytt_losenord, anvandare_id)
+        )
+        conn.commit()
+        return {"id": anvandare_id, "namn": nytt_namn, "epost": nytt_epost}
+    finally:
+        conn.close()
+
+
+@app.get("/anvandare/{anvandare_id}/kropp")
+def hamta_kroppsdata(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("SELECT langd, vikt FROM anvandare WHERE id = %s", (anvandare_id,))
+        anv = cursor.fetchone()
+        if not anv:
+            raise HTTPException(status_code=404, detail="Användaren hittades inte.")
+        if anv["langd"] is None or anv["vikt"] is None:
+            raise HTTPException(status_code=404, detail="Ingen kroppsdata sparad.")
+        bmi = round(anv["vikt"] / ((anv["langd"] / 100) ** 2), 1)
+        return {"langd": anv["langd"], "vikt": anv["vikt"], "bmi": bmi}
+    finally:
+        conn.close()
+
+
+@app.put("/anvandare/{anvandare_id}/kropp")
+def spara_kroppsdata(anvandare_id: int, data: KroppsdataRequest):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("""
+            ALTER TABLE anvandare
+            ADD COLUMN IF NOT EXISTS langd NUMERIC(5,1),
+            ADD COLUMN IF NOT EXISTS vikt  NUMERIC(5,1);
+        """)
+        cursor.execute(
+            "UPDATE anvandare SET langd = %s, vikt = %s WHERE id = %s RETURNING id",
+            (data.langd, data.vikt, anvandare_id)
+        )
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Användaren hittades inte.")
+        conn.commit()
+        bmi = round(data.vikt / ((data.langd / 100) ** 2), 1)
+        return {"langd": data.langd, "vikt": data.vikt, "bmi": bmi}
+    finally:
+        conn.close()
+        
  
