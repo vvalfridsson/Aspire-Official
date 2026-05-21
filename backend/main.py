@@ -475,7 +475,7 @@ def valj_atlet(anvandare_id: int, body: ValjAtletBody):
  
         # Hämta atletens aktiviteter
         cursor.execute("""
-            SELECT namn, tid_start, tid_slut, beskrivning
+            SELECT namn, tid_start, tid_slut, beskrivning, typ
             FROM atlet_aktiviteter
             WHERE atlet_id = %s
             ORDER BY tid_start
@@ -491,10 +491,9 @@ def valj_atlet(anvandare_id: int, body: ValjAtletBody):
         # Kopiera in atletens aktiviteter som dagens schema
         for akt in aktiviteter:
             cursor.execute("""
-                INSERT INTO anvandare_schema (anvandar_id, atlet_id, namn, tid_start, tid_slut, beskrivning, datum, avbockad)
-                VALUES (%s, %s, %s, %s, %s, %s, CURRENT_DATE, FALSE)
-            """, (anvandare_id, body.atlet_id, akt["namn"], akt.get("tid_start"), akt.get("tid_slut"), akt.get("beskrivning")))
- 
+                INSERT INTO anvandare_schema (anvandar_id, atlet_id, namn, tid_start, tid_slut, beskrivning, typ, datum, avbockad)
+VALUES (%s, %s, %s, %s, %s, %s, %s, CURRENT_DATE, FALSE)
+""", (anvandare_id, body.atlet_id, akt["namn"], akt.get("tid_start"), akt.get("tid_slut"), akt.get("beskrivning"), akt.get("typ"))) 
         conn.commit()
         return {"status": "ok"}
     finally:
@@ -537,8 +536,8 @@ def hamta_schema_idag(anvandare_id: int):
         cursor = get_cursor(conn)
  
         cursor.execute("""
-            SELECT id, namn, tid_start, tid_slut, beskrivning, avbockad
-            FROM anvandare_schema
+            SELECT id, namn, tid_start, tid_slut, beskrivning, avbockad, typ
+                FROM anvandare_schema
             WHERE anvandar_id = %s AND datum = CURRENT_DATE
             ORDER BY tid_start
         """, (anvandare_id,))
@@ -551,14 +550,14 @@ def hamta_schema_idag(anvandare_id: int):
                 "tid_start": r["tid_start"],
                 "tid_slut": r["tid_slut"],
                 "beskrivning": r["beskrivning"],
-                "avbockad": r["avbockad"]
+                "avbockad": r["avbockad"],
+                "typ": r["typ"]
             }
             for r in rader
         ]
     finally:
-        conn.close()
- 
- 
+            conn.close()  
+
 @app.post("/anvandare/{anvandare_id}/schema/{rad_id}/bocka-av")
 def bocka_av_aktivitet(anvandare_id: int, rad_id: int, body: BockaAvBody):
     """Bockar av eller avmarkerar en aktivitet och uppdaterar streak om hela dagen är klar."""

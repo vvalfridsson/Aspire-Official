@@ -99,8 +99,21 @@
         <div class="aktivitet-rad ${akt.avbockad ? "avbockad" : ""}" id="rad-${akt.id}">
           <div class="aktivitet-prick ${i < Math.ceil(totalt / 2) ? "rod" : "gra"}"></div>
           <div class="aktivitet-ikon">
-            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </div>
+  ${(() => {
+    const typIkon = {
+      'träning':      'icons/traning.svg',
+      'mat':          'icons/mat.svg',
+      'återhämtning': 'icons/aterhamtning.svg',
+      'sömn':         'icons/somn.svg',
+      'rutin':        'icons/rutin.svg',
+      'mental':       'icons/mental.svg'
+    };
+    const ikonSrc = typIkon[akt.typ];
+    return ikonSrc
+      ? `<img src="${ikonSrc}" width="20" height="20" style="opacity:0.6;">`
+      : `<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`;
+  })()}
+</div>
           <div class="aktivitet-kropp">
             ${tid ? `<div class="aktivitet-tid">${tid}</div>` : ""}
             <div class="aktivitet-namn">${akt.namn}</div>
