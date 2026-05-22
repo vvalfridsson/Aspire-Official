@@ -71,23 +71,35 @@ function byttMaltid(klickad) {
 ───────────────────────────────────────────────────── */
 function sparaKalorier() {
   const inmatning = document.getElementById('kalori-input');
-  const kcal = inmatning.value;
+  const felEl = document.getElementById('kalori-fel');
+  const kcal = parseInt(inmatning.value);
+
+  if (felEl) felEl.style.display = 'none';
+
+  if (!kcal || kcal <= 0 || isNaN(kcal)) {
+    if (felEl) {
+      felEl.textContent = 'Ange ett heltal större än 0, t.ex. 450.';
+      felEl.style.display = 'block';
+    }
+    return;
+  }
 
   const aktivFlik = document.querySelector('.maltids-flik.aktiv');
   const maltidstyp = aktivFlik ? aktivFlik.textContent.trim() : 'Okänd';
 
-  if (!kcal || kcal <= 0) {
-    alert('Ange ett giltigt kalorival!');
+  const user = JSON.parse(localStorage.getItem('aspire_inloggad'));
+  if (!user) {
+    if (felEl) {
+      felEl.textContent = 'Du måste vara inloggad.';
+      felEl.style.display = 'block';
+    }
     return;
   }
-
-  const user = JSON.parse(localStorage.getItem('aspire_inloggad'));
-  if (!user) { alert('Du måste vara inloggad.'); return; }
 
   fetch(`${ASPIRE_API_BASE_URL}/kalorier/${user.id}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ maltid: maltidstyp, kalorier: parseInt(kcal) })
+    body: JSON.stringify({ maltid: maltidstyp, kalorier: kcal })
   })
   .then(svar => svar.json())
   .then(data => {
@@ -96,7 +108,10 @@ function sparaKalorier() {
     uppdateraKalorier();
   })
   .catch(() => {
-    alert('Kunde inte spara till databasen.');
+    if (felEl) {
+      felEl.textContent = 'Kunde inte spara till databasen. Kontrollera anslutningen.';
+      felEl.style.display = 'block';
+    }
   });
 }
 
@@ -597,3 +612,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+
+const skyddadeSidor = ['hem.html', 'profil.html', 'streaks.html', 'kalorier.html', 'sok.html', 'installningar.html'];
+
+if (skyddadeSidor.includes(filnamn) && !localStorage.getItem('aspire_inloggad')) {
+  window.location.replace('index.html');
+}

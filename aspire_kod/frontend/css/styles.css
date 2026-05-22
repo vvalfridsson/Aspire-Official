@@ -1705,3 +1705,19 @@ body {
   background-color: #E8241C;
   color: #FFFFFF;
 }
+
+.laddnings-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  display: inline-block;
+  animation: snurra 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@keyframes snurra {
+  to { transform: rotate(360deg); }
+}
