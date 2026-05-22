@@ -60,6 +60,9 @@ class KaloriRequest(BaseModel):
     maltid: str
     kalorier: int
 
+class Kroppsdata(BaseModel):
+    langd: float
+    vikt: float
 
 # ─────────────────────────────────────────────────────
 # Grund-endpoint
@@ -337,14 +340,7 @@ def hamta_profil(anvandare_id: int):
         anv = cursor.fetchone()
         if not anv:
             raise HTTPException(status_code=404, detail="Användare hittades inte")
-
-        cursor.execute("""
-            SELECT DISTINCT datum
-            FROM anvandar_aktiviteter
-            WHERE anvandar_id = %s
-            ORDER BY datum DESC
-        """, (anvandare_id,))
-        streak = cursor.fetchone()["streak"]
+        streak = hamta_streak(anvandare_id)["aktuell"]
 
         # Hämta antal utmaningar
         cursor.execute("""
@@ -440,7 +436,7 @@ def hamta_profil(anvandare_id: int):
         }
 
     finally:
-        conn.close()
+        release_connection(conn)
 
 # ─────────────────────────────────────────────────────
 # VÄLJ ATLET & SCHEMA FÖR HEM.HTML
@@ -582,5 +578,37 @@ def bocka_av_aktivitet(anvandare_id: int, rad_id: int, body: BockaAvBody):
         conn.commit()
         return {"status": "ok", "avbockade": avbockade, "totalt": totalt}
     finally:
-        conn.close()
+        release_connection(conn)
+
+@app.get("/anvandare/{anvandare_id}/kropp")
+def hamta_kropp(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("""
+            SELECT langd, vikt FROM anvandare WHERE id = %s
+        """, (anvandare_id,))
+        rad = cursor.fetchone()
+        if not rad:
+            raise HTTPException(status_code=404, detail="Användare hittades inte")
+        return {"langd": rad["langd"], "vikt": rad["vikt"]}
+    finally:
+        release_connection(conn)
+
+
+@app.put("/anvandare/{anvandare_id}/kropp")
+def spara_kropp(anvandare_id: int, data: Kroppsdata):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("""
+            UPDATE anvandare SET langd = %s, vikt = %s WHERE id = %s
+        """, (data.langd, data.vikt, anvandare_id))
+        conn.commit()
+        return {"status": "ok"}
+    finally:
+        release_connection(conn)
+
+        
+        
  

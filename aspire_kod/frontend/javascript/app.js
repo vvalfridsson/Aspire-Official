@@ -364,7 +364,7 @@ async function hamtaProfil() {
 
   // Veckans sammanfattning — rätt ID:n och formatering
   document.getElementById("vecka-traning").textContent = `${data.vecka.traning} pass`;
-  document.getElementById("vecka-kalorier").textContent = `${data.vecka.kalorier}/7 dagar`;
+document.getElementById("vecka-kalorier").textContent = `${data.vecka.kalorier_dagar ?? 0}/7 dagar`;
 
   const forb = data.vecka.forbattring;
   const forbEl = document.getElementById("vecka-forbattring");
