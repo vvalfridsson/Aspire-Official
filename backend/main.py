@@ -5,9 +5,11 @@ FastAPI-backend med endpoints för inloggning, registrering, atleter och profile
 Starta servern:
 py -m uvicorn main:app --reload --port 8002
 """
-
+from fastapi import Depends
+from jose import jwt
+from fastapi import Header
+import bcrypt
 from datetime import date, timedelta
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
@@ -23,6 +25,18 @@ from database import (
 
 
 app = FastAPI(title="Aspire API", version="1.0")
+SECRET_KEY = "SUPER_HEMLIG_NYCKEL"
+ALGORITHM = "HS256"
+
+def skapa_token(anvandare):
+    return jwt.encode(
+        {
+            "id": anvandare['id'],
+            "epost": anvandare['epost']
+        },
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
 
 
 app.add_middleware(
@@ -104,19 +118,42 @@ def registrera(data: RegistreraRequest):
 def logga_in(data: LoggaInRequest):
     anvandare = hamta_anvandare(data.epost)
 
-    if anvandare is None or anvandare["losenord"] != data.losenord:
+    if anvandare is None:
         raise HTTPException(
             status_code=401,
             detail="Felaktig e-postadress eller lösenord."
-        )
+    )
+
+    korrekt_losenord = bcrypt.checkpw(
+        data.losenord.encode('utf-8'),
+        anvandare['losenord'].encode('utf-8')
+)
+
+    if not korrekt_losenord:
+        raise HTTPException(
+            status_code=401,
+            detail="Felaktig e-postadress eller lösenord."
+    )
 
     return {
         "id": anvandare["id"],
         "namn": anvandare["namn"],
         "epost": anvandare["epost"],
+        "token": skapa_token(anvandare),
     }
 
+def verifiera_token(authorization: str = Header(None)):
 
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Token saknas")
+
+    token = authorization.replace("Bearer ", "")
+
+    try:
+        data = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return data
+    except:
+        raise HTTPException(status_code=401, detail="Ogiltig token")
 # ─────────────────────────────────────────────────────
 # Atleter
 # ─────────────────────────────────────────────────────
@@ -212,8 +249,19 @@ def hamta_atlet_aktiviteter(atlet_id: int):
 # ─────────────────────────────────────────────────────
 
 @app.get("/streak/{anvandare_id}")
-def hamta_streak(anvandare_id: int):
+def hamta_streak(
+    anvandare_id: int,
+    user = Depends(verifiera_token)
+):
+
+    if user["id"] != anvandare_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Ingen behörighet"
+        )
+
     conn = get_connection()
+
     try:
         cursor = get_cursor(conn)
 
@@ -227,16 +275,27 @@ def hamta_streak(anvandare_id: int):
                 """,
                 (anvandare_id,)
             )
+
             rows = cursor.fetchall()
+
         except Exception:
-            return {"aktuell": 0, "langsta": 0, "dagar": []}
+            return {
+                "aktuell": 0,
+                "langsta": 0,
+                "dagar": []
+            }
 
         if not rows:
-            return {"aktuell": 0, "langsta": 0, "dagar": []}
+            return {
+                "aktuell": 0,
+                "langsta": 0,
+                "dagar": []
+            }
 
         dates = [r["datum"] for r in rows]
 
         today = date.today()
+
         streak = 0
         check_day = today
 
@@ -248,8 +307,10 @@ def hamta_streak(anvandare_id: int):
         current = 1
 
         for i in range(1, len(dates)):
+
             if dates[i - 1] - dates[i] == timedelta(days=1):
                 current += 1
+
             else:
                 longest = max(longest, current)
                 current = 1
@@ -265,22 +326,38 @@ def hamta_streak(anvandare_id: int):
     finally:
         release_connection(conn)
 
-
 # ─────────────────────────────────────────────────────
 # Notiser
 # ─────────────────────────────────────────────────────
 
 @app.get("/notiser/{anvandare_id}")
-def hamta_notiser(anvandare_id: int):
-    return {"antal": 0}
+def hamta_notiser(
+    anvandare_id: int,
+    user = Depends(verifiera_token)
+):
 
+    if user["id"] != anvandare_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Ingen behörighet"
+        )
 
 # ─────────────────────────────────────────────────────
 # Kalorilogg
 # ─────────────────────────────────────────────────────
 
 @app.post("/kalorier/{anvandare_id}")
-def spara_kalori(anvandare_id: int, data: KaloriRequest):
+def spara_kalori(
+    anvandare_id: int,
+    data: KaloriRequest,
+    user = Depends(verifiera_token)
+):
+
+    if user["id"] != anvandare_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Ingen behörighet"
+        )
     if data.kalorier <= 0:
         raise HTTPException(status_code=400, detail="Kalorier måste vara större än 0.")
     conn = get_connection()
@@ -298,7 +375,16 @@ def spara_kalori(anvandare_id: int, data: KaloriRequest):
 
 
 @app.get("/kalorier/{anvandare_id}")
-def hamta_kalorier(anvandare_id: int):
+def hamta_kalorier(
+    anvandare_id: int,
+    user = Depends(verifiera_token)
+):
+
+    if user["id"] != anvandare_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Ingen behörighet"
+        )
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
@@ -312,22 +398,61 @@ def hamta_kalorier(anvandare_id: int):
 
 
 @app.delete("/kalorier/{kalori_id}/ta-bort")
-def ta_bort_kalori(kalori_id: int):
+def ta_bort_kalori(
+    kalori_id: int,
+    user = Depends(verifiera_token)
+):
+
     conn = get_connection()
+
     try:
         cursor = get_cursor(conn)
-        cursor.execute("DELETE FROM kaloriloggar WHERE id = %s", (kalori_id,))
+
+        cursor.execute(
+            "SELECT anvandar_id FROM kaloriloggar WHERE id = %s",
+            (kalori_id,)
+        )
+
+        kalori = cursor.fetchone()
+
+        if not kalori:
+            raise HTTPException(
+                status_code=404,
+                detail="Kaloripost hittades inte"
+            )
+
+        if kalori["anvandar_id"] != user["id"]:
+            raise HTTPException(
+                status_code=403,
+                detail="Ingen behörighet"
+            )
+
+        cursor.execute(
+            "DELETE FROM kaloriloggar WHERE id = %s",
+            (kalori_id,)
+        )
+
         conn.commit()
+
         return {"status": "borttagen"}
+
     finally:
         release_connection(conn)
-
 
 # ─────────────────────────────────────────────────────
 # Profil
 # ─────────────────────────────────────────────────────
 @app.get("/profil/{anvandare_id}")
-def hamta_profil(anvandare_id: int):
+def hamta_profil(
+    anvandare_id: int,
+    user = Depends(verifiera_token)
+):
+
+    if user["id"] != anvandare_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Ingen behörighet"
+        )
     conn = get_connection()
     try:
         cursor = get_cursor(conn)

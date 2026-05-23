@@ -2,7 +2,7 @@
 Aspire — database.py
 Hanterar databasanslutning och användarfunktioner mot PostgreSQL.
 """
-
+import bcrypt
 import os
 import psycopg2
 import psycopg2.extras
@@ -44,11 +44,15 @@ def skapa_anvandartabell(conn):
 
 def registrera_anvandare(namn, epost, losenord):
     conn = get_connection()
+    hashat_losenord = bcrypt.hashpw(
+    losenord.encode('utf-8'),
+    bcrypt.gensalt()
+    ).decode('utf-8')
     try:
         cursor = get_cursor(conn)
         cursor.execute(
             "INSERT INTO anvandare (namn, epost, losenord) VALUES (%s, %s, %s) RETURNING id, namn, epost;",
-            (namn, epost, losenord)
+            (namn, epost, hashat_losenord)
         )
         anvandare = cursor.fetchone()
         conn.commit()

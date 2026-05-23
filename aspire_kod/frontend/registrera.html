@@ -33,6 +33,17 @@
           <label class="faltetikett">Bekräfta lösenord</label>
           <input id="reg-bekrafta" class="textfalt" type="password" placeholder="Upprepa lösenordet">
           <div id="fel-reg-bekrafta" style="font-size:12px;color:#E8241C;margin-top:-8px;margin-bottom:10px;display:none;"></div>
+          <div class="gdpr-box">
+  <input type="checkbox" id="gdpr-godkann">
+  <label for="gdpr-godkann">
+    Jag godkänner Aspire:s
+    <a href="integritetspolicy.html" target="_blank">
+      integritetspolicy
+    </a>
+  </label>
+</div>
+
+<div id="fel-gdpr" class="feltext" style="display:none;"></div>
           <button class="logga-in-knapp" onclick="hanteraRegistrering()">Skapa konto</button>
           <div class="registrera-rad">
             <p>Har du redan ett konto?</p>
@@ -44,5 +55,8 @@
   </div>
 <script src="../javascript/app.js"></script>
 <script src="javascript/statusbar.js"></script>
+<div id="loader" class="loader-overlay" style="display:none;">
+  <div class="loader"></div>
+</div>
 </body>
 </html>

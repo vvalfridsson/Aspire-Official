@@ -249,31 +249,78 @@ function hanteraInloggning() {
 }
 
 function hanteraRegistrering() {
-  const namn = document.getElementById('reg-namn').value.trim();
-  const epost = document.getElementById('reg-epost').value.trim();
-  const losenord = document.getElementById('reg-losenord').value;
-  const bekrafta = document.getElementById('reg-bekrafta').value;
+  var namn = document.getElementById('reg-namn').value.trim();
+  var epost = document.getElementById('reg-epost').value.trim();
+  var losenord = document.getElementById('reg-losenord').value;
+  var bekrafta = document.getElementById('reg-bekrafta').value;
+  var gdpr = document.getElementById('gdpr-godkann').checked;
 
-  ['fel-reg-namn','fel-reg-epost','fel-reg-losenord','fel-reg-bekrafta','reg-fel'].forEach(dolFelmeddelande);
+  ['fel-reg-namn',
+   'fel-reg-epost',
+   'fel-reg-losenord',
+   'fel-reg-bekrafta',
+   'fel-gdpr',
+   'reg-fel']
+  .forEach(dolFelmeddelande);
 
-  if (!namn) return visaFelmeddelande('fel-reg-namn', 'Namn är obligatoriskt.');
-  if (!epost) return visaFelmeddelande('fel-reg-epost', 'E-post är obligatoriskt.');
-  if (!losenord || losenord.length < 8) return visaFelmeddelande('fel-reg-losenord', 'Lösenordet måste ha minst 8 tecken.');
-  if (losenord !== bekrafta) return visaFelmeddelande('fel-reg-bekrafta', 'Lösenorden matchar inte.');
+  if (!namn) {
+    visaFelmeddelande('fel-reg-namn', 'Namn är obligatoriskt.');
+    return;
+  }
 
-  fetch(`${ASPIRE_API_BASE_URL}/registrera`, {
+  if (!epost.includes('@')) {
+    visaFelmeddelande('fel-reg-epost', 'Ogiltig e-postadress.');
+    return;
+  }
+  if (losenord.length < 8) {
+    visaFelmeddelande('fel-reg-losenord', 'Minst 8 tecken krävs.');
+    return;
+  }
+
+  if (losenord !== bekrafta) {
+    visaFelmeddelande('fel-reg-bekrafta', 'Lösenorden matchar inte.');
+    return;
+  }
+
+  if (!gdpr) {
+    visaFelmeddelande('fel-gdpr', 'Du måste godkänna integritetspolicyn.');
+    return;
+  }
+  visaLaddning();
+
+  fetch('http://127.0.0.1:8002/registrera', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ namn, epost, losenord })
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      namn: namn,
+      epost: epost,
+      losenord: losenord,
+      gdpr_godkand: gdpr
+    })
   })
-  .then(svar => svar.json())
-  .then(data => {
-    if (data.detail) return visaFelmeddelande('reg-fel', data.detail);
+  .then(function(svar) {
+    return svar.json();
+  })
+  .then(function(data) {
+    doljLaddning();
+
+    if (data.detail) {
+      visaFelmeddelande('reg-fel', data.detail);
+      return;
+    }
     localStorage.setItem('aspire_inloggad', JSON.stringify(data));
     window.location.href = 'hem.html';
   })
-  .catch(() => visaFelmeddelande('reg-fel', 'Kunde inte ansluta till servern.'));
+  .catch(function() {
+    doljLaddning();
+    visaFelmeddelande('reg-fel', 'Serverfel.');
+  });
 }
+
+
+
 
 function loggarUt() {
   ['aspire_inloggad', 'anvandare', 'user'].forEach(k => localStorage.removeItem(k));
@@ -617,4 +664,60 @@ const skyddadeSidor = ['hem.html', 'profil.html', 'streaks.html', 'kalorier.html
 
 if (skyddadeSidor.includes(filnamn) && !localStorage.getItem('aspire_inloggad')) {
   window.location.replace('index.html');
+}
+
+function startaRealtidsvalidering() {
+
+  const namn = document.getElementById('reg-namn');
+  const epost = document.getElementById('reg-epost');
+  const losenord = document.getElementById('reg-losenord');
+  const bekrafta = document.getElementById('reg-bekrafta');
+
+  if (!namn) return;
+
+  namn.addEventListener('input', function() {
+    if (namn.value.trim().length < 2) {
+      visaFelmeddelande('fel-reg-namn', 'Minst 2 bokstäver krävs.');
+    } else {
+      dolFelmeddelande('fel-reg-namn');
+    }
+  });
+
+  epost.addEventListener('input', function() {
+    if (!epost.value.includes('@')) {
+      visaFelmeddelande('fel-reg-epost', 'Ogiltig e-post.');
+    } else {
+      dolFelmeddelande('fel-reg-epost');
+    }
+  });
+  losenord.addEventListener('input', function() {
+    if (losenord.value.length < 8) {
+      visaFelmeddelande('fel-reg-losenord', 'Minst 8 tecken krävs.');
+    } else {
+      dolFelmeddelande('fel-reg-losenord');
+    }
+  });
+
+  bekrafta.addEventListener('input', function() {
+    if (bekrafta.value !== losenord.value) {
+      visaFelmeddelande('fel-reg-bekrafta', 'Lösenorden matchar inte.');
+    } else {
+      dolFelmeddelande('fel-reg-bekrafta');
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', startaRealtidsvalidering);
+
+function visaLaddning() {
+  const loader = document.getElementById('loader');
+  if (loader) {
+    loader.style.display = 'flex';
+  }
+}
+
+function doljLaddning() {
+  const loader = document.getElementById('loader');
+  if (loader) {
+    loader.style.display = 'none';
+  }
 }
