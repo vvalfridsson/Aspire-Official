@@ -19,6 +19,9 @@
         <div class="login-formular">
           <div class="login-titel">Skapa konto</div>
           <div class="login-undertext">Kom igång idag</div>
+          <div class="integritet-lank-rad">
+          <a href="integritet.html" target="_blank" class="integritet-lank-registrera">Läs vår integritetspolicy</a>
+          </div>
           <div id="reg-lyckad" style="font-size:13px;color:#22AA66;margin-bottom:12px;display:none;"></div>
           <div id="reg-fel" style="font-size:13px;color:#E8241C;margin-bottom:12px;display:none;"></div>
           <label class="faltetikett">Namn</label>
@@ -33,6 +36,17 @@
           <label class="faltetikett">Bekräfta lösenord</label>
           <input id="reg-bekrafta" class="textfalt" type="password" placeholder="Upprepa lösenordet">
           <div id="fel-reg-bekrafta" style="font-size:12px;color:#E8241C;margin-top:-8px;margin-bottom:10px;display:none;"></div>
+          <div class="gdpr-rad">
+            <input type="checkbox" id="gdpr-samtycke" class="gdpr-kryssruta">
+            <label for="gdpr-samtycke" class="gdpr-etikett">
+              Jag har läst och godkänner
+              <a href="integritet.html" target="_blank" class="gdpr-lank">integritetspolicyn</a>
+              och samtycker till att Aspire behandlar mina personuppgifter.
+            </label>
+          </div>
+          <div id="fel-gdpr" class="faltfel" style="display:none;">
+            Du måste godkänna integritetspolicyn för att fortsätta.
+          </div>
           <button class="logga-in-knapp" onclick="hanteraRegistrering()">Skapa konto</button>
           <div class="registrera-rad">
             <p>Har du redan ett konto?</p>

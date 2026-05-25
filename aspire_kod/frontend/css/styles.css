@@ -1721,3 +1721,187 @@ body {
 @keyframes snurra {
   to { transform: rotate(360deg); }
 }
+
+/* ─────────────────────────────────────────────────────
+   INTEGRITETSPOLICY
+───────────────────────────────────────────────────── */
+
+.integritet-sida {
+  min-height: 100vh;
+  background: #FAFAFA;
+  padding: 0 0 48px 0;
+}
+
+.integritet-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 20px 20px;
+  background: #fff;
+  border-bottom: 1px solid #F0F0F0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.integritet-rubrik {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0A0A0A;
+}
+
+.integritet-innehall {
+  padding: 24px 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.integritet-uppdaterad {
+  font-size: 12px;
+  color: #ADADAD;
+  margin-bottom: 24px;
+}
+
+.integritet-ingress {
+  font-size: 15px;
+  color: #2A2A2A;
+  line-height: 1.7;
+  margin-bottom: 28px;
+  padding: 16px;
+  background: #F7F7F7;
+  border-radius: 12px;
+}
+
+.integritet-sektion {
+  margin-bottom: 28px;
+}
+
+.integritet-sektion h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0A0A0A;
+  margin: 0 0 8px 0;
+}
+
+.integritet-sektion p,
+.integritet-sektion li {
+  font-size: 14px;
+  color: #4A4A4A;
+  line-height: 1.7;
+  margin: 0 0 6px 0;
+}
+
+.integritet-sektion ul {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+
+.integritet-kontakt {
+  background: #F0F0F0;
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.integritet-kontakt p {
+  font-size: 13px;
+  color: #4A4A4A;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.integritet-kontakt a {
+  color: #0A0A0A;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ─────────────────────────────────────────────────────
+   GDPR-KRYSSRUTA (registreringssidan)
+───────────────────────────────────────────────────── */
+
+.gdpr-rad {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.gdpr-kryssruta {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #0A0A0A;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.gdpr-etikett {
+  font-size: 13px;
+  color: #4A4A4A;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.gdpr-lank {
+  color: #0A0A0A;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.faltfel {
+  font-size: 12px;
+  color: #E8241C;
+  margin-top: -8px;
+  margin-bottom: 10px;
+}
+
+/*radwrea konto*/
+
+.radera-konto-knapp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: calc(100% - 40px);
+  margin: 8px 20px 0;
+  padding: 15px;
+  background: #FEF2F2;
+  color: #EF4444;
+  border: none;
+  border-radius: 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.radera-konto-knapp:hover {
+  background: #FEE2E2;
+}
+
+.radera-konto-knapp svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.integritet-lank-rad {
+  margin-bottom: 16px;
+}
+
+.integritet-lank-registrera {
+  font-size: 13px;
+  color: #ADADAD;
+  text-decoration: underline;
+}
+
+.integritet-sida {
+  overflow-y: scroll;
+  height: 100vh;
+}

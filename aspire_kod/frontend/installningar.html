@@ -663,6 +663,17 @@
         </svg>
         Logga ut
       </button>
+
+      <button class="radera-konto-knapp" onclick="raderaKonto()">
+        <svg viewBox="0 0 24 24">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+          <path d="M10 11v6"/>
+          <path d="M14 11v6"/>
+          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+        </svg>
+        Radera konto
+      </button>
  
       <div class="botten-mellanrum" style="height:28px;"></div>
  
@@ -991,6 +1002,29 @@ function loggarUt() {
   if (!confirm('Vill du verkligen logga ut?')) return;
   ['aspire_inloggad', 'anvandare', 'user', 'aspire_alla_atleter'].forEach(k => localStorage.removeItem(k));
   window.location.href = 'index.html';
+}
+
+/* ── RADERA KONTO (K-SEC-1.1) ── */
+function raderaKonto() {
+  if (!confirm('Är du säker på att du vill radera ditt konto? All data tas bort permanent och kan inte återställas.')) return;
+  var anvandare = JSON.parse(localStorage.getItem('aspire_inloggad') || 'null');
+  if (!anvandare || !anvandare.id) {
+    alert('Kunde inte hitta kontoinformation.');
+    return;
+  }
+  fetch('http://127.0.0.1:8002/anvandare/' + anvandare.id, {
+    method: 'DELETE'
+  })
+  .then(function(svar) { return svar.json(); })
+  .then(function() {
+    ['aspire_inloggad', 'anvandare', 'user', 'aspire_alla_atleter'].forEach(function(k) {
+      localStorage.removeItem(k);
+    });
+    window.location.href = 'index.html';
+  })
+  .catch(function() {
+    alert('Något gick fel. Försök igen.');
+  });
 }
  
 </script>

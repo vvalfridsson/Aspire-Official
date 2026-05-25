@@ -304,7 +304,11 @@ function hanteraRegistrering() {
   var epost    = document.getElementById('reg-epost').value.trim();
   var losenord = document.getElementById('reg-losenord').value;
   var bekrafta = document.getElementById('reg-bekrafta').value;
-
+  var gdpr = document.getElementById('gdpr-samtycke');
+    if (gdpr && !gdpr.checked) {
+      document.getElementById('fel-gdpr').style.display = 'block';
+      return;
+  }
   ['fel-reg-namn','fel-reg-epost','fel-reg-losenord','fel-reg-bekrafta','reg-fel']
     .forEach(dolFelmeddelande);
 
@@ -346,6 +350,67 @@ function hanteraRegistrering() {
     visaFelmeddelande('reg-fel', 'Kunde inte ansluta till servern.');
   });
 }
+
+/*realtidsvalidering*/
+document.addEventListener('DOMContentLoaded', function () {
+  var namnFalt    = document.getElementById('reg-namn');
+  var epostFalt   = document.getElementById('reg-epost');
+  var losenordFalt = document.getElementById('reg-losenord');
+  var bekraftaFalt = document.getElementById('reg-bekrafta');
+
+  if (!namnFalt) return;
+
+  namnFalt.addEventListener('input', function () {
+    var fel = document.getElementById('fel-reg-namn');
+    if (namnFalt.value.trim().length < 2) {
+      fel.textContent = 'Namnet måste ha minst 2 tecken.';
+      fel.style.display = 'block';
+    } else {
+      fel.style.display = 'none';
+    }
+  });
+
+  epostFalt.addEventListener('input', function () {
+    var fel = document.getElementById('fel-reg-epost');
+    var giltig = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(epostFalt.value);
+    if (!giltig && epostFalt.value.length > 0) {
+      fel.textContent = 'Ange en giltig e-postadress.';
+      fel.style.display = 'block';
+    } else {
+      fel.style.display = 'none';
+    }
+  });
+
+  losenordFalt.addEventListener('input', function () {
+    var fel = document.getElementById('fel-reg-losenord');
+    if (losenordFalt.value.length > 0 && losenordFalt.value.length < 8) {
+      fel.textContent = 'Lösenordet måste ha minst 8 tecken.';
+      fel.style.display = 'block';
+    } else {
+      fel.style.display = 'none';
+    }
+    if (bekraftaFalt.value.length > 0) {
+      var felBekr = document.getElementById('fel-reg-bekrafta');
+      if (losenordFalt.value !== bekraftaFalt.value) {
+        felBekr.textContent = 'Lösenorden matchar inte.';
+        felBekr.style.display = 'block';
+      } else {
+        felBekr.style.display = 'none';
+      }
+    }
+  });
+
+  bekraftaFalt.addEventListener('input', function () {
+    var fel = document.getElementById('fel-reg-bekrafta');
+    if (bekraftaFalt.value.length > 0 && bekraftaFalt.value !== losenordFalt.value) {
+      fel.textContent = 'Lösenorden matchar inte.';
+      fel.style.display = 'block';
+    } else {
+      fel.style.display = 'none';
+    }
+  });
+});
+
 
 function loggarUt() {
   localStorage.removeItem("aspire_inloggad");
