@@ -4,6 +4,7 @@ Hanterar databasanslutning och användarfunktioner mot PostgreSQL.
 """
 
 import os
+import bcrypt
 import psycopg2
 import psycopg2.extras
 import psycopg2.pool
@@ -41,14 +42,24 @@ def skapa_anvandartabell(conn):
     """)
     conn.commit()
 
+def hasha_losenord(losenord: str) -> str:
+    salt = bcrypt.gensalt()
+    hashad = bcrypt.hashpw(losenord.encode('utf-8'), salt)
+    return hashad.decode('utf-8')
+
+
+def kontrollera_losenord(losenord: str, hashad: str) -> bool:
+    return bcrypt.checkpw(losenord.encode('utf-8'), hashad.encode('utf-8'))
+
 
 def registrera_anvandare(namn, epost, losenord):
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
+        hashad = hasha_losenord(losenord)
         cursor.execute(
             "INSERT INTO anvandare (namn, epost, losenord) VALUES (%s, %s, %s) RETURNING id, namn, epost;",
-            (namn, epost, losenord)
+            (namn, epost, hashad)
         )
         anvandare = cursor.fetchone()
         conn.commit()

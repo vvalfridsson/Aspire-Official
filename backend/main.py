@@ -7,6 +7,7 @@ py -m uvicorn main:app --reload --port 8002
 """
 
 from datetime import date, timedelta
+from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,6 +20,8 @@ from database import (
     registrera_anvandare,
     hamta_anvandare,
     skapa_anvandartabell,
+    kontrollera_losenord,
+    hasha_losenord,
 )
 
 
@@ -60,10 +63,6 @@ class KaloriRequest(BaseModel):
     maltid: str
     kalorier: int
 
-class Kroppsdata(BaseModel):
-    langd: float
-    vikt: float
-
 # ─────────────────────────────────────────────────────
 # Grund-endpoint
 # ─────────────────────────────────────────────────────
@@ -104,7 +103,13 @@ def registrera(data: RegistreraRequest):
 def logga_in(data: LoggaInRequest):
     anvandare = hamta_anvandare(data.epost)
 
-    if anvandare is None or anvandare["losenord"] != data.losenord:
+    if anvandare is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Felaktig e-postadress eller lösenord."
+        )
+
+    if not kontrollera_losenord(data.losenord, anvandare["losenord"]):
         raise HTTPException(
             status_code=401,
             detail="Felaktig e-postadress eller lösenord."
@@ -448,6 +453,22 @@ class ValjAtletBody(BaseModel):
 class BockaAvBody(BaseModel):
     avbockad: bool
 
+class Kroppsdata(BaseModel):
+    langd: float
+    vikt: float
+    fettprocent: Optional[float] = None
+
+class NyttPass(BaseModel):
+    namn: str
+
+class NyOvning(BaseModel):
+    pass_id: int
+    ovning: str
+    set_antal: int
+    reps: int
+    vikt_kg: float
+    vilotid_sek: int
+
 
 @app.post("/anvandare/{anvandare_id}/valj-atlet")
 def valj_atlet(anvandare_id: int, body: ValjAtletBody):
@@ -586,12 +607,12 @@ def hamta_kropp(anvandare_id: int):
     try:
         cursor = get_cursor(conn)
         cursor.execute("""
-            SELECT langd, vikt FROM anvandare WHERE id = %s
+            SELECT langd, vikt, fettprocent FROM anvandare WHERE id = %s
         """, (anvandare_id,))
         rad = cursor.fetchone()
         if not rad:
             raise HTTPException(status_code=404, detail="Användare hittades inte")
-        return {"langd": rad["langd"], "vikt": rad["vikt"]}
+        return {"langd": rad["langd"], "vikt": rad["vikt"], "fettprocent": rad["fettprocent"]}
     finally:
         release_connection(conn)
 
@@ -602,10 +623,27 @@ def spara_kropp(anvandare_id: int, data: Kroppsdata):
     try:
         cursor = get_cursor(conn)
         cursor.execute("""
-            UPDATE anvandare SET langd = %s, vikt = %s WHERE id = %s
-        """, (data.langd, data.vikt, anvandare_id))
+            UPDATE anvandare SET langd = %s, vikt = %s, fettprocent = %s WHERE id = %s
+        """, (data.langd, data.vikt, data.fettprocent, anvandare_id))
         conn.commit()
         return {"status": "ok"}
+    finally:
+        release_connection(conn)
+
+@app.delete("/anvandare/{anvandare_id}")
+def radera_konto(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("DELETE FROM kaloriloggar WHERE anvandar_id = %s", (anvandare_id,))
+        cursor.execute("DELETE FROM anvandar_aktiviteter WHERE anvandar_id = %s", (anvandare_id,))
+        cursor.execute("DELETE FROM anvandare_schema WHERE anvandar_id = %s", (anvandare_id,))
+        cursor.execute("DELETE FROM anvandar_utmaningar WHERE anvandar_id = %s", (anvandare_id,))
+        cursor.execute("DELETE FROM traning_ovningar WHERE pass_id IN (SELECT id FROM traning_pass WHERE anvandar_id = %s)", (anvandare_id,))
+        cursor.execute("DELETE FROM traning_pass WHERE anvandar_id = %s", (anvandare_id,))
+        cursor.execute("DELETE FROM anvandare WHERE id = %s", (anvandare_id,))
+        conn.commit()
+        return {"status": "konto raderat"}
     finally:
         release_connection(conn)
 
