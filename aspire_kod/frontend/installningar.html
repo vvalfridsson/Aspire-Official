@@ -827,7 +827,7 @@ async function sparaKroppsdata() {
   try {
     const svar = await fetch(`${ASPIRE_API_BASE_URL}/anvandare/${user.id}/kropp`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' , 'X-Anvandare-Id': user.id},
       body: JSON.stringify({ langd, vikt })
     });
  
@@ -1013,7 +1013,8 @@ function raderaKonto() {
     return;
   }
   fetch('http://127.0.0.1:8002/anvandare/' + anvandare.id, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: { 'X-Anvandare-Id': anvandare.id }
   })
   .then(function(svar) { return svar.json(); })
   .then(function() {

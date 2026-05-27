@@ -102,6 +102,10 @@ function sparaKalorier() {
   var user = JSON.parse(localStorage.getItem('aspire_inloggad'));
   if (!user) { alert('Du måste vara inloggad.'); return; }
 
+  var sparaKnapp = document.querySelector('.spara-knapp');
+  sparaKnapp.disabled = true;
+  sparaKnapp.innerHTML = '<span class="laddnings-spinner"></span> Sparar…';
+
   fetch(ASPIRE_API_BASE_URL + '/kalorier/' + user.id, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -112,17 +116,21 @@ function sparaKalorier() {
     laggTillMaltidRad(data.id, maltidstyp, kcal, nuvarandeTid());
     inmatning.value = '';
     uppdateraKalorier();
+    sparaKnapp.disabled = false;
+    sparaKnapp.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Spara';
   })
   .catch(function() {
     alert('Kunde inte spara till databasen.');
+    sparaKnapp.disabled = false;
+    sparaKnapp.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Spara';
   });
 }
-
 /* ─────────────────────────────────────────────────────
    TA BORT MÅLTID
    Letar upp måltiden man klickade på och raderar den från sidan och databasen.
 ───────────────────────────────────────────────────── */
 function taBortMaltid(knapp) {
+  if (!confirm('Vill du ta bort denna måltid?')) return;
   var radAttTaBort = knapp.closest('.maltid-post');
   if (!radAttTaBort) return;
 
@@ -478,6 +486,7 @@ document.addEventListener("DOMContentLoaded", hamtaNotiser); /*när DOM är fyll
 
 async function hamtaProfil() { // funktionen hämtar all profilinformation från backend och fyller profilsidans mall
 //hämtar användarens id som sparades vid inloggningen, det används för att veta vilken användare som datan ska hömats från
+if (!document.getElementById('profil-namn')) return;
   const user = JSON.parse(localStorage.getItem("aspire_inloggad"));
   if (!user) return;
   const anvandareId = user.id;

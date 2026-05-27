@@ -9,7 +9,7 @@ py -m uvicorn main:app --reload --port 8002
 from datetime import date, timedelta
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 
@@ -35,6 +35,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def krav_inloggad(x_anvandare_id: int = Header(...)):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("SELECT id FROM anvandare WHERE id = %s", (x_anvandare_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=401, detail="Obehörig")
+        return x_anvandare_id
+    finally:
+        release_connection(conn)
 
 @app.on_event("startup")
 def startup():
@@ -618,7 +628,7 @@ def hamta_kropp(anvandare_id: int):
 
 
 @app.put("/anvandare/{anvandare_id}/kropp")
-def spara_kropp(anvandare_id: int, data: Kroppsdata):
+def spara_kropp(anvandare_id: int, data: Kroppsdata, _: int = Depends(krav_inloggad)):
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
@@ -631,7 +641,7 @@ def spara_kropp(anvandare_id: int, data: Kroppsdata):
         release_connection(conn)
 
 @app.delete("/anvandare/{anvandare_id}")
-def radera_konto(anvandare_id: int):
+def radera_konto(anvandare_id: int, _: int = Depends(krav_inloggad)):
     conn = get_connection()
     try:
         cursor = get_cursor(conn)
@@ -648,5 +658,91 @@ def radera_konto(anvandare_id: int):
         release_connection(conn)
 
         
-        
- 
+# ─────────────────────────────────────────────────────
+# TRÄNINGSDAGBOK
+# ─────────────────────────────────────────────────────
+
+@app.post("/anvandare/{anvandare_id}/traning/pass")
+def skapa_pass(anvandare_id: int, data: NyttPass, _: int = Depends(krav_inloggad)):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("""
+            INSERT INTO traning_pass (anvandar_id, namn, datum)
+            VALUES (%s, %s, CURRENT_DATE)
+            RETURNING id, namn, datum
+        """, (anvandare_id, data.namn))
+        rad = cursor.fetchone()
+        conn.commit()
+        return {"id": rad["id"], "namn": rad["namn"], "datum": str(rad["datum"])}
+    finally:
+        release_connection(conn)
+
+
+@app.get("/anvandare/{anvandare_id}/traning/pass")
+def hamta_pass(anvandare_id: int, _: int = Depends(krav_inloggad)):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("""
+            SELECT id, namn, datum FROM traning_pass
+            WHERE anvandar_id = %s
+            ORDER BY datum DESC, id DESC
+        """, (anvandare_id,))
+        pass_lista = cursor.fetchall()
+        resultat = []
+        for p in pass_lista:
+            cursor.execute("""
+                SELECT id, ovning, set_antal, reps, vikt_kg, vilotid_sek
+                FROM traning_ovningar WHERE pass_id = %s
+                ORDER BY id
+            """, (p["id"],))
+            ovningar = cursor.fetchall()
+            resultat.append({
+                "id": p["id"],
+                "namn": p["namn"],
+                "datum": str(p["datum"]),
+                "ovningar": [
+                    {
+                        "id": o["id"],
+                        "ovning": o["ovning"],
+                        "set_antal": o["set_antal"],
+                        "reps": o["reps"],
+                        "vikt_kg": o["vikt_kg"],
+                        "vilotid_sek": o["vilotid_sek"]
+                    }
+                    for o in ovningar
+                ]
+            })
+        return resultat
+    finally:
+        release_connection(conn)
+
+
+@app.post("/anvandare/{anvandare_id}/traning/ovning")
+def logga_ovning(anvandare_id: int, data: NyOvning, _: int = Depends(krav_inloggad)):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("""
+            INSERT INTO traning_ovningar (pass_id, ovning, set_antal, reps, vikt_kg, vilotid_sek)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (data.pass_id, data.ovning, data.set_antal, data.reps, data.vikt_kg, data.vilotid_sek))
+        rad = cursor.fetchone()
+        conn.commit()
+        return {"id": rad["id"], "status": "ok"}
+    finally:
+        release_connection(conn)
+
+
+@app.delete("/traning/ovning/{ovning_id}")
+def ta_bort_ovning(ovning_id: int, _: int = Depends(krav_inloggad)):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("DELETE FROM traning_ovningar WHERE id = %s", (ovning_id,))
+        conn.commit()
+        return {"status": "ok"}
+    finally:
+        release_connection(conn)        

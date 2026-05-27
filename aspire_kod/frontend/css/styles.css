@@ -1905,3 +1905,202 @@ body {
   overflow-y: scroll;
   height: 100vh;
 }
+
+/* ─────────────────────────────────────────────────────
+   TRÄNINGSDAGBOK
+───────────────────────────────────────────────────── */
+
+.traning-formular {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 20px;
+  margin-bottom: 8px;
+}
+
+.traning-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid #E5E5E5;
+  border-radius: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: #0A0A0A;
+  background: #FAFAFA;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.traning-input:focus {
+  border-color: #0A0A0A;
+  background: #fff;
+}
+
+.traning-rad {
+  display: flex;
+  gap: 8px;
+}
+
+.traning-falt {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 4px;
+}
+
+.traning-etikett {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ADADAD;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.traning-input-liten {
+  width: 100%;
+  padding: 10px 8px;
+  border: 1.5px solid #E5E5E5;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #0A0A0A;
+  background: #FAFAFA;
+  box-sizing: border-box;
+  outline: none;
+  text-align: center;
+}
+
+.traning-input-liten:focus {
+  border-color: #0A0A0A;
+  background: #fff;
+}
+
+.traning-ovning-sektion {
+  margin-top: 4px;
+}
+
+.ovningar-lista {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ovning-rad {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F7F7F7;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.ovning-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ovning-namn {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0A0A0A;
+}
+
+.ovning-detaljer {
+  font-size: 12px;
+  color: #ADADAD;
+}
+
+.traning-historik {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.traning-kort {
+  background: #F7F7F7;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.traning-kort-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.traning-kort-namn {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0A0A0A;
+}
+
+.traning-kort-datum {
+  font-size: 12px;
+  color: #ADADAD;
+}
+
+.historik-ovning {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px solid #EBEBEB;
+}
+
+.historik-ovning-namn {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0A0A0A;
+}
+
+.historik-ovning-detalj {
+  font-size: 12px;
+  color: #ADADAD;
+}
+
+.traning-tom {
+  font-size: 14px;
+  color: #ADADAD;
+  padding: 16px 0;
+}
+
+/* ─────────────────────────────────────────────────────
+   TRÄNINGSDAGBOK GENVÄG (profil.html)
+───────────────────────────────────────────────────── */
+
+.traning-genvag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: #F7F7F7;
+  border-radius: 16px;
+  margin: 0 20px 8px;
+  text-decoration: none;
+  color: #0A0A0A;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.traning-genvag svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #0A0A0A;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.traning-genvag-pil {
+  margin-left: auto;
+  stroke: #ADADAD !important;
+}
