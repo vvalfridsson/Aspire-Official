@@ -98,7 +98,7 @@ function sparaKalorier() {
 
   fetch(`${ASPIRE_API_BASE_URL}/kalorier/${user.id}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Anvandare-Id': user.id },
     body: JSON.stringify({ maltid: maltidstyp, kalorier: kcal })
   })
   .then(svar => svar.json())
@@ -119,20 +119,26 @@ function sparaKalorier() {
    TA BORT MÅLTID
 ───────────────────────────────────────────────────── */
 function taBortMaltid(knapp) {
+  if (!confirm('Vill du ta bort denna måltid?')) return;
+
   const radAttTaBort = knapp.closest('.maltid-post');
   if (!radAttTaBort) return;
 
   const kaloriId = radAttTaBort.dataset.id;
+  const user = JSON.parse(localStorage.getItem('aspire_inloggad'));
+  if (!user) return;
 
   if (kaloriId) {
-    fetch(`${ASPIRE_API_BASE_URL}/kalorier/${kaloriId}/ta-bort`, {
-      method: 'DELETE'
+    fetch(${ASPIRE_API_BASE_URL}/kalorier/${kaloriId}/ta-bort, {
+      method: 'DELETE',
+      headers: { 'X-Anvandare-Id': user.id }
     });
   }
 
   radAttTaBort.remove();
   uppdateraKalorier();
 }
+
 
 /* ─────────────────────────────────────────────────────
    LÄGG TILL EN MÅLTIDSRAD I LISTAN
@@ -236,7 +242,7 @@ function hanteraInloggning() {
 
   fetch(`${ASPIRE_API_BASE_URL}/logga-in`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json','X-Anvandare-Id': user.id },
     body: JSON.stringify({ epost, losenord })
   })
   .then(svar => svar.json())
@@ -263,7 +269,7 @@ function hanteraRegistrering() {
 
   fetch(`${ASPIRE_API_BASE_URL}/registrera`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Anvandare-Id': user.id},
     body: JSON.stringify({ namn, epost, losenord })
   })
   .then(svar => svar.json())
@@ -618,3 +624,168 @@ const skyddadeSidor = ['hem.html', 'profil.html', 'streaks.html', 'kalorier.html
 if (skyddadeSidor.includes(filnamn) && !localStorage.getItem('aspire_inloggad')) {
   window.location.replace('index.html');
 }
+
+/* ─────────────────────────────────────────────────────
+   TRÄNINGSDAGBOK (traning.html)
+───────────────────────────────────────────────────── */
+
+var aktivtPassId = null;
+
+function skapaPass() {
+  if (!document.getElementById('pass-namn')) return;
+
+  var namn = document.getElementById('pass-namn').value.trim();
+  if (!namn) { alert('Ange ett namn på passet.'); return; }
+
+  var user = JSON.parse(localStorage.getItem('aspire_inloggad'));
+  if (!user) { window.location.href = 'index.html'; return; }
+
+  var knapp = document.querySelector('#pass-namn + .spara-knapp');
+  knapp.disabled = true;
+  knapp.innerHTML = '<span class="laddnings-spinner"></span> Skapar…';
+
+  fetch(ASPIRE_API_BASE_URL + '/anvandare/' + user.id + '/traning/pass', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Anvandare-Id': user.id},
+    body: JSON.stringify({ namn: namn })
+  })
+  .then(function(svar) { return svar.json(); })
+  .then(function(data) {
+    aktivtPassId = data.id;
+    document.getElementById('aktivt-pass-rubrik').textContent = 'Logga övning — ' + data.namn;
+    document.getElementById('ovning-sektion').style.display = 'block';
+    document.getElementById('pass-namn').value = '';
+    laddaHistorik();
+    knapp.disabled = false;
+    knapp.innerHTML = '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Skapa pass';
+  })
+  .catch(function() {
+    alert('Kunde inte skapa passet.');
+    knapp.disabled = false;
+    knapp.innerHTML = '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Skapa pass';
+  });
+}
+
+function loggaOvning() {
+  if (!aktivtPassId) { alert('Skapa ett pass först.'); return; }
+
+  var ovning = document.getElementById('ovning-namn').value.trim();
+  var set    = parseInt(document.getElementById('ovning-set').value);
+  var reps   = parseInt(document.getElementById('ovning-reps').value);
+  var vikt   = parseFloat(document.getElementById('ovning-vikt').value);
+  var vila   = parseInt(document.getElementById('ovning-vila').value);
+
+  if (!ovning || !set || !reps || !vikt || !vila) {
+    alert('Fyll i alla fält.');
+    return;
+  }
+
+  var user = JSON.parse(localStorage.getItem('aspire_inloggad'));
+  if (!user) return;
+
+  var knapp = document.getElementById('logga-ovning-knapp');
+  knapp.disabled = true;
+  knapp.innerHTML = '<span class="laddnings-spinner"></span> Sparar…';
+
+  fetch(ASPIRE_API_BASE_URL + '/anvandare/' + user.id + '/traning/ovning', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Anvandare-Id': user.id},
+    body: JSON.stringify({
+      pass_id: aktivtPassId,
+      ovning: ovning,
+      set_antal: set,
+      reps: reps,
+      vikt_kg: vikt,
+      vilotid_sek: vila
+    })
+  })
+  .then(function(svar) { return svar.json(); })
+  .then(function(data) {
+    laggTillOvningRad(data.id, ovning, set, reps, vikt, vila);
+    document.getElementById('ovning-namn').value = '';
+    document.getElementById('ovning-set').value = '';
+    document.getElementById('ovning-reps').value = '';
+    document.getElementById('ovning-vikt').value = '';
+    document.getElementById('ovning-vila').value = '';
+    knapp.disabled = false;
+    knapp.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Lägg till övning';
+  })
+  .catch(function() {
+    alert('Kunde inte logga övningen.');
+    knapp.disabled = false;
+    knapp.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Lägg till övning';
+  });
+}
+
+function laggTillOvningRad(id, ovning, set, reps, vikt, vila) {
+  var lista = document.getElementById('ovningar-lista');
+  if (!lista) return;
+  var rad = document.createElement('div');
+  rad.className = 'ovning-rad';
+  rad.dataset.id = id;
+  rad.innerHTML =
+    '<div class="ovning-info">' +
+      '<div class="ovning-namn">' + ovning + '</div>' +
+      '<div class="ovning-detaljer">' + set + ' set × ' + reps + ' reps · ' + vikt + ' kg · Vila ' + vila + 's</div>' +
+    '</div>' +
+    '<button class="ta-bort-knapp" onclick="taBortOvning(this)">' +
+      '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+    '</button>';
+  lista.appendChild(rad);
+}
+
+function taBortOvning(knapp) {
+  if (!confirm('Ta bort övningen?')) return;
+  var rad = knapp.closest('.ovning-rad');
+  var id = rad.dataset.id;
+fetch(ASPIRE_API_BASE_URL + '/traning/ovning/' + id, { method: 'DELETE', headers: { 'X-Anvandare-Id': user.id } })
+  .then(function() { rad.remove(); })
+  .catch(function() { alert('Kunde inte ta bort övningen.'); });
+}
+
+function laddaHistorik() {
+  var lista = document.getElementById('historik-lista');
+  if (!lista) return;
+
+  var user = JSON.parse(localStorage.getItem('aspire_inloggad'));
+  if (!user) return;
+
+  lista.innerHTML = '<div class="traning-tom">Laddar…</div>';
+
+  fetch(ASPIRE_API_BASE_URL + '/anvandare/' + user.id + '/traning/pass', {headers: { 'X-Anvandare-Id': user.id }})
+  .then(function(svar) { return svar.json(); })
+  .then(function(pass) {
+    if (!pass.length) {
+      lista.innerHTML = '<div class="traning-tom">Inga pass loggade än.</div>';
+      return;
+    }
+    lista.innerHTML = '';
+    pass.forEach(function(p) {
+      var kort = document.createElement('div');
+      kort.className = 'traning-kort';
+      var ovningarHtml = p.ovningar.length
+        ? p.ovningar.map(function(o) {
+            return '<div class="historik-ovning">' +
+              '<span class="historik-ovning-namn">' + o.ovning + '</span>' +
+              '<span class="historik-ovning-detalj">' + o.set_antal + ' set × ' + o.reps + ' reps · ' + o.vikt_kg + ' kg · Vila ' + o.vilotid_sek + 's</span>' +
+            '</div>';
+          }).join('')
+        : '<div class="traning-tom">Inga övningar loggade.</div>';
+      kort.innerHTML =
+        '<div class="traning-kort-header">' +
+          '<div class="traning-kort-namn">' + p.namn + '</div>' +
+          '<div class="traning-kort-datum">' + p.datum + '</div>' +
+        '</div>' +
+        ovningarHtml;
+      lista.appendChild(kort);
+    });
+  })
+  .catch(function() {
+    lista.innerHTML = '<div class="traning-tom">Kunde inte ladda historik.</div>';
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (!document.getElementById('historik-lista')) return;
+  laddaHistorik();
+});
