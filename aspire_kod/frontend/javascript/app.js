@@ -129,7 +129,7 @@ function taBortMaltid(knapp) {
   if (!user) return;
 
   if (kaloriId) {
-    fetch(${ASPIRE_API_BASE_URL}/kalorier/${kaloriId}/ta-bort, {
+    fetch(`${ASPIRE_API_BASE_URL}/kalorier/${kaloriId}/ta-bort`, {
       method: 'DELETE',
       headers: { 'X-Anvandare-Id': user.id }
     });
@@ -242,7 +242,7 @@ function hanteraInloggning() {
 
   fetch(`${ASPIRE_API_BASE_URL}/logga-in`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json','X-Anvandare-Id': user.id },
+    headers: { 'Content-Type': 'application/json'},
     body: JSON.stringify({ epost, losenord })
   })
   .then(svar => svar.json())
@@ -269,7 +269,7 @@ function hanteraRegistrering() {
 
   fetch(`${ASPIRE_API_BASE_URL}/registrera`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Anvandare-Id': user.id},
+    headers: { 'Content-Type': 'application/json'},
     body: JSON.stringify({ namn, epost, losenord })
   })
   .then(svar => svar.json())
@@ -596,7 +596,7 @@ function byttFlik(klickadFlik, flikNamn) {
 const filnamn = window.location.pathname.split("/").pop();
 
 if (filnamn === "sok.html") {
-  laddaAtleterFranDatabasTillSok();
+  document.addEventListener("DOMContentLoaded", laddaAtleterFranDatabasTillSok);
 } 
 else if (filnamn === "atletprofil.html") {
   laddaAtletProfilFranDatabas();
