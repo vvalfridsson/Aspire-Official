@@ -22,20 +22,20 @@
           <div class="integritet-lank-rad">
           <a href="integritet.html" target="_blank" class="integritet-lank-registrera">Läs vår integritetspolicy</a>
           </div>
-          <div id="reg-lyckad" style="font-size:13px;color:#22AA66;margin-bottom:12px;display:none;"></div>
-          <div id="reg-fel" style="font-size:13px;color:#E8241C;margin-bottom:12px;display:none;"></div>
+          <div id="reg-lyckad" class="reg-lyckad"></div>
+          <div id="reg-fel" class="faltfel reg-fel"></div>
           <label class="faltetikett">Namn</label>
           <input id="reg-namn" class="textfalt" type="text" placeholder="Ditt namn">
-          <div id="fel-reg-namn" style="font-size:12px;color:#E8241C;margin-top:-8px;margin-bottom:10px;display:none;"></div>
+          <div id="fel-reg-namn" class="faltfel reg-fel"></div>
           <label class="faltetikett">E-postadress</label>
           <input id="reg-epost" class="textfalt" type="email" placeholder="din@epost.se">
-          <div id="fel-reg-epost" style="font-size:12px;color:#E8241C;margin-top:-8px;margin-bottom:10px;display:none;"></div>
+          <div id="fel-reg-epost" class="faltfel reg-fel"></div>
           <label class="faltetikett">Lösenord (minst 8 tecken)</label>
           <input id="reg-losenord" class="textfalt" type="password" placeholder="Minst 8 tecken">
-          <div id="fel-reg-losenord" style="font-size:12px;color:#E8241C;margin-top:-8px;margin-bottom:10px;display:none;"></div>
+          <div id="fel-reg-losenord" class="faltfel reg-fel"></div>
           <label class="faltetikett">Bekräfta lösenord</label>
           <input id="reg-bekrafta" class="textfalt" type="password" placeholder="Upprepa lösenordet">
-          <div id="fel-reg-bekrafta" style="font-size:12px;color:#E8241C;margin-top:-8px;margin-bottom:10px;display:none;"></div>
+          <div id="fel-reg-bekrafta" class="faltfel reg-fel"></div>
           <div class="gdpr-rad">
             <input type="checkbox" id="gdpr-samtycke" class="gdpr-kryssruta">
             <label for="gdpr-samtycke" class="gdpr-etikett">
@@ -44,10 +44,10 @@
               och samtycker till att Aspire behandlar mina personuppgifter.
             </label>
           </div>
-          <div id="fel-gdpr" class="faltfel" style="display:none;">
+          <div id="fel-gdpr" class="faltfel">
             Du måste godkänna integritetspolicyn för att fortsätta.
           </div>
-          <button class="logga-in-knapp" onclick="hanteraRegistrering()">Skapa konto</button>
+          <button class="logga-in-knapp" id="registrera-knapp" type="button">Skapa konto</button>
           <div class="registrera-rad">
             <p>Har du redan ett konto?</p>
             <a href="index.html">Logga in</a>
@@ -56,7 +56,7 @@
       </div>
     </div>
   </div>
-<script src="../javascript/app.js"></script>
+<script src="javascript/app.js"></script>
 <script src="javascript/statusbar.js"></script>
 </body>
 </html>

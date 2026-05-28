@@ -9,25 +9,6 @@
   <title>Aspire — Sök atleter</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  <style>
-  .valj-knapp {
-    flex-shrink: 0;
-    height: 32px;
-    padding: 0 14px;
-    background: #0A0A0A;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    font-family: 'Inter', sans-serif;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .valj-knapp.vald { background: #22AA66; pointer-events: none; }
-  .valj-knapp.laddning { background: #ADADAD; pointer-events: none; }
-  .atlet-rad-lank { display: flex; align-items: center; gap: 12px; flex: 1; text-decoration: none; min-width: 0; }
-</style>
 </head>
 <body>
 
@@ -56,19 +37,18 @@
         </svg>
         <input
           class="sok-falt"
-          type="text"
+          id="sok-falt"
           placeholder="Sök namn eller sport…"
-          oninput="sokAtleter(this.value)"
         >
       </div>
 
       <!-- Sport-filter -->
       <div class="filter-rad">
-        <button class="filter-pill aktiv"   onclick="filterSport(this, 'alla')">Alla</button>
-        <button class="filter-pill inaktiv" onclick="filterSport(this, 'Basketball')">Basketball</button>
-        <button class="filter-pill inaktiv" onclick="filterSport(this, 'Fotboll')">Fotboll</button>
-        <button class="filter-pill inaktiv" onclick="filterSport(this, 'Tennis')">Tennis</button>
-        <button class="filter-pill inaktiv" onclick="filterSport(this, 'Sprint')">Sprint</button>
+        <button class="filter-pill aktiv" data-sport="alla">Alla</button>
+        <button class="filter-pill inaktiv" data-sport="Basketball">Basketball</button>
+        <button class="filter-pill inaktiv" data-sport="Fotboll">Fotboll</button>
+        <button class="filter-pill inaktiv" data-sport="Tennis">Tennis</button>
+        <button class="filter-pill inaktiv" data-sport="Sprint">Sprint</button>
       </div>
 
       <!-- Atletlista — klick öppnar atletprofil.html -->
@@ -105,28 +85,7 @@
 
 <script src="javascript/app.js"></script>
 <script src="javascript/statusbar.js"></script>
-<script>
-  async function valjAtlet(atletId, knapp) {
-    const user = JSON.parse(localStorage.getItem("aspire_inloggad"));
-    if (!user) return;
-    knapp.textContent = "Väljer...";
-    knapp.classList.add("laddning");
-    try {
-      await fetch(`http://127.0.0.1:8002/anvandare/${user.id}/valj-atlet`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ atlet_id: atletId })
-      });
-      knapp.textContent = "Vald ✓";
-      knapp.classList.remove("laddning");
-      knapp.classList.add("vald");
-      setTimeout(() => { window.location.href = "hem.html"; }, 600);
-    } catch (e) {
-      knapp.textContent = "Välj";
-      knapp.classList.remove("laddning");
-    }
-  }
-</script>
+<script src="javascript/sok.js"></script>
 
 </body>
 </html>

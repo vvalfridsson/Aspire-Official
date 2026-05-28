@@ -31,25 +31,24 @@
         <div class="login-logotyp">Aspire</div>
 
         <!-- Formulär längst ner -->
-        <form class="login-formular" onsubmit="event.preventDefault(); hanteraInloggning();">
+        <form class="login-formular" id="login-formular">
 
           <div class="login-titel">Logga in</div>
           <div class="login-undertext">Välkommen tillbaka</div>
 
           <label class="faltetikett">E-postadress</label>
           <input id="inlogg-epost" class="textfalt" type="email" placeholder="din@epost.se">
-          <div id="fel-epost" style="font-size:12px;color:#E8241C;
-          margin-top:-8px;margin-bottom:10px;display:none;">
+          <div id="fel-epost" class="faltfel">
           </div>
 
           <label class="faltetikett">Lösenord</label>
           <input id="inlogg-losenord" class="textfalt" type="password" placeholder="••••••••" autocomplete="current-password">
-          <div id="fel-losenord" style="font-size:12px;color:#E8241C;margin-top:-8px;margin-bottom:10px;display:none;"></div>
+          <div id="fel-losenord" class="faltfel"></div>
           <div class="glomt-losenord">Glömt lösenord?</div>
 
           <!-- Knapp navigerar till hem.html -->
-          <button class="logga-in-knapp" onclick="hanteraInloggning()">Logga in</button>
-          <div id="inlogg-fel" style="font-size:13px;color:#E8241C; margin-top:8px;display:none;">
+          <button class="logga-in-knapp" type="submit">Logga in</button>
+          <div id="inlogg-fel" class="faltfel">
           </div>
 
           <div class="registrera-rad">
@@ -63,7 +62,7 @@
 
   </div>
 
-<script src="../javascript/app.js"></script>
+<script src="javascript/app.js"></script>
 <script src="javascript/statusbar.js"></script>
 </body>
 </html>

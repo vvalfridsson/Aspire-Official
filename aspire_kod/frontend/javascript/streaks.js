@@ -245,3 +245,18 @@ async function aterstallData() {
       console.log("Databasen kunde inte nås för reset:", fel);
   }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  document.querySelectorAll('.akt-flik').forEach(function (knapp) {
+    knapp.addEventListener('click', function () {
+      bytAktFlik(knapp, knapp.dataset.vy);
+    });
+  });
+
+  const resetKnapp = document.getElementById('reset-knapp');
+  if (resetKnapp) {
+    resetKnapp.addEventListener('click', aterstallData);
+  }
+
+});

@@ -20,7 +20,7 @@
 
     <div class="innehall">
 
-      <a href="sok.html" class="tillbaka-knapp" style="display:flex;">
+      <a href="sok.html" class="tillbaka-knapp">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </a>
 
@@ -64,47 +64,16 @@
 
       <div class="citat-ruta" id="profil-citat"></div>
 
-      <script>
-        (function() {
-          try {
-            const id = new URLSearchParams(window.location.search).get("id") || "1";
-            const sparade = JSON.parse(localStorage.getItem('aspire_alla_atleter')) || [];
-            const atlet = sparade.find(a => a.id == id);
-            if (atlet) {
-              const delar = atlet.namn ? atlet.namn.trim().split(" ") : [];
-              const init = delar.length === 1 ? delar[0].substring(0, 2) : (delar[0][0] + delar[delar.length - 1][0]);
-              
-              document.getElementById("profil-avatar").textContent = atlet.initialer || init.toUpperCase();
-              document.getElementById("profil-namn").textContent = atlet.namn || "";
-              document.getElementById("profil-sport").textContent = atlet.sport || "";
-              document.getElementById("profil-kalorier").textContent = atlet.kcal_per_dag ? atlet.kcal_per_dag + " kcal" : "Saknas";
-              document.getElementById("profil-traning").textContent = atlet.traningstid_timmar ? atlet.traningstid_timmar + "h/dag" : "Saknas";
-              document.getElementById("profil-citat").textContent = atlet.citat || "Ingen motivationstext finns ännu.";
-              document.title = "Aspire — " + (atlet.namn || "Profil");
-
-              const joints = document.querySelectorAll(".atlet-stat-siffra");
-              const statVarden = [
-                atlet.kcal_per_dag || "-",
-                atlet.traningstid_timmar ? atlet.traningstid_timmar + "h" : "-",
-                atlet.sport || "-",
-                atlet.id || "-"
-              ];
-              joints.forEach((el, i) => { if(el) el.textContent = statVarden[i]; });
-            }
-          } catch(e) { console.error(e); }
-        })();
-      </script>
-
       <div class="flik-rad">
-        <button class="flik aktiv" onclick="byttFlik(this, 'schema')">
+        <button class="flik aktiv">
           <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           Schema
         </button>
-        <button class="flik" onclick="byttFlik(this, 'kost')">
+        <button class="flik">
           <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
           Kost
         </button>
-        <button class="flik" onclick="byttFlik(this, 'traning')">
+        <button class="flik">
           <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           Träning
         </button>
@@ -141,5 +110,6 @@
 
 <script src="javascript/app.js"></script>
 <script src="javascript/statusbar.js"></script>
+<script src="javascript/atletprofil.js"></script>
 </body>
 </html>

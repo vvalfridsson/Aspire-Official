@@ -28,7 +28,7 @@
       <div class="sektionsrubrik">Nytt pass</div>
       <div class="traning-formular">
         <input id="pass-namn" class="traning-input" type="text" placeholder="Namn på passet, t.ex. Bröst & Triceps">
-        <button class="spara-knapp" onclick="skapaPass()">
+        <button class="spara-knapp" id="skapa-pass-knapp">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Skapa pass
         </button>
@@ -56,7 +56,7 @@
               <input id="ovning-vila" class="traning-input-liten" type="number" placeholder="90">
             </div>
           </div>
-          <button class="spara-knapp" id="logga-ovning-knapp" onclick="loggaOvning()">
+          <button class="spara-knapp" id="logga-ovning-knapp">
             <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
             Lägg till övning
           </button>
@@ -64,7 +64,7 @@
         <div id="ovningar-lista" class="ovningar-lista"></div>
       </div>
 
-      <div class="sektionsrubrik" style="margin-top:8px;">Historik</div>
+      <div class="sektionsrubrik sektionsrubrik--mellanrum">Historik</div>
       <div id="historik-lista" class="traning-historik"></div>
 
       <div class="botten-mellanrum"></div>
@@ -97,5 +97,6 @@
 
 <script src="javascript/app.js"></script>
 <script src="javascript/statusbar.js"></script>
+<script src="javascript/traning.js"></script>
 </body>
 </html> 

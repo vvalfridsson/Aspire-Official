@@ -789,3 +789,27 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!document.getElementById('historik-lista')) return;
   laddaHistorik();
 });
+
+const loginFormular = document.getElementById('login-formular');
+if (loginFormular) {
+  loginFormular.addEventListener('submit', function (event) {
+    event.preventDefault();
+    hanteraInloggning();
+  });
+}
+
+document.querySelectorAll('.maltids-flik').forEach(function (knapp) {
+  knapp.addEventListener('click', function () {
+    byttMaltid(knapp);
+  });
+});
+
+const sparaKaloierKnapp = document.getElementById('spara-kalorier-knapp');
+if (sparaKaloierKnapp) {
+  sparaKaloierKnapp.addEventListener('click', sparaKalorier);
+}
+
+const registreraKnapp = document.getElementById('registrera-knapp');
+if (registreraKnapp) {
+  registreraKnapp.addEventListener('click', hanteraRegistrering);
+}

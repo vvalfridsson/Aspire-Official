@@ -2,7 +2,7 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Aspire – Min profil</title>
@@ -23,7 +23,7 @@
     <!-- ─── SIDRUBRIK + KUGGHJUL ─── -->
     <div class="sidrubrik">
       <div class="sidrubrik-titel">Min profil</div>
-       <a href="installningar.html" class="rund-knapp" title="Inställningar" style="text-decoration:none;">
+       <a href="installningar.html" class="rund-knapp" title="Inställningar" title="Inställningar">
         <svg viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -66,8 +66,8 @@
       <div class="sektionsrubrik">Aktiv utmaning</div>
 
       <div class="kort">
-        <div id="aktiv-titel" style="font-size:15px; font-weight:700; margin-bottom:2px;"></div>
-        <div id="aktiv-dag" style="font-size:13px; color:#ADADAD; margin-bottom:14px;"></div>
+        <div id="aktiv-titel" class="aktiv-titel"></div>
+        <div id="aktiv-dag" class="aktiv-dag"></div>
         
         <div class="progress-rad">
           <div class="progress-spar">
@@ -78,7 +78,7 @@
       </div>
 
       <!-- Veckans sammanfattning -->
-      <div class="sektionsrubrik" style="margin-top: 8px;">Veckans sammanfattning</div>
+      <div class="sektionsrubrik sektionsrubrik--mellanrum">Veckans sammanfattning</div>
 
       <div class="vecko-rader">
 
@@ -109,7 +109,7 @@
       </div>
 
       <!-- Historik -->
-      <div class="sektionsrubrik" style="margin-top:8px;">Historik</div>
+      <div class="sektionsrubrik sektionsrubrik--mellanrum">Historik</div>
       
       <a href="traning.html" class="traning-genvag">
         <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -117,8 +117,8 @@
         <svg class="traning-genvag-pil" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
 
-      <div class="kort" id="historik-lista" style="padding:0;">
-        <div style="padding:16px; color:#ADADAD; font-size:14px;">Laddar historik…</div>
+      <div class="kort" id="historik-lista">
+        <div class="historik-laddning">Laddar historik…</div>
       </div>
 
       <div class="botten-mellanrum"></div>
