@@ -520,7 +520,11 @@ if (!document.getElementById('profil-namn')) return;
   document.getElementById("vecka-forbattring").textContent = data.vecka.forbattring;//jämför förbättringen i procent jämfört med förra veckan.
 }
 //när sidan laddas klart körs funktionen automatiskt
-document.addEventListener("DOMContentLoaded", hamtaProfil);
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.location.pathname.endsWith("profil.html")) {
+    hamtaProfil();
+  }
+});
 
 /* =====================================================
    HÄMTA ATLETER FRÅN DATABASEN TILL SÖK-SIDAN
