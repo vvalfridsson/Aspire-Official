@@ -1,7 +1,18 @@
 
   const API = "http://127.0.0.1:8002";
 
+  function visaFab() {
+    const fab = document.getElementById('fab-traning');
+    if (fab) fab.classList.add('synlig');
+  }
+
+  function doljFab() {
+    const fab = document.getElementById('fab-traning');
+    if (fab) fab.classList.remove('synlig');
+  }
+
   function visaValjAtlet() {
+    doljFab();
     document.getElementById("huvudinnehall").innerHTML = `
       <div class="valj-atlet-skarm">
         <div class="valj-atlet-titel">Välj en atlet</div>
@@ -73,6 +84,7 @@
       </a>
       <div class="botten-mellanrum"></div>
     `;
+    visaFab();
   }
 
   async function bockaAv(aktivitetId, knapp) {

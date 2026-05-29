@@ -266,6 +266,8 @@ function hanteraRegistrering() {
   if (!epost) return visaFelmeddelande('fel-reg-epost', 'E-post är obligatoriskt.');
   if (!losenord || losenord.length < 8) return visaFelmeddelande('fel-reg-losenord', 'Lösenordet måste ha minst 8 tecken.');
   if (losenord !== bekrafta) return visaFelmeddelande('fel-reg-bekrafta', 'Lösenorden matchar inte.');
+  const gdpr = document.getElementById('gdpr-samtycke');
+  if (!gdpr || !gdpr.checked) return visaFelmeddelande('fel-gdpr', 'Du måste godkänna integritetspolicyn för att fortsätta.');
 
   fetch(`${ASPIRE_API_BASE_URL}/registrera`, {
     method: 'POST',
@@ -812,4 +814,122 @@ if (sparaKaloierKnapp) {
 const registreraKnapp = document.getElementById('registrera-knapp');
 if (registreraKnapp) {
   registreraKnapp.addEventListener('click', hanteraRegistrering);
+}
+
+/* ─────────────────────────────────────────────────────
+   REALTIDSVALIDERING — INLOGGNING
+───────────────────────────────────────────────────── */
+const inloggEpost    = document.getElementById('inlogg-epost');
+const inloggLosenord = document.getElementById('inlogg-losenord');
+
+if (inloggEpost && inloggLosenord) {
+  let epostRord    = false;
+  let losenordRord = false;
+
+  inloggEpost.addEventListener('blur', () => {
+    epostRord = true;
+    if (!inloggEpost.value.trim()) {
+      visaFelmeddelande('fel-epost', 'E-postfältet är obligatoriskt.');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inloggEpost.value.trim())) {
+      visaFelmeddelande('fel-epost', 'Ange en giltig e-postadress.');
+    } else {
+      dolFelmeddelande('fel-epost');
+    }
+  });
+
+  inloggEpost.addEventListener('input', () => {
+    if (!epostRord) return;
+    if (!inloggEpost.value.trim()) {
+      visaFelmeddelande('fel-epost', 'E-postfältet är obligatoriskt.');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inloggEpost.value.trim())) {
+      visaFelmeddelande('fel-epost', 'Ange en giltig e-postadress.');
+    } else {
+      dolFelmeddelande('fel-epost');
+    }
+  });
+
+  inloggLosenord.addEventListener('blur', () => {
+    losenordRord = true;
+    if (!inloggLosenord.value) {
+      visaFelmeddelande('fel-losenord', 'Lösenordsfältet är obligatoriskt.');
+    } else {
+      dolFelmeddelande('fel-losenord');
+    }
+  });
+
+  inloggLosenord.addEventListener('input', () => {
+    if (!losenordRord) return;
+    if (!inloggLosenord.value) {
+      visaFelmeddelande('fel-losenord', 'Lösenordsfältet är obligatoriskt.');
+    } else {
+      dolFelmeddelande('fel-losenord');
+    }
+  });
+}
+
+/* ─────────────────────────────────────────────────────
+   REALTIDSVALIDERING — REGISTRERING
+───────────────────────────────────────────────────── */
+const regNamnFalt     = document.getElementById('reg-namn');
+const regEpostFalt    = document.getElementById('reg-epost');
+const regLosenordFalt = document.getElementById('reg-losenord');
+const regBekraftaFalt = document.getElementById('reg-bekrafta');
+
+if (regNamnFalt && regEpostFalt && regLosenordFalt && regBekraftaFalt) {
+  let rord = { namn: false, epost: false, losenord: false, bekrafta: false };
+
+  regNamnFalt.addEventListener('blur', () => {
+    rord.namn = true;
+    if (!regNamnFalt.value.trim()) visaFelmeddelande('fel-reg-namn', 'Namn är obligatoriskt.');
+    else if (regNamnFalt.value.trim().length < 2) visaFelmeddelande('fel-reg-namn', 'Namnet måste ha minst 2 tecken.');
+    else dolFelmeddelande('fel-reg-namn');
+  });
+  regNamnFalt.addEventListener('input', () => {
+    if (!rord.namn) return;
+    if (!regNamnFalt.value.trim()) visaFelmeddelande('fel-reg-namn', 'Namn är obligatoriskt.');
+    else if (regNamnFalt.value.trim().length < 2) visaFelmeddelande('fel-reg-namn', 'Namnet måste ha minst 2 tecken.');
+    else dolFelmeddelande('fel-reg-namn');
+  });
+
+  regEpostFalt.addEventListener('blur', () => {
+    rord.epost = true;
+    if (!regEpostFalt.value.trim()) visaFelmeddelande('fel-reg-epost', 'E-post är obligatoriskt.');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEpostFalt.value.trim())) visaFelmeddelande('fel-reg-epost', 'Ange en giltig e-postadress.');
+    else dolFelmeddelande('fel-reg-epost');
+  });
+  regEpostFalt.addEventListener('input', () => {
+    if (!rord.epost) return;
+    if (!regEpostFalt.value.trim()) visaFelmeddelande('fel-reg-epost', 'E-post är obligatoriskt.');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEpostFalt.value.trim())) visaFelmeddelande('fel-reg-epost', 'Ange en giltig e-postadress.');
+    else dolFelmeddelande('fel-reg-epost');
+  });
+
+  regLosenordFalt.addEventListener('blur', () => {
+    rord.losenord = true;
+    if (!regLosenordFalt.value) visaFelmeddelande('fel-reg-losenord', 'Lösenord är obligatoriskt.');
+    else if (regLosenordFalt.value.length < 8) visaFelmeddelande('fel-reg-losenord', `Lösenordet måste ha minst 8 tecken (${regLosenordFalt.value.length}/8).`);
+    else dolFelmeddelande('fel-reg-losenord');
+    if (rord.bekrafta) regBekraftaFalt.dispatchEvent(new Event('input'));
+  });
+  regLosenordFalt.addEventListener('input', () => {
+    if (!rord.losenord) return;
+    if (!regLosenordFalt.value) visaFelmeddelande('fel-reg-losenord', 'Lösenord är obligatoriskt.');
+    else if (regLosenordFalt.value.length < 8) visaFelmeddelande('fel-reg-losenord', `Lösenordet måste ha minst 8 tecken (${regLosenordFalt.value.length}/8).`);
+    else dolFelmeddelande('fel-reg-losenord');
+    if (rord.bekrafta) regBekraftaFalt.dispatchEvent(new Event('input'));
+  });
+
+  regBekraftaFalt.addEventListener('blur', () => {
+    rord.bekrafta = true;
+    if (!regBekraftaFalt.value) visaFelmeddelande('fel-reg-bekrafta', 'Bekräfta ditt lösenord.');
+    else if (regBekraftaFalt.value !== regLosenordFalt.value) visaFelmeddelande('fel-reg-bekrafta', 'Lösenorden matchar inte.');
+    else dolFelmeddelande('fel-reg-bekrafta');
+  });
+  regBekraftaFalt.addEventListener('input', () => {
+    if (!rord.bekrafta && regBekraftaFalt.value === '') return;
+    rord.bekrafta = true;
+    if (!regBekraftaFalt.value) visaFelmeddelande('fel-reg-bekrafta', 'Bekräfta ditt lösenord.');
+    else if (regBekraftaFalt.value !== regLosenordFalt.value) visaFelmeddelande('fel-reg-bekrafta', 'Lösenorden matchar inte.');
+    else dolFelmeddelande('fel-reg-bekrafta');
+  });
 }
