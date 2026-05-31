@@ -18,6 +18,9 @@
       <span class="statusrad-tid"></span>
       <div class="statusrad-ikoner"></div>
     </div>
+      <a href="hem.html" class="tillbaka-knapp" aria-label="Tillbaka">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </a>
 
     <div class="sidrubrik">
       <div class="sidrubrik-titel">Träningsdagbok</div>
@@ -25,17 +28,26 @@
 
     <div class="innehall">
 
-      <div class="sektionsrubrik">Nytt pass</div>
+      <div class="traning-steg-etikett">Steg 1 — Namnge ditt pass</div>
       <div class="traning-formular">
         <input id="pass-namn" class="traning-input" type="text" placeholder="Namn på passet, t.ex. Bröst & Triceps">
         <button class="spara-knapp" id="skapa-pass-knapp">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Skapa pass
+          Starta pass
         </button>
       </div>
 
-      <div id="ovning-sektion" class="traning-ovning-sektion">
-        <div class="sektionsrubrik" id="aktivt-pass-rubrik">Logga övning</div>
+      <div id="ovning-sektion" class="traning-ovning-sektion dold">
+
+        <div class="aktivt-pass-kort">
+          <div class="aktivt-pass-info">
+            <div class="aktivt-pass-etikett">Aktivt pass</div>
+            <div class="aktivt-pass-namn" id="aktivt-pass-rubrik">—</div>
+          </div>
+          <button class="avsluta-pass-knapp" id="avsluta-pass-knapp">Avsluta</button>
+        </div>
+
+        <div class="traning-steg-etikett">Steg 2 — Lägg till övningar</div>
         <div class="traning-formular">
           <input id="ovning-namn" class="traning-input" type="text" placeholder="Övning, t.ex. Bänkpress">
           <div class="traning-rad">

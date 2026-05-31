@@ -2801,3 +2801,92 @@ body {
 .textfalt.falt-fel {
   border-color: #E8241C !important;
 }
+
+.dold {
+  display: none;
+}
+
+/* ─────────────────────────────────────────────────────
+   TRÄNINGSDAGBOK — Tillbaka-knapp & steg-etikett
+───────────────────────────────────────────────────── */
+.tillbaka-knapp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #F5F5F5;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.tillbaka-knapp svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #0A0A0A;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.traning-steg-etikett {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ADADAD;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 20px 20px 10px;
+}
+
+/* ─────────────────────────────────────────────────────
+   TRÄNINGSDAGBOK — Aktivt pass-kort
+───────────────────────────────────────────────────── */
+.aktivt-pass-kort {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 20px 0;
+  padding: 14px 16px;
+  background: #0A0A0A;
+  border-radius: 14px;
+}
+
+.aktivt-pass-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.aktivt-pass-etikett {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ADADAD;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.aktivt-pass-namn {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.avsluta-pass-knapp {
+  height: 32px;
+  padding: 0 14px;
+  background: #ffffff;
+  color: #0A0A0A;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.avsluta-pass-knapp:active {
+  background: #F0F0F0;
+}
