@@ -2957,3 +2957,117 @@ body {
   height: 22px;
   stroke: #0A0A0A;
 }
+
+/* ─────────────────────────────────────────────────────
+   UTMANINGAR — klickbart kort
+───────────────────────────────────────────────────── */
+.klickbart-kort {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.klickbart-kort:active {
+  background: #F0F0F0;
+}
+
+/* ─────────────────────────────────────────────────────
+   UTMANINGAR — avsluta-knapp
+───────────────────────────────────────────────────── */
+.avsluta-utmaning-knapp {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  background: #FEF2F2;
+  color: #EF4444;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+
+.avsluta-utmaning-knapp:active {
+  background: #FEE2E2;
+}
+
+/* ─────────────────────────────────────────────────────
+   UTMANINGAR — panel
+───────────────────────────────────────────────────── */
+.utmaning-panel {
+  margin: 0 20px 8px;
+  background: #F5F5F5;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.utmaning-panel-rubrik {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ADADAD;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 14px 16px 8px;
+}
+
+/* ─────────────────────────────────────────────────────
+   UTMANINGAR — rader i panelen
+───────────────────────────────────────────────────── */
+.utmaning-rad {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid #EBEBEB;
+  gap: 12px;
+}
+
+.utmaning-rad-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.utmaning-rad-namn {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0A0A0A;
+}
+
+.utmaning-rad-beskrivning {
+  font-size: 12px;
+  color: #ADADAD;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.utmaning-rad-dagar {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0A0A0A;
+  margin-top: 2px;
+}
+
+.utmaning-starta-knapp {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 14px;
+  background: #0A0A0A;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.utmaning-starta-knapp--inaktiv {
+  background: #ADADAD;
+  cursor: not-allowed;
+}

@@ -84,7 +84,7 @@
       <!-- Aktiv utmaning -->
       <div class="sektionsrubrik">Aktiv utmaning</div>
 
-      <div class="kort">
+      <div class="kort klickbart-kort" id="utmaning-kort" tabindex="0">
         <div id="aktiv-titel" class="aktiv-titel"></div>
         <div id="aktiv-dag" class="aktiv-dag"></div>
         
@@ -94,8 +94,15 @@
           </div>
           <div id="aktiv-procent" class="progress-ring"></div>
         </div>
+        <button class="avsluta-utmaning-knapp dold" id="avsluta-utmaning-knapp">Avsluta utmaning</button>
       </div>
 
+<!-- Utmaningspanel -->
+      <div id="utmaning-panel" class="utmaning-panel dold">
+        <div class="utmaning-panel-rubrik">Välj en utmaning</div>
+        <div id="utmaning-lista"></div>
+      </div>
+      
       <!-- Veckans sammanfattning -->
       <div class="sektionsrubrik sektionsrubrik--mellanrum">Veckans sammanfattning</div>
 

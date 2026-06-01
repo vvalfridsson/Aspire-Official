@@ -492,6 +492,10 @@ class NyOvning(BaseModel):
     vikt_kg: float
     vilotid_sek: int
 
+class StartaUtmaningBody(BaseModel):
+    milstolpe_id: int
+
+
 
 @app.post("/anvandare/{anvandare_id}/valj-atlet")
 def valj_atlet(anvandare_id: int, body: ValjAtletBody):
@@ -670,6 +674,119 @@ def radera_konto(anvandare_id: int, _: int = Depends(krav_inloggad)):
     finally:
         release_connection(conn)
 
+# ─────────────────────────────────────────────────────
+# UTMANINGAR 
+# ─────────────────────────────────────────────────────
+
+@app.get("/utmaningar")
+def hamta_utmaningar():
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("SELECT id, namn, beskrivning, krav_dagar, ikon FROM milstolpar ORDER BY krav_dagar")
+        return cursor.fetchall()
+    finally:
+        release_connection(conn)
+
+
+@app.post("/anvandare/{anvandare_id}/utmaning/starta")
+def starta_utmaning(anvandare_id: int, body: StartaUtmaningBody):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+
+        cursor.execute("""
+            SELECT id, namn, krav_dagar FROM milstolpar WHERE id = %s
+        """, (body.milstolpe_id,))
+        milstolpe = cursor.fetchone()
+        if not milstolpe:
+            raise HTTPException(status_code=404, detail="Utmaningen finns inte.")
+
+        cursor.execute("""
+            UPDATE anvandar_utmaningar SET aktiv = false
+            WHERE anvandar_id = %s AND aktiv = true
+        """, (anvandare_id,))
+
+        cursor.execute("""
+            INSERT INTO anvandar_utmaningar
+                (anvandar_id, milstolpe_id, titel, dag, total_dagar, procent_klar, aktiv, startdatum)
+            VALUES (%s, %s, %s, 1, %s, 0, true, CURRENT_DATE)
+            RETURNING id
+        """, (anvandare_id, body.milstolpe_id, milstolpe["namn"], milstolpe["krav_dagar"]))
+
+        conn.commit()
+        return {"status": "ok"}
+    finally:
+        release_connection(conn)
+
+
+@app.get("/anvandare/{anvandare_id}/utmaning/aktiv")
+def hamta_aktiv_utmaning(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("""
+            SELECT titel, dag, total_dagar, procent_klar
+            FROM anvandar_utmaningar
+            WHERE anvandar_id = %s AND aktiv = true
+            LIMIT 1
+        """, (anvandare_id,))
+        rad = cursor.fetchone()
+        if not rad:
+            raise HTTPException(status_code=404, detail="Ingen aktiv utmaning.")
+        return {
+            "titel": rad["titel"],
+            "dag": rad["dag"],
+            "total": rad["total_dagar"],
+            "procent": rad["procent_klar"]
+        }
+    finally:
+        release_connection(conn)
+
+
+@app.post("/anvandare/{anvandare_id}/utmaning/framsteg")
+def uppdatera_framsteg(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("""
+            SELECT id, dag, total_dagar FROM anvandar_utmaningar
+            WHERE anvandar_id = %s AND aktiv = true
+            LIMIT 1
+        """, (anvandare_id,))
+        rad = cursor.fetchone()
+        if not rad:
+            raise HTTPException(status_code=404, detail="Ingen aktiv utmaning.")
+
+        ny_dag = rad["dag"] + 1
+        ny_procent = round((ny_dag / rad["total_dagar"]) * 100)
+        avklarad = ny_dag >= rad["total_dagar"]
+
+        cursor.execute("""
+            UPDATE anvandar_utmaningar
+            SET dag = %s, procent_klar = %s, aktiv = %s
+            WHERE id = %s
+        """, (ny_dag, ny_procent, not avklarad, rad["id"]))
+
+        conn.commit()
+        return {"dag": ny_dag, "procent": ny_procent, "avklarad": avklarad}
+    finally:
+        release_connection(conn)
+
+
+@app.delete("/anvandare/{anvandare_id}/utmaning/avsluta")
+def avsluta_utmaning(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute("""
+            UPDATE anvandar_utmaningar SET aktiv = false
+            WHERE anvandar_id = %s AND aktiv = true
+        """, (anvandare_id,))
+        conn.commit()
+        return {"status": "ok"}
+    finally:
+        release_connection(conn)
         
 # ─────────────────────────────────────────────────────
 # TRÄNINGSDAGBOK

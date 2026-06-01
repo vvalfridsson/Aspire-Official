@@ -152,6 +152,107 @@ async function laddaProfil() {
 
   await laddaValdAtlet(anvandareId);
   await laddaTraningsHistorik(anvandareId);
+
+  const harAktiv = !!(data && data.aktiv && data.aktiv.titel);
+
+  const avslutaKnapp = document.getElementById('avsluta-utmaning-knapp');
+  if (avslutaKnapp) {
+    if (harAktiv) {
+      avslutaKnapp.classList.remove('dold');
+      avslutaKnapp.onclick = function () { avslutaUtmaning(anvandareId); };
+    } else {
+      avslutaKnapp.classList.add('dold');
+    }
+  }
+
+  const utmaningKort = document.getElementById('utmaning-kort');
+  if (utmaningKort) {
+    utmaningKort.onclick = function () { oppnaUtmaningPanel(anvandareId, harAktiv); };
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   UTMANINGAR
+───────────────────────────────────────────────────── */
+let utmaningPanelOppen = false;
+
+async function laddaUtmaningar(anvandareId, harAktiv) {
+  const lista = document.getElementById('utmaning-lista');
+  if (!lista) return;
+
+  try {
+    const svar = await fetch(`${PROFIL_API}/utmaningar`);
+    const utmaningar = await svar.json();
+
+    if (!utmaningar || utmaningar.length === 0) {
+      lista.innerHTML = '<div class="historik-laddning">Inga utmaningar tillgängliga.</div>';
+      return;
+    }
+
+    lista.innerHTML = utmaningar.map(function (u) {
+      const knappText = harAktiv ? 'Avsluta pågående först' : 'Starta';
+      const knappKlass = harAktiv ? 'utmaning-starta-knapp utmaning-starta-knapp--inaktiv' : 'utmaning-starta-knapp';
+      const disabled = harAktiv ? 'disabled' : '';
+
+      return '<div class="utmaning-rad">' +
+        '<div class="utmaning-rad-info">' +
+          '<div class="utmaning-rad-namn">' + u.namn + '</div>' +
+          '<div class="utmaning-rad-beskrivning">' + u.beskrivning + '</div>' +
+          '<div class="utmaning-rad-dagar">' + u.krav_dagar + ' dagar</div>' +
+        '</div>' +
+        '<button class="' + knappKlass + '" ' + disabled + ' onclick="startaUtmaning(' + anvandareId + ', ' + u.id + ')">' + knappText + '</button>' +
+      '</div>';
+    }).join('');
+
+  } catch (fel) {
+    lista.innerHTML = '<div class="historik-laddning">Kunde inte ladda utmaningar.</div>';
+  }
+}
+
+async function startaUtmaning(anvandareId, milstolpeId) {
+  try {
+    await fetch(`${PROFIL_API}/anvandare/${anvandareId}/utmaning/starta`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ milstolpe_id: milstolpeId })
+    });
+    stangUtmaningPanel();
+    await laddaProfil();
+  } catch (fel) {
+    console.log('Kunde inte starta utmaning:', fel);
+  }
+}
+
+async function avslutaUtmaning(anvandareId) {
+  if (!confirm('Vill du avsluta utmaningen?')) return;
+  try {
+    await fetch(`${PROFIL_API}/anvandare/${anvandareId}/utmaning/avsluta`, {
+      method: 'DELETE'
+    });
+    await laddaProfil();
+  } catch (fel) {
+    console.log('Kunde inte avsluta utmaning:', fel);
+  }
+}
+
+function oppnaUtmaningPanel(anvandareId, harAktiv) {
+  const panel = document.getElementById('utmaning-panel');
+  if (!panel) return;
+
+  if (utmaningPanelOppen) {
+    stangUtmaningPanel();
+    return;
+  }
+
+  panel.classList.remove('dold');
+  utmaningPanelOppen = true;
+  laddaUtmaningar(anvandareId, harAktiv);
+}
+
+function stangUtmaningPanel() {
+  const panel = document.getElementById('utmaning-panel');
+  if (panel) panel.classList.add('dold');
+  utmaningPanelOppen = false;
 }
 
 /* ─────────────────────────────────────────────────────
