@@ -2890,3 +2890,70 @@ body {
 .avsluta-pass-knapp:active {
   background: #F0F0F0;
 }
+
+.kal-ruta {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────────────
+   PROFIL — Vald atlet-kort
+───────────────────────────────────────────────────── */
+.profil-atlet-kort {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.profil-atlet-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profil-atlet-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #0A0A0A;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profil-atlet-namn {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0A0A0A;
+}
+
+.profil-atlet-sport {
+  font-size: 12px;
+  font-weight: 500;
+  color: #ADADAD;
+  margin-top: 2px;
+}
+
+.profil-atlet-byt {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0A0A0A;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #F5F5F5;
+}
+
+/* ─────────────────────────────────────────────────────
+   PROFIL — Statistik-ikoner (SVG ersätter emojis)
+───────────────────────────────────────────────────── */
+.statistik-ikon svg {
+  width: 22px;
+  height: 22px;
+  stroke: #0A0A0A;
+}

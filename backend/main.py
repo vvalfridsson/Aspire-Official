@@ -280,6 +280,19 @@ def hamta_streak(anvandare_id: int):
     finally:
         release_connection(conn)
 
+@app.post("/streak/{anvandare_id}/reset")
+def aterstall_streak(anvandare_id: int):
+    conn = get_connection()
+    try:
+        cursor = get_cursor(conn)
+        cursor.execute(
+            "DELETE FROM anvandar_aktiviteter WHERE anvandar_id = %s",
+            (anvandare_id,)
+        )
+        conn.commit()
+        return {"status": "ok"}
+    finally:
+        release_connection(conn)
 
 # ─────────────────────────────────────────────────────
 # Notiser
