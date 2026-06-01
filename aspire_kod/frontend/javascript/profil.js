@@ -96,9 +96,11 @@ async function laddaProfil() {
 
   const anvandareId = user.id;
 
+  let data = null;
+
   try {
     const svar = await fetch(`${PROFIL_API}/profil/${anvandareId}`);
-    const data = await svar.json();
+    data = await svar.json();
 
     /* — Användarinfo — */
     sattText('profil-namn', data.namn);
