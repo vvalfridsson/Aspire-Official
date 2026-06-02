@@ -609,7 +609,7 @@ body {
   flex-shrink: 0;
 }
 
-.filter-pill.aktiv  { background: #0A0A0A; color: white; }
+.filter-pill.aktiv  { background: #1A4D2E; color: white; }
 .filter-pill.inaktiv { background: #F0F0F0; color: #2A2A2A; }
 
 .atlet-rad {
@@ -626,7 +626,7 @@ body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #E5E5E5;
+  background: #C9A84C;
   flex-shrink: 0;
 
   display: flex;
@@ -635,7 +635,7 @@ body {
 
   font-size: 13px;
   font-weight: 700;
-  color: #2A2A2A;
+  color: #ffff;
 }
 
 .atlet-avatar.lila { background: #7C5CBF; color: white; }
@@ -880,7 +880,7 @@ body {
 }
 
 .statistik-ikon    { font-size: 20px; line-height: 1; margin-bottom: 2px; }
-.statistik-siffra  { font-size: 22px; font-weight: 800; color: #0A0A0A; }
+.statistik-siffra  { font-size: 22px; font-weight: 800; color: #C9A84C; }
 .statistik-etikett { font-size: 11px; color: #ADADAD; text-align: center; }
 
 .progress-rad {
@@ -899,7 +899,7 @@ body {
 
 .progress-fyll {
   height: 100%;
-  background: #0A0A0A;
+  background: #1A4D2E;
   border-radius: 2px;
 }
 
@@ -907,7 +907,7 @@ body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 2.5px solid #0A0A0A;
+  border: 2.5px solid #1A4D2E;
   flex-shrink: 0;
 
   display: flex;
@@ -1037,7 +1037,7 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
-.maltids-flik.aktiv  { background: #0A0A0A; color: white; }
+.maltids-flik.aktiv  { background: #1A4D2E; color: white; }
 .maltids-flik.inaktiv { background: #E5E5E5; color: #2A2A2A; }
 
 .kalori-falt-etikett { font-size: 13px; color: #666666; margin-bottom: 6px; }
@@ -1079,7 +1079,7 @@ body {
 .spara-knapp {
   flex: 1.5;
   height: 40px;
-  background: #0A0A0A;
+  background: #1A4D2E;
   color: white;
   border: none;
   border-radius: 10px;
@@ -1187,7 +1187,7 @@ body {
 }
 
 .streak-ikon    { font-size: 22px; line-height: 1; margin-bottom: 2px; }
-.streak-siffra  { font-size: 28px; font-weight: 900; color: #0A0A0A; letter-spacing: -1px; }
+.streak-siffra  { font-size: 28px; font-weight: 900; color: #C9A84C; letter-spacing: -1px; }
 .streak-etikett { font-size: 12px; color: #ADADAD; }
 
 .vecko-kalender { margin: 0 20px 20px 20px; }
@@ -1496,9 +1496,9 @@ body {
 }
 
 .kal-ruta.aktiv {
-  background-color: #E8241C;
+  background-color: #1A4D2E;
   color: #FFFFFF;
-  border: 1px solid #E8241C;
+  border: 1px solid #1A4D2E;
 }
 
 /* Hover-effekt för vanliga rutor */
@@ -1527,7 +1527,7 @@ body {
 }
 
 .kal-streak-rad strong {
-  color: #0A0A0A;
+  color: #C9A84C;
   font-weight: 800;
 }
 
@@ -1602,7 +1602,7 @@ body {
 }
 
 .statistik-stapel.nuvarande {
-  background-color: #0A0A0A;
+  background-color: #1A4D2E;
   color: white;
 }
 
@@ -2118,7 +2118,7 @@ body {
   .valj-atlet-knapp { background: #0A0A0A; color: white; border: none; border-radius: 12px; padding: 14px 28px; font-size: 15px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: none; display: inline-block; }
   .bocka-knapp { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #E5E5E5; background: none; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
   .bocka-knapp svg { width: 14px; height: 14px; fill: none; stroke: transparent; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-  .bocka-knapp.klar { background: #0A0A0A; border-color: #0A0A0A; }
+  .bocka-knapp.klar { background: #1A4D2E; border-color: #1A4D2E; }
   .bocka-knapp.klar svg { stroke: white; }
   .aktivitet-rad.avbockad { opacity: 0.45; }
   .progress-omslag { padding: 12px 20px 4px 20px; }
@@ -2126,7 +2126,7 @@ body {
   .progress-text { font-size: 12px; color: #ADADAD; }
   .progress-procent { font-size: 12px; font-weight: 700; color: #0A0A0A; }
   .progress-bar { height: 4px; background: #F0F0F0; border-radius: 2px; overflow: hidden; }
-  .progress-fill { height: 100%; background: #0A0A0A; border-radius: 2px; transition: width 0.5s ease; }
+  .progress-fill { height: 100%; background: #1A4D2E; border-radius: 2px; transition: width 0.5s ease; }
   .byt-atlet-rad { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid #F0F0F0; text-decoration: none; cursor: pointer; }
   .byt-atlet-rad span { font-size: 14px; color: #ADADAD; }
   .byt-atlet-rad svg { width: 14px; height: 14px; fill: none; stroke: #ADADAD; stroke-width: 2; stroke-linecap: round; }
@@ -2715,7 +2715,7 @@ body {
 
 .reg-lyckad {
   font-size: 13px;
-  color: #22AA66;
+  color: #1A4D2E;
   margin-bottom: 12px;
   display: none;
 }
@@ -2739,7 +2739,7 @@ body {
     cursor: pointer;
     white-space: nowrap;
   }
-  .valj-knapp.vald { background: #22AA66; pointer-events: none; }
+  .valj-knapp.vald { background: #1A4D2E; pointer-events: none; }
   .valj-knapp.laddning { background: #ADADAD; pointer-events: none; }
   .atlet-rad-lank { display: flex; align-items: center; gap: 12px; flex: 1; text-decoration: none; min-width: 0; }
 
@@ -2795,7 +2795,7 @@ body {
 
 /* Realtidsvalidering — input-tillstånd */
 .textfalt.falt-ok {
-  border-color: #22C55E !important;
+  border-color: #1A4D2E !important;
 }
 
 .textfalt.falt-fel {
